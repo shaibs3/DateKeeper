@@ -2,6 +2,7 @@
 
 import { Header } from '@/components/layout/Header';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function Home() {
   return (
@@ -21,12 +22,12 @@ export default function Home() {
               BirthdayBuddy helps you remember birthdays, anniversaries, and other
               special events with timely reminders via email, SMS, or WhatsApp.
             </p>
-            <a 
-              href="/signup"
+            <Link 
+              href="/auth/signup"
               className="btn-primary text-lg px-8 py-3 inline-block"
             >
               Get Started — It&apos;s Free
-            </a>
+            </Link>
           </div>
           <div className="relative">
             <Image
@@ -149,7 +150,9 @@ export default function Home() {
                   <span className="text-gray-400">Ad-supported experience</span>
                 </li>
               </ul>
-              <button className="w-full btn-primary">Start for Free</button>
+              <Link href="/auth/signup" className="w-full btn-primary">
+                Start for Free
+              </Link>
             </div>
             
             <div className="border rounded-lg p-8 bg-white border-purple-200 shadow-lg">
@@ -181,7 +184,9 @@ export default function Home() {
                   Ad-free experience
                 </li>
               </ul>
-              <button className="w-full btn-primary bg-purple-600 hover:bg-purple-700">Get Premium</button>
+              <Link href="/auth/signup" className="w-full btn-primary bg-purple-600 hover:bg-purple-700">
+                Get Premium
+              </Link>
             </div>
           </div>
         </div>

@@ -9,10 +9,10 @@ export function Header() {
             </a>
           </div>
           <div className="flex items-center space-x-4">
-            <a href="/login" className="text-gray-600 hover:text-gray-900">
+            <a href="/auth/ldsdsdsogin" className="text-gray-600 hover:text-gray-900">
               Log In
             </a>
-            <a href="/signup" className="btn-primary">
+            <a href="/auth/signup" className="btn-primary">
               Sign Up
             </a>
           </div>

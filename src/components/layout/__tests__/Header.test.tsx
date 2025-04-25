@@ -15,8 +15,8 @@ describe('Header', () => {
     
     expect(loginLink).toBeInTheDocument();
     expect(signupLink).toBeInTheDocument();
-    expect(loginLink).toHaveAttribute('href', '/login');
-    expect(signupLink).toHaveAttribute('href', '/signup');
+    expect(loginLink).toHaveAttribute('href', '/auth/login');
+    expect(signupLink).toHaveAttribute('href', '/auth/signup');
   });
 
   it('has correct styling classes', () => {

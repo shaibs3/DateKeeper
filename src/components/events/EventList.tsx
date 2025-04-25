@@ -1,4 +1,4 @@
-'use client';
+§'use client';
 
 import { EventCard } from './EventCard';
 import { Event } from './EventCard';

@@ -2,28 +2,37 @@
 
 import { useState } from 'react';
 
+type EventType = 'BIRTHDAY' | 'ANNIVERSARY' | 'OTHER';
+
 interface AddEventFormProps {
   onSubmit: (event: {
     name: string;
     date: Date;
-    type: 'BIRTHDAY' | 'ANNIVERSARY' | 'OTHER';
+    type: EventType;
   }) => void;
 }
 
 export function AddEventForm({ onSubmit }: AddEventFormProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    date: string;
+    type: EventType;
+  }>({
     name: '',
     date: '',
-    type: 'BIRTHDAY' as const,
+    type: 'BIRTHDAY',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    onSubmit({
-      ...formData,
-      date: new Date(formData.date),
-    });
-    setFormData({ name: '', date: '', type: 'BIRTHDAY' });
+    const formData = new FormData(e.currentTarget);
+    const eventData = {
+      name: formData.get('name') as string,
+      date: new Date(formData.get('date') as string),
+      type: formData.get('type') as EventType,
+    };
+    onSubmit(eventData);
+    e.currentTarget.reset();
   };
 
   return (
@@ -65,7 +74,10 @@ export function AddEventForm({ onSubmit }: AddEventFormProps) {
           <select
             id="type"
             value={formData.type}
-            onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
+            onChange={(e) => {
+              const value = e.target.value as EventType;
+              setFormData({ ...formData, type: value });
+            }}
             className="input-field"
           >
             <option value="BIRTHDAY">Birthday</option>

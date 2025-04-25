@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import { Header } from '@/components/layout/Header';
+import Image from 'next/image';
 
 export default function Home() {
   return (
@@ -25,14 +25,17 @@ export default function Home() {
               href="/signup"
               className="btn-primary text-lg px-8 py-3 inline-block"
             >
-              Get Started — It's Free
+              Get Started — It&apos;s Free
             </a>
           </div>
           <div className="relative">
-            <img
+            <Image
               src="/images/hero-image.jpg"
               alt="Calendar Reminder"
               className="rounded-lg shadow-xl"
+              width={500}
+              height={300}
+              priority
             />
           </div>
         </div>

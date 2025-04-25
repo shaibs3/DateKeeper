@@ -1,19 +1,20 @@
-import { EventCard, Event } from './EventCard';
+'use client';
+
+import { EventCard } from './EventCard';
+import { Event } from './EventCard';
 
 interface EventListProps {
   events: Event[];
-  onEdit?: (id: string) => void;
-  onDelete?: (id: string) => void;
+  onDelete: (id: string) => void;
 }
 
-export function EventList({ events, onEdit, onDelete }: EventListProps) {
+export function EventList({ events, onDelete }: EventListProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {events.map((event) => (
-        <EventCard 
-          key={event.id} 
+        <EventCard
+          key={event.id}
           event={event} 
-          onEdit={onEdit}
           onDelete={onDelete}
         />
       ))}

@@ -3,8 +3,10 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { EventCard } from '@/components/events/EventCard';
+import { EventCard, Event } from '@/components/events/EventCard';
 import { EventForm } from '@/components/events/EventForm';
+
+export const dynamic = 'force-dynamic';
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
@@ -16,13 +18,11 @@ export default function Dashboard() {
     }
   }, [status, router]);
 
-  const handleEventSubmit = (event: any) => {
-    console.log('New event:', event);
+  const handleEventSubmit = (_event: Omit<Event, 'id'>) => {
     // TODO: Add event to database
   };
 
-  const handleEventDelete = (eventId: string) => {
-    console.log('Delete event:', eventId);
+  const handleEventDelete = (_eventId: string) => {
     // TODO: Delete event from database
   };
 
@@ -78,7 +78,6 @@ export default function Dashboard() {
                       name: 'John\'s Birthday',
                       date: new Date('2024-05-15'),
                       type: 'BIRTHDAY',
-                      notes: 'Don\'t forget to buy a gift!',
                     }}
                     onDelete={handleEventDelete}
                   />
@@ -88,7 +87,6 @@ export default function Dashboard() {
                       name: 'Wedding Anniversary',
                       date: new Date('2024-06-20'),
                       type: 'ANNIVERSARY',
-                      notes: 'Book a restaurant reservation',
                     }}
                     onDelete={handleEventDelete}
                   />

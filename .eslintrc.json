@@ -32,5 +32,6 @@
     "react": {
       "version": "detect"
     }
-  }
+  },
+  "ignorePatterns": [".github/**/*.yml", ".github/**/*.yaml"]
 } 

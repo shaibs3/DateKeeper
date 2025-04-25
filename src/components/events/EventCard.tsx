@@ -41,7 +41,8 @@ export function EventCard({ event, onDelete }: EventCardProps) {
   };
 
   return (
-    <div 
+    <div
+      data-testid="event-card"
       className="card group"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

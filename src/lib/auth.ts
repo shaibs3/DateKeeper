@@ -18,7 +18,7 @@ export const {
   handlers: { GET, POST },
   auth,
 } = NextAuth({
-  adapter: PrismaAdapter(prisma),
+  adapter: process.env.DATABASE_URL ? PrismaAdapter(prisma) : undefined,
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,

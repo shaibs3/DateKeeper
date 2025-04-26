@@ -1,4 +1,4 @@
-name: CI
+name: CI Pipeline
 
 on:
   push:
@@ -7,56 +7,75 @@ on:
     branches: [ main ]
 
 jobs:
-  lint:
+  build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-          
+      
       - name: Install dependencies
         run: npm ci
-        
-      - name: Run ESLint
-        run: npm run lint || true
-        
-      - name: Check types
-        run: npm run type-check || true
+      
+      - name: Run linting
+        run: npm run lint
+      
+      - name: Run type checking
+        run: npm run type-check
+      
+      - name: Build application
+        run: npm run build
+        env:
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
 
   test:
+    name: Test
+    needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-          
+      
       - name: Install dependencies
         run: npm ci
-        
+      
       - name: Run tests
-        run: npm test || true
+        run: npm test
+      
+      - name: Run test coverage
+        run: npm run test:coverage
 
-  build:
+  security:
+    name: Security
+    needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-          
+      
       - name: Install dependencies
         run: npm ci
-        
-      - name: Build project
-        run: npm run build 
+      
+      - name: Run npm audit
+        run: npm audit
+      
+      - name: Run npm audit fix
+        run: npm audit fix --dry-run 

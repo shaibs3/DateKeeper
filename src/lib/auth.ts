@@ -1,5 +1,3 @@
-import { PrismaAdapter } from '@auth/prisma-adapter';
-import { prisma } from '@/lib/prisma';
 import Google from 'next-auth/providers/google';
 import NextAuth from 'next-auth';
 
@@ -14,11 +12,20 @@ declare module 'next-auth' {
   }
 }
 
+// Only import Prisma if we have a database URL
+const prismaConfig = process.env.DATABASE_URL
+  ? {
+      adapter: (await import('@auth/prisma-adapter')).PrismaAdapter(
+        (await import('@/lib/prisma')).prisma
+      ),
+    }
+  : {};
+
 export const {
   handlers: { GET, POST },
   auth,
 } = NextAuth({
-  adapter: process.env.DATABASE_URL ? PrismaAdapter(prisma) : undefined,
+  ...prismaConfig,
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,

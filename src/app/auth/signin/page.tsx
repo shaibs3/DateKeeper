@@ -1,9 +1,9 @@
 'use client';
 
 import { signIn, useSession } from 'next-auth/react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { FcGoogle } from 'react-icons/fc';
 
 export default function SignIn() {
   const { data: session } = useSession();
@@ -24,30 +24,23 @@ export default function SignIn() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-lg">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
-            <Link
-              href="/auth/signup"
-              className="font-medium text-blue-600 hover:text-blue-500"
-            >
-              create a new account
-            </Link>
-          </p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-100 px-4">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 flex flex-col items-center">
+        <div className="mb-6 flex flex-col items-center">
+          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center mb-2">
+            <span className="text-3xl font-bold text-white">BB</span>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-1">Sign in to BirthdayBuddy</h2>
+          <p className="text-gray-500 text-sm">Welcome back! Please sign in to continue.</p>
         </div>
-        <div className="mt-8 space-y-6">
-          <button
-            onClick={handleGoogleSignIn}
-            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            Sign in with Google
-          </button>
-        </div>
+        <button
+          onClick={handleGoogleSignIn}
+          className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg border border-gray-200 bg-white shadow hover:shadow-md transition-all font-semibold text-gray-700 text-base mb-4"
+        >
+          <FcGoogle className="text-2xl" />
+          Sign in with Google
+        </button>
+        {/* Optionally, add more providers or a divider here */}
       </div>
     </div>
   );

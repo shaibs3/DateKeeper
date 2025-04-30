@@ -5,12 +5,14 @@ import { useRouter } from 'next/navigation';
 import { FiGift, FiCalendar, FiBell, FiSettings, FiMoon } from 'react-icons/fi';
 import { useState, useRef, useEffect } from 'react';
 import { AuthenticatedHeader } from '@/components/layout/AuthenticatedHeader';
+import { AddDateModal } from '@/components/events/AddDateModal';
 
 export default function HomePage() {
   const { status } = useSession();
   const router = useRouter();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const settingsRef = useRef<HTMLDivElement>(null);
+  const [addModalOpen, setAddModalOpen] = useState(false);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -40,6 +42,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-[#f6fcfb]">
       <AuthenticatedHeader />
+      <AddDateModal open={addModalOpen} onClose={() => setAddModalOpen(false)} />
       <main className="max-w-6xl mx-auto py-10 px-4">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Your Important Dates</h1>
@@ -50,7 +53,12 @@ export default function HomePage() {
               className="px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-100 bg-white"
               style={{ minWidth: 200 }}
             />
-            <button className="ml-2 px-5 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow hover:bg-blue-700 transition-colors">+ Add Date</button>
+            <button
+              className="ml-2 px-5 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow hover:bg-blue-700 transition-colors"
+              onClick={() => setAddModalOpen(true)}
+            >
+              + Add Date
+            </button>
           </div>
         </div>
 
@@ -61,7 +69,12 @@ export default function HomePage() {
           </div>
           <h2 className="text-2xl font-bold mb-2">No dates added yet</h2>
           <p className="text-gray-600 mb-6">Start adding important dates to never miss a special occasion again.</p>
-          <button className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow hover:bg-blue-700 transition-colors">+ Add Your First Date</button>
+          <button
+            className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow hover:bg-blue-700 transition-colors"
+            onClick={() => setAddModalOpen(true)}
+          >
+            + Add Your First Date
+          </button>
         </div>
       </main>
     </div>

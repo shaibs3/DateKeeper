@@ -1,8 +1,23 @@
-import Google from 'next-auth/providers/google';
 import NextAuth from 'next-auth';
-import { PrismaAdapter } from '@auth/prisma-adapter';
-import { prisma } from '@/lib/prisma';
+import GoogleProvider from 'next-auth/providers/google';
+import type { NextAuthConfig } from 'next-auth';
 import type { OAuthConfig } from 'next-auth/providers';
+
+// Debug logging for environment variables
+console.log('Environment Variables:', {
+  NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+  NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET ? '***' : undefined,
+  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET ? '***' : undefined,
+  NODE_ENV: process.env.NODE_ENV,
+});
+
+console.log('Loaded ENV:', {
+  NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+  NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+});
 
 declare module 'next-auth' {
   interface Session {
@@ -23,60 +38,55 @@ const mockUser = {
   image: null,
 };
 
-// Only import Prisma if we have a database URL
-const prismaConfig = process.env.DATABASE_URL
-  ? {
-      adapter: PrismaAdapter(prisma),
-    }
-  : {};
-
-// Mock Google provider for development
-const providers = process.env.NODE_ENV === 'development'
-  ? [
-      {
-        id: 'google',
-        name: 'Google',
-        type: 'oauth' as const,
-        wellKnown: 'https://accounts.google.com/.well-known/openid-configuration',
-        authorization: { params: { scope: 'openid email profile' } },
-        clientId: process.env.GOOGLE_CLIENT_ID!,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-        profile(profile: any) {
-          return {
-            id: mockUser.id,
-            name: mockUser.name,
-            email: mockUser.email,
-            image: mockUser.image,
-          };
-        },
-      } as OAuthConfig<any>,
-    ]
-  : [
-      Google({
-        clientId: process.env.GOOGLE_CLIENT_ID!,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      }),
-    ];
+// Verify required environment variables
+if (!process.env.GOOGLE_CLIENT_ID) {
+  throw new Error('GOOGLE_CLIENT_ID is not set');
+}
+if (!process.env.GOOGLE_CLIENT_SECRET) {
+  throw new Error('GOOGLE_CLIENT_SECRET is not set');
+}
+if (!process.env.NEXTAUTH_SECRET) {
+  throw new Error('NEXTAUTH_SECRET is not set');
+}
+if (!process.env.NEXTAUTH_URL) {
+  throw new Error('NEXTAUTH_URL is not set');
+}
 
 export const {
   handlers: { GET, POST },
   auth,
 } = NextAuth({
-  ...prismaConfig,
-  providers,
+  providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
+  ],
+  debug: true,
   callbacks: {
-    session({ session, user }) {
-      if (session.user) {
-        session.user.id = process.env.NODE_ENV === 'development' 
-          ? mockUser.id 
-          : user.id;
-      }
+    async signIn({ user, account, profile }) {
+      console.log('Sign in attempt:', { user, account, profile });
+      return true;
+    },
+    session({ session }) {
       return session;
+    },
+    async redirect({ url, baseUrl }) {
+      // If no specific URL is provided, redirect to home
+      if (!url || url === '/') {
+        return `${baseUrl}/home`;
+      }
+      // Allow relative URLs
+      if (url.startsWith('/')) return `${baseUrl}${url}`;
+      // Allow URLs from the same origin
+      else if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
     },
   },
   pages: {
     signIn: '/auth/signin',
-    signOut: '/auth/signin',
-    error: '/auth/signin',
+    signOut: '/auth/signout',
+    error: '/auth/error',
   },
+  secret: process.env.NEXTAUTH_SECRET,
 }); 

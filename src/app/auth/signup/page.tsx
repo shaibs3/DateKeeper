@@ -6,7 +6,7 @@ import Link from 'next/link';
 export default function SignUp() {
   const handleGoogleSignIn = async () => {
     try {
-      await signIn('google', { callbackUrl: '/' });
+      await signIn('google', { callbackUrl: '/home' });
     } catch (error) {
       console.error('Error signing in:', error);
     }

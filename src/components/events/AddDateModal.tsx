@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { FiX, FiCalendar } from 'react-icons/fi';
+import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 const colorOptions = [
   { name: 'blue', color: 'bg-blue-500' },
@@ -31,6 +33,8 @@ export function AddDateModal({ open, onClose }: { open: boolean; onClose: () => 
   const [reminders, setReminders] = useState<string[]>(['On day', '1 day before', '7 days before']);
   const [recurrence, setRecurrence] = useState(recurrenceOptions[0]);
   const [notes, setNotes] = useState('');
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   if (!open) return null;
 
@@ -42,10 +46,25 @@ export function AddDateModal({ open, onClose }: { open: boolean; onClose: () => 
     );
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: handle save logic
-    onClose();
+    setLoading(true);
+    try {
+      const res = await fetch('/api/date-event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, date, category, color, recurrence, notes, reminders }),
+      });
+      if (!res.ok) throw new Error('Failed to save');
+      toast.success('Date saved successfully!');
+      onClose();
+      router.push('/');
+    } catch (err) {
+      toast.error('Failed to save date');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -160,8 +179,9 @@ export function AddDateModal({ open, onClose }: { open: boolean; onClose: () => 
             <button
               type="submit"
               className="flex-1 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700"
+              disabled={loading}
             >
-              Save
+              {loading ? 'Saving...' : 'Save'}
             </button>
           </div>
         </form>

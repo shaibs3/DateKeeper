@@ -29,7 +29,7 @@ export function AuthenticatedHeader() {
 
   return (
     <header className="flex items-center justify-between px-8 py-4 bg-white shadow-sm">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push('/home')}>
         <div className="text-2xl text-blue-500"><FiCalendar /></div>
         <span className="text-xl font-bold bg-gradient-to-r from-purple-500 to-blue-500 bg-clip-text text-transparent">Datekeeper</span>
       </div>

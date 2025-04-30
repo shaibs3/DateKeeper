@@ -60,6 +60,11 @@ export const {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      authorization: {
+        params: {
+          prompt: 'select_account consent',
+        },
+      },
     }),
   ],
   debug: true,
@@ -72,6 +77,10 @@ export const {
       return session;
     },
     async redirect({ url, baseUrl }) {
+      // Handle sign-out redirect
+      if (url.includes('signout')) {
+        return baseUrl;
+      }
       // If no specific URL is provided, redirect to home
       if (!url || url === '/') {
         return `${baseUrl}/home`;
@@ -85,7 +94,6 @@ export const {
   },
   pages: {
     signIn: '/auth/signin',
-    signOut: '/auth/signout',
     error: '/auth/error',
   },
   secret: process.env.NEXTAUTH_SECRET,

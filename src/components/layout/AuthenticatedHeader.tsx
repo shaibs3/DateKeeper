@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import { FiCalendar, FiBell, FiSettings, FiMoon, FiLogOut } from 'react-icons/fi';
 import { useState, useRef, useEffect } from 'react';
+import Image from 'next/image';
 
 export function AuthenticatedHeader() {
   const router = useRouter();
@@ -43,10 +44,12 @@ export function AuthenticatedHeader() {
                 className="focus:outline-none"
                 onClick={() => setMenuOpen((open) => !open)}
               >
-                <img
+                <Image
                   src={session.user.image}
                   alt="Profile"
                   className="w-9 h-9 rounded-full border-2 border-gray-200 object-cover hover:border-blue-400 transition-all"
+                  width={36}
+                  height={36}
                 />
               </button>
             ) : (

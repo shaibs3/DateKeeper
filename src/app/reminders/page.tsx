@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { FiCalendar, FiBell, FiSettings, FiMoon } from 'react-icons/fi';
+import { FiCalendar, FiBell } from 'react-icons/fi';
 import { useState, useRef, useEffect } from 'react';
 import { AuthenticatedHeader } from '@/components/layout/AuthenticatedHeader';
 
@@ -45,7 +45,7 @@ export default function RemindersPage() {
         {/* Default Reminder Settings */}
         <section className="bg-white rounded-2xl shadow-lg p-8 mb-8">
           <h2 className="text-lg font-semibold mb-2">Default Reminder Settings</h2>
-          <p className="text-gray-600 mb-4">Set when you'd like to be reminded about upcoming dates by default. These settings will be applied to new dates you add.</p>
+          <p className="text-gray-600 mb-4">Set when you&apos;d like to be reminded about upcoming dates by default. These settings will be applied to new dates you add.</p>
           <div className="flex flex-wrap gap-2">
             <button className="px-4 py-2 rounded-lg border border-blue-500 bg-blue-50 text-blue-700 font-semibold">On the day</button>
             <button className="px-4 py-2 rounded-lg border border-blue-500 bg-blue-50 text-blue-700 font-semibold">1 day before</button>

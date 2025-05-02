@@ -16,20 +16,12 @@ export default function HomePage() {
   const [addModalOpen, setAddModalOpen] = useState(false);
 
   const fetchEvents = async () => {
-    console.log('Fetching events...');
     try {
       const response = await fetch('/api/events');
-      console.log('Events response:', response.status);
       if (response.ok) {
         const data = await response.json();
-        console.log('Fetched events:', data);
         setEvents(data);
-      } else {
-        const error = await response.json();
-        console.error('Failed to fetch events:', error);
       }
-    } catch (error) {
-      console.error('Failed to fetch events:', error);
     } finally {
       setLoading(false);
     }
@@ -42,7 +34,6 @@ export default function HomePage() {
   }, [status]);
 
   const handleEventUpdated = () => {
-    console.log('Event updated, refreshing list...');
     fetchEvents();
   };
 

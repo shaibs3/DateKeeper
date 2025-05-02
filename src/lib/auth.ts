@@ -1,24 +1,6 @@
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
-import type { NextAuthConfig } from 'next-auth';
-import type { OAuthConfig } from 'next-auth/providers';
 import { prisma } from '@/lib/prisma';
-
-// Debug logging for environment variables
-console.log('Environment Variables:', {
-  NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-  NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET ? '***' : undefined,
-  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
-  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET ? '***' : undefined,
-  NODE_ENV: process.env.NODE_ENV,
-});
-
-console.log('Loaded ENV:', {
-  NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-  NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
-  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
-  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
-});
 
 declare module 'next-auth' {
   interface Session {
@@ -30,14 +12,6 @@ declare module 'next-auth' {
     };
   }
 }
-
-// Mock user for development
-const mockUser = {
-  id: 'mock-user-id',
-  name: 'Mock User',
-  email: 'mock@example.com',
-  image: null,
-};
 
 // Verify required environment variables
 if (!process.env.GOOGLE_CLIENT_ID) {
@@ -70,8 +44,7 @@ export const {
   ],
   debug: true,
   callbacks: {
-    async signIn({ user, account, profile }) {
-      console.log('Sign in attempt:', { user, account, profile });
+    async signIn({ user, account: _account, profile: _profile }) {
       if (!user.email) return false;
       const existingUser = await prisma.user.findUnique({ where: { email: user.email } });
       if (!existingUser) {

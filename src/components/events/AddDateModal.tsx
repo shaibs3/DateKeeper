@@ -57,7 +57,6 @@ export function AddDateModal({ open, onClose, event, onSaved }: AddDateModalProp
   useEffect(() => {
     if (open) {
       if (event) {
-        console.log('Editing event:', event);
         setName(event.name);
         setDate(event.date.split('T')[0]);
         setCategory(event.category);
@@ -90,12 +89,10 @@ export function AddDateModal({ open, onClose, event, onSaved }: AddDateModalProp
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    console.log('Saving event:', { event, formData: { name, date, category, color, recurrence, notes, reminders } });
     
     try {
       const url = event ? `/api/events/${event.id}` : '/api/date-event';
       const method = event ? 'PUT' : 'POST';
-      console.log('Making request:', { url, method });
       
       const res = await fetch(url, {
         method,
@@ -103,10 +100,7 @@ export function AddDateModal({ open, onClose, event, onSaved }: AddDateModalProp
         body: JSON.stringify({ name, date, category, color, recurrence, notes, reminders }),
       });
       
-      console.log('Save response:', res.status);
       if (!res.ok) {
-        const error = await res.json();
-        console.error('Save error:', error);
         throw new Error('Failed to save');
       }
       
@@ -115,7 +109,6 @@ export function AddDateModal({ open, onClose, event, onSaved }: AddDateModalProp
       if (onSaved) onSaved();
       router.refresh();
     } catch (err) {
-      console.error('Save error:', err);
       toast.error(event ? 'Failed to update event' : 'Failed to save date');
     } finally {
       setLoading(false);

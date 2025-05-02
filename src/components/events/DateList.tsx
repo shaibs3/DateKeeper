@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { FiGift, FiCalendar, FiMoreVertical, FiEdit2, FiTrash2, FiHeart } from 'react-icons/fi';
 import { FaBirthdayCake } from 'react-icons/fa';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
@@ -16,22 +16,6 @@ interface DateEvent {
   recurrence: string;
   notes?: string;
   reminders: string[];
-}
-
-function getRelativeTimeString(date: Date): string {
-  const now = new Date();
-  const diffTime = date.getTime() - now.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
-  if (diffDays === 0) return 'Today!';
-  if (diffDays === 1) return 'Tomorrow!';
-  if (diffDays < 30) return `In ${diffDays} days`;
-  
-  const diffMonths = Math.ceil(diffDays / 30);
-  if (diffMonths === 1) return 'In 1 month';
-  if (diffMonths < 12) return `In ${diffMonths} months`;
-  
-  return date.toLocaleDateString();
 }
 
 function calculateAge(birthDate: Date, eventDate: Date): number {
@@ -61,37 +45,20 @@ export function DateList({ events, onEventDeleted }: { events: DateEvent[], onEv
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-  // const menuRef = useRef<HTMLDivElement>(null);
-
-  // Temporarily remove click outside logic for debugging
-  // useEffect(() => {
-  //   function handleClickOutside(event: MouseEvent) {
-  //     if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-  //       setOpenMenuId(null);
-  //     }
-  //   }
-  //   document.addEventListener('mousedown', handleClickOutside);
-  //   return () => document.removeEventListener('mousedown', handleClickOutside);
-  // }, []);
 
   const handleDelete = async () => {
     if (!selectedEvent) return;
-    console.log('Deleting event:', selectedEvent.id);
     try {
       const response = await fetch(`/api/events/${selectedEvent.id}`, {
         method: 'DELETE',
       });
-      console.log('Delete response:', response.status);
       if (response.ok) {
         toast.success('Event deleted successfully!');
         onEventDeleted();
       } else {
-        const error = await response.json();
-        console.error('Delete error:', error);
         toast.error('Failed to delete event');
       }
     } catch (error) {
-      console.error('Failed to delete event:', error);
       toast.error('Failed to delete event');
     }
     setShowDeleteConfirm(false);
@@ -146,7 +113,6 @@ export function DateList({ events, onEventDeleted }: { events: DateEvent[], onEv
                 <button
                   className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                   onClick={() => {
-                    console.log('Edit clicked', event);
                     setSelectedEvent(event);
                     setShowEditModal(true);
                     setOpenMenuId(null);
@@ -158,7 +124,6 @@ export function DateList({ events, onEventDeleted }: { events: DateEvent[], onEv
                 <button
                   className="w-full px-4 py-2 text-left text-red-600 hover:bg-gray-50 flex items-center gap-2"
                   onClick={() => {
-                    console.log('Delete clicked', event);
                     setSelectedEvent(event);
                     setShowDeleteConfirm(true);
                     setOpenMenuId(null);

@@ -3,6 +3,7 @@
 import { useSession } from 'next-auth/react';
 import { Header } from '@/components/layout/Header';
 import { SignOutButton } from '@/components/auth/SignOutButton';
+import Image from 'next/image';
 
 export default function ProfilePage() {
   const { data: session } = useSession();
@@ -49,10 +50,12 @@ export default function ProfilePage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700">Profile Picture</label>
                 <div className="mt-2">
-                  <img
+                  <Image
                     src={session.user.image}
                     alt="Profile"
                     className="h-24 w-24 rounded-full"
+                    width={96}
+                    height={96}
                   />
                 </div>
               </div>

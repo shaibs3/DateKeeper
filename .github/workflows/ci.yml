@@ -27,7 +27,10 @@ jobs:
       
       - name: Run type checking
         run: npm run type-check
-      
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
       - name: Build application
         run: |
           npm run build

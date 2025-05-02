@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 import { Header } from '@/components/layout/Header';
-import { SignOutButton } from '@/components/auth/SignOutButton';
+import SignOutButton from '@/components/auth/SignOutButton';
 import Image from 'next/image';
 
 export default function ProfilePage() {

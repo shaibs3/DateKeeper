@@ -62,14 +62,8 @@ export const {
       return session;
     },
     async redirect({ url, baseUrl }) {
-      // Handle sign-out redirect
-      if (url.includes('signout')) {
-        return baseUrl;
-      }
-      // If no specific URL is provided, redirect to home
-      if (!url || url === '/') {
-        return `${baseUrl}/home`;
-      }
+      // Allow sign out to go to the root
+      if (url === '/' || url === baseUrl) return baseUrl;
       // Allow relative URLs
       if (url.startsWith('/')) return `${baseUrl}${url}`;
       // Allow URLs from the same origin

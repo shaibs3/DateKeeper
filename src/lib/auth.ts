@@ -2,6 +2,7 @@ import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import type { NextAuthConfig } from 'next-auth';
 import type { OAuthConfig } from 'next-auth/providers';
+import { prisma } from '@/lib/prisma';
 
 // Debug logging for environment variables
 console.log('Environment Variables:', {
@@ -71,6 +72,17 @@ export const {
   callbacks: {
     async signIn({ user, account, profile }) {
       console.log('Sign in attempt:', { user, account, profile });
+      if (!user.email) return false;
+      const existingUser = await prisma.user.findUnique({ where: { email: user.email } });
+      if (!existingUser) {
+        await prisma.user.create({
+          data: {
+            email: user.email,
+            name: user.name || '',
+            image: user.image || null,
+          },
+        });
+      }
       return true;
     },
     session({ session }) {

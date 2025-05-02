@@ -1,9 +1,27 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FiX, FiCalendar } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
+
+interface DateEvent {
+  id: string;
+  name: string;
+  date: string;
+  category: string;
+  color: string;
+  recurrence: string;
+  notes?: string;
+  reminders: string[];
+}
+
+interface AddDateModalProps {
+  open: boolean;
+  onClose: () => void;
+  event?: DateEvent;
+  onSaved?: () => void;
+}
 
 const colorOptions = [
   { name: 'blue', color: 'bg-blue-500' },
@@ -25,7 +43,7 @@ const reminderOptions = [
 const categoryOptions = ['Birthday', 'Anniversary', 'Other'];
 const recurrenceOptions = ['Yearly', 'Monthly', 'One-time'];
 
-export function AddDateModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function AddDateModal({ open, onClose, event, onSaved }: AddDateModalProps) {
   const [name, setName] = useState('');
   const [date, setDate] = useState('');
   const [category, setCategory] = useState(categoryOptions[0]);
@@ -35,6 +53,29 @@ export function AddDateModal({ open, onClose }: { open: boolean; onClose: () => 
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    if (open) {
+      if (event) {
+        console.log('Editing event:', event);
+        setName(event.name);
+        setDate(event.date.split('T')[0]);
+        setCategory(event.category);
+        setColor(event.color);
+        setReminders(event.reminders);
+        setRecurrence(event.recurrence);
+        setNotes(event.notes || '');
+      } else {
+        setName('');
+        setDate('');
+        setCategory(categoryOptions[0]);
+        setColor('green');
+        setReminders(['On day', '1 day before', '7 days before']);
+        setRecurrence(recurrenceOptions[0]);
+        setNotes('');
+      }
+    }
+  }, [open, event]);
 
   if (!open) return null;
 
@@ -49,19 +90,33 @@ export function AddDateModal({ open, onClose }: { open: boolean; onClose: () => 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    console.log('Saving event:', { event, formData: { name, date, category, color, recurrence, notes, reminders } });
+    
     try {
-      const res = await fetch('/api/date-event', {
-        method: 'POST',
+      const url = event ? `/api/events/${event.id}` : '/api/date-event';
+      const method = event ? 'PUT' : 'POST';
+      console.log('Making request:', { url, method });
+      
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, date, category, color, recurrence, notes, reminders }),
       });
-      if (!res.ok) throw new Error('Failed to save');
-      toast.success('Date saved successfully!');
+      
+      console.log('Save response:', res.status);
+      if (!res.ok) {
+        const error = await res.json();
+        console.error('Save error:', error);
+        throw new Error('Failed to save');
+      }
+      
+      toast.success(event ? 'Event updated successfully!' : 'Date saved successfully!');
       onClose();
-      router.push('/');
+      if (onSaved) onSaved();
+      router.refresh();
     } catch (err) {
-      toast.error('Failed to save date');
-      console.error(err);
+      console.error('Save error:', err);
+      toast.error(event ? 'Failed to update event' : 'Failed to save date');
     } finally {
       setLoading(false);
     }
@@ -77,7 +132,7 @@ export function AddDateModal({ open, onClose }: { open: boolean; onClose: () => 
         >
           <FiX />
         </button>
-        <h2 className="text-2xl font-bold mb-6">Add New Date</h2>
+        <h2 className="text-2xl font-bold mb-6">{event ? 'Edit Event' : 'Add New Date'}</h2>
         <form onSubmit={handleSave} className="space-y-4 flex-1 flex flex-col">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>

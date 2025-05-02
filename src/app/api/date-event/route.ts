@@ -7,15 +7,14 @@ export async function POST(req: NextRequest) {
   if (!session || !session.user?.email) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-
   const data = await req.json();
   const { name, date, category, color, recurrence, notes, reminders } = data;
-
   try {
     const user = await prisma.user.findUnique({ where: { email: session.user.email } });
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
+
     const event = await prisma.dateEvent.create({
       data: {
         name,

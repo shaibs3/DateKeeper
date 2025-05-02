@@ -30,7 +30,6 @@ jobs:
       
       - name: Build application
         run: |
-          cp ci.env .env
           npm run build
 
   test:

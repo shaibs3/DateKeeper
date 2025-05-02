@@ -25,6 +25,14 @@ jobs:
       - name: Run linting
         run: npm run lint
       
+      - name: Create .env file with dummy values
+        run: |
+          echo "GOOGLE_CLIENT_ID=dummy" >> .env
+          echo "GOOGLE_CLIENT_SECRET=dummy" >> .env
+          echo "NEXTAUTH_URL=http://localhost:3000" >> .env
+          echo "NEXTAUTH_SECRET=dummy" >> .env
+          echo "DATABASE_URL=postgresql://user:pass@localhost:5432/db" >> .env
+
       - name: Run type checking
         run: npm run type-check
 

@@ -40,7 +40,7 @@ const reminderOptions = [
   '30 days before',
 ];
 
-const categoryOptions = ['Birthday', 'Anniversary', 'Other'];
+const categoryOptions = ['Birthday', 'Anniversary', 'Holiday'];
 const recurrenceOptions = ['Yearly', 'Monthly', 'One-time'];
 
 export function AddDateModal({ open, onClose, event, onSaved }: AddDateModalProps) {

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { FiCalendar, FiMoreVertical, FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { FiGift, FiCalendar, FiMoreVertical, FiEdit2, FiTrash2, FiHeart } from 'react-icons/fi';
+import { FaBirthdayCake } from 'react-icons/fa';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { AddDateModal } from '@/components/events/AddDateModal';
 import { toast } from 'react-hot-toast';
@@ -40,6 +41,19 @@ function calculateAge(birthDate: Date, eventDate: Date): number {
     age--;
   }
   return age;
+}
+
+function getEventIcon(category: string) {
+  switch (category) {
+    case 'Birthday':
+      return <span className="bg-blue-100 rounded-full p-2"><FaBirthdayCake className="text-blue-500" /></span>;
+    case 'Anniversary':
+      return <span className="bg-blue-100 rounded-full p-2"><FiHeart className="text-blue-500" /></span>;
+    case 'Holiday':
+      return <span className="bg-blue-100 rounded-full p-2"><FiGift className="text-blue-500" /></span>;
+    default:
+      return <span className="bg-blue-100 rounded-full p-2"><FiCalendar className="text-blue-500" /></span>;
+  }
 }
 
 export function DateList({ events, onEventDeleted }: { events: DateEvent[], onEventDeleted: () => void }) {
@@ -101,8 +115,8 @@ export function DateList({ events, onEventDeleted }: { events: DateEvent[], onEv
     return (
       <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${event.color === 'blue' ? 'bg-blue-100' : 'bg-pink-100'}`}>
-            <FiCalendar className={`text-xl ${event.color === 'blue' ? 'text-blue-500' : 'text-pink-500'}`} />
+          <div className="w-10 h-10 flex items-center justify-center">
+            {getEventIcon(event.category)}
           </div>
           <div>
             <h3 className="font-semibold text-gray-900">{event.name}</h3>

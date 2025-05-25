@@ -2,19 +2,31 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { EventCard, Event } from '@/components/events/EventCard';
 import { EventForm } from '@/components/events/EventForm';
 
 export const dynamic = 'force-dynamic';
 
+const MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
+
 export default function Dashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth/signin');
+    } else if (status === 'authenticated') {
+      fetch('/api/events')
+        .then(res => res.json())
+        .then(data => setEvents(data))
+        .finally(() => setLoading(false));
     }
   }, [status, router]);
 
@@ -26,13 +38,21 @@ export default function Dashboard() {
     // TODO: Delete event from database
   };
 
-  if (status === 'loading') {
+  if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
       </div>
     );
   }
+
+  // Group events by month
+  const eventsByMonth: { [month: number]: any[] } = {};
+  events.forEach(event => {
+    const month = new Date(event.date).getMonth();
+    if (!eventsByMonth[month]) eventsByMonth[month] = [];
+    eventsByMonth[month].push(event);
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -70,26 +90,30 @@ export default function Dashboard() {
                 <h2 className="text-lg font-medium text-gray-900">Your Events</h2>
               </div>
               <div className="p-6">
-                <div className="space-y-4">
-                  {/* Sample Event Cards - Replace with actual data */}
-                  <EventCard
-                    event={{
-                      id: '1',
-                      name: 'John\'s Birthday',
-                      date: new Date('2024-05-15'),
-                      type: 'BIRTHDAY',
-                    }}
-                    onDelete={handleEventDelete}
-                  />
-                  <EventCard
-                    event={{
-                      id: '2',
-                      name: 'Wedding Anniversary',
-                      date: new Date('2024-06-20'),
-                      type: 'ANNIVERSARY',
-                    }}
-                    onDelete={handleEventDelete}
-                  />
+                <div className="space-y-8">
+                  {Object.keys(eventsByMonth).length === 0 && (
+                    <div className="text-gray-500">No events found.</div>
+                  )}
+                  {Object.keys(eventsByMonth)
+                    .sort((a, b) => Number(a) - Number(b))
+                    .map(monthIdx => (
+                      <div key={monthIdx}>
+                        <h3 className="text-xl font-semibold text-blue-700 mb-4">{MONTHS[Number(monthIdx)]}</h3>
+                        <div className="space-y-4">
+                          {eventsByMonth[Number(monthIdx)].map(event => (
+                            <EventCard
+                              key={event.id}
+                              event={{
+                                ...event,
+                                date: new Date(event.date),
+                                type: event.category?.toUpperCase() || 'OTHER',
+                              }}
+                              onDelete={handleEventDelete}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    ))}
                 </div>
               </div>
             </div>

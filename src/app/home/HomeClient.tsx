@@ -8,6 +8,7 @@ import { AuthenticatedHeader } from '@/components/layout/AuthenticatedHeader';
 import { AddDateModal } from '@/components/events/AddDateModal';
 import { DateList } from '@/components/events/DateList';
 import Select from 'react-select';
+import type { DateEvent } from '@/components/events/DateList';
 
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -19,7 +20,7 @@ const monthOptions = MONTHS.map((month, idx) => ({ value: idx, label: month }));
 export default function HomeClient() {
   const { status } = useSession();
   const router = useRouter();
-  const [events, setEvents] = useState([]);
+  const [events, setEvents] = useState<DateEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [selectedMonths, setSelectedMonths] = useState<{ value: number; label: string }[]>([]);
@@ -49,7 +50,7 @@ export default function HomeClient() {
   // Filter events by selected months
   const filteredEvents = selectedMonths.length === 0
     ? events
-    : events.filter((event: any) => selectedMonths.some(m => m.value === new Date(event.date).getMonth()));
+    : events.filter((event: DateEvent) => selectedMonths.some(m => m.value === new Date(event.date).getMonth()));
 
   if (status === 'loading' || loading) {
     return (

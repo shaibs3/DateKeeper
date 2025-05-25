@@ -7,7 +7,7 @@ import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { AddDateModal } from '@/components/events/AddDateModal';
 import { toast } from 'react-hot-toast';
 
-interface DateEvent {
+export interface DateEvent {
   id: string;
   name: string;
   date: string;

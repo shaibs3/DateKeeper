@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { EventCard, Event } from '@/components/events/EventCard';
 import { EventForm } from '@/components/events/EventForm';
+import type { DateEvent } from '@/components/events/DateList';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,7 +17,7 @@ const MONTHS = [
 export default function Dashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [events, setEvents] = useState<any[]>([]);
+  const [events, setEvents] = useState<DateEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -47,11 +48,16 @@ export default function Dashboard() {
   }
 
   // Group events by month
-  const eventsByMonth: { [month: number]: any[] } = {};
+  const eventsByMonth: { [month: number]: DateEvent[] } = {};
   events.forEach(event => {
     const month = new Date(event.date).getMonth();
     if (!eventsByMonth[month]) eventsByMonth[month] = [];
     eventsByMonth[month].push(event);
+  });
+  // Sort events within each month by date ascending
+  Object.keys(eventsByMonth).forEach(monthIdxStr => {
+    const monthIdx = Number(monthIdxStr);
+    eventsByMonth[monthIdx] = eventsByMonth[monthIdx].sort((a: DateEvent, b: DateEvent) => new Date(a.date).getTime() - new Date(b.date).getTime());
   });
 
   return (

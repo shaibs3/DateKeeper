@@ -207,7 +207,7 @@ export default function HomeClient() {
             </button>
           </div>
         ) : (
-          <DateList events={filteredEvents} onEventDeleted={handleEventUpdated} />
+          <DateList events={filteredEvents} originalEvents={events} onEventDeleted={handleEventUpdated} />
         )}
       </main>
     </div>

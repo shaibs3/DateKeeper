@@ -32,7 +32,7 @@ function getEventIcon(category: string) {
   }
 }
 
-export function DateList({ events, onEventDeleted }: { events: DateEvent[], onEventDeleted: () => void }) {
+export function DateList({ events, originalEvents, onEventDeleted }: { events: DateEvent[], originalEvents: DateEvent[], onEventDeleted: () => void }) {
   const [selectedEvent, setSelectedEvent] = useState<DateEvent | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -101,7 +101,9 @@ export function DateList({ events, onEventDeleted }: { events: DateEvent[], onEv
       <div
         className="bg-white rounded-lg p-4 shadow-sm border border-gray-100 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition"
         onClick={() => {
-          setSelectedEvent(event);
+          // Always use the original event (with the real DB ID) for editing
+          const realEvent = originalEvents.find(e => e.id === (event.id.split('-')[0]));
+          setSelectedEvent(realEvent || event);
           setShowEditModal(true);
         }}
       >
@@ -139,7 +141,8 @@ export function DateList({ events, onEventDeleted }: { events: DateEvent[], onEv
                 <button
                   className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                   onClick={() => {
-                    setSelectedEvent(event);
+                    const realEvent = originalEvents.find(e => e.id === (event.id.split('-')[0]));
+                    setSelectedEvent(realEvent || event);
                     setShowEditModal(true);
                     setOpenMenuId(null);
                   }}

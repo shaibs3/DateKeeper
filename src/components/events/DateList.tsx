@@ -19,15 +19,6 @@ export interface DateEvent {
   originalDate?: string;
 }
 
-function calculateAge(birthDate: Date, eventDate: Date): number {
-  let age = eventDate.getFullYear() - birthDate.getFullYear();
-  const m = eventDate.getMonth() - birthDate.getMonth();
-  if (m < 0 || (m === 0 && eventDate.getDate() < birthDate.getDate())) {
-    age--;
-  }
-  return age;
-}
-
 function getEventIcon(category: string) {
   switch (category) {
     case 'Birthday':

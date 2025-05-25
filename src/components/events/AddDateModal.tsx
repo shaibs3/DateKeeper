@@ -41,7 +41,7 @@ const reminderOptions = [
 ];
 
 const categoryOptions = ['Birthday', 'Anniversary', 'Other'];
-const recurrenceOptions = ['Yearly', 'Monthly'];
+const recurrenceOptions = ['Monthly', 'Yearly'];
 
 export function AddDateModal({ open, onClose, event, onSaved }: AddDateModalProps) {
   const [name, setName] = useState('');
@@ -70,7 +70,7 @@ export function AddDateModal({ open, onClose, event, onSaved }: AddDateModalProp
         setCategory(categoryOptions[0]);
         setColor('green');
         setReminders(['On day', '1 day before', '7 days before']);
-        setRecurrence(recurrenceOptions[0]);
+        setRecurrence('Yearly');
         setNotes('');
       }
     }
@@ -90,6 +90,8 @@ export function AddDateModal({ open, onClose, event, onSaved }: AddDateModalProp
     e.preventDefault();
     setLoading(true);
     
+    // Force recurrence to 'Yearly' for Birthday and Anniversary
+    const finalRecurrence = (category === 'Birthday' || category === 'Anniversary') ? 'Yearly' : recurrence;
     try {
       const url = event ? `/api/events/${event.id}` : '/api/date-event';
       const method = event ? 'PUT' : 'POST';
@@ -97,7 +99,7 @@ export function AddDateModal({ open, onClose, event, onSaved }: AddDateModalProp
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, date, category, color, recurrence, notes, reminders }),
+        body: JSON.stringify({ name, date, category, color, recurrence: finalRecurrence, notes, reminders }),
       });
       
       if (!res.ok) {
@@ -160,6 +162,8 @@ export function AddDateModal({ open, onClose, event, onSaved }: AddDateModalProp
                 setCategory(e.target.value);
                 if (e.target.value === 'Anniversary' || e.target.value === 'Birthday') {
                   setRecurrence('Yearly');
+                } else if (recurrence === 'Yearly') {
+                  setRecurrence('Monthly');
                 }
               }}
             >

@@ -7,8 +7,6 @@ import { EventCard, Event } from '@/components/events/EventCard';
 import { EventForm } from '@/components/events/EventForm';
 import type { DateEvent } from '@/components/events/DateList';
 
-console.log('DASHBOARD FILE LOADED');
-
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'
@@ -20,9 +18,6 @@ export default function Dashboard() {
   const [events, setEvents] = useState<DateEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Debug: log events on every render
-  console.log('Dashboard events state:', events);
-
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth/signin');
@@ -31,7 +26,6 @@ export default function Dashboard() {
         .then(res => res.json())
         .then(data => {
           setEvents(data);
-          console.log('Fetched events:', data);
         })
         .finally(() => setLoading(false));
     }

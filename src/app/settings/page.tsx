@@ -2,14 +2,16 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { FiSettings, FiMoon, FiDownload, FiUpload, FiTrash2 } from 'react-icons/fi';
+import { FiSettings, FiMoon, FiDownload, FiTrash2 } from 'react-icons/fi';
 import { useState } from 'react';
 import { AuthenticatedHeader } from '@/components/layout/AuthenticatedHeader';
+import toast from 'react-hot-toast';
 
 export default function SettingsPage() {
   const { status } = useSession();
   const router = useRouter();
   const [selectedColor, setSelectedColor] = useState('blue');
+  const [clearLoading, setClearLoading] = useState(false);
 
   if (status === 'loading') return null;
   if (status === 'unauthenticated') {
@@ -81,8 +83,27 @@ export default function SettingsPage() {
                   <div className="font-semibold">Clear All Data</div>
                   <div className="text-gray-600 text-sm">Delete all your dates and reset preferences</div>
                 </div>
-                <button className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700">
-                  <FiTrash2 /> Clear Data
+                <button className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700"
+                  onClick={async () => {
+                    if (!window.confirm('Are you sure you want to delete all your dates? This cannot be undone.')) return;
+                    setClearLoading(true);
+                    try {
+                      const res = await fetch('/api/events', { method: 'DELETE' });
+                      if (res.ok) {
+                        toast.success('All data cleared!');
+                        router.refresh();
+                      } else {
+                        toast.error('Failed to clear data');
+                      }
+                    } catch {
+                      toast.error('Failed to clear data');
+                    } finally {
+                      setClearLoading(false);
+                    }
+                  }}
+                  disabled={clearLoading}
+                >
+                  <FiTrash2 /> {clearLoading ? 'Clearing...' : 'Clear Data'}
                 </button>
               </div>
             </div>

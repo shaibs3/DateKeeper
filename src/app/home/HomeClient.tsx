@@ -7,11 +7,14 @@ import { useState, useEffect } from 'react';
 import { AuthenticatedHeader } from '@/components/layout/AuthenticatedHeader';
 import { AddDateModal } from '@/components/events/AddDateModal';
 import { DateList } from '@/components/events/DateList';
+import Select from 'react-select';
 
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'
 ];
+
+const monthOptions = MONTHS.map((month, idx) => ({ value: idx, label: month }));
 
 export default function HomeClient() {
   const { status } = useSession();
@@ -19,7 +22,7 @@ export default function HomeClient() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [addModalOpen, setAddModalOpen] = useState(false);
-  const [selectedMonths, setSelectedMonths] = useState<number[]>([]);
+  const [selectedMonths, setSelectedMonths] = useState<{ value: number; label: string }[]>([]);
 
   const fetchEvents = async () => {
     try {
@@ -46,7 +49,7 @@ export default function HomeClient() {
   // Filter events by selected months
   const filteredEvents = selectedMonths.length === 0
     ? events
-    : events.filter((event: any) => selectedMonths.includes(new Date(event.date).getMonth()));
+    : events.filter((event: any) => selectedMonths.some(m => m.value === new Date(event.date).getMonth()));
 
   if (status === 'loading' || loading) {
     return (
@@ -75,22 +78,15 @@ export default function HomeClient() {
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Your Important Dates</h1>
           <div className="flex gap-2 items-center">
-            <div className="relative">
-              <select
-                multiple
-                value={selectedMonths.map(String)}
-                onChange={e => {
-                  const options = Array.from(e.target.selectedOptions).map(opt => Number(opt.value));
-                  setSelectedMonths(options);
-                }}
-                className="px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-100 bg-white min-w-[200px] h-[44px]"
-                style={{ minWidth: 200 }}
-              >
-                {MONTHS.map((month, idx) => (
-                  <option key={month} value={idx}>{month}</option>
-                ))}
-              </select>
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></span>
+            <div className="min-w-[220px]">
+              <Select
+                isMulti
+                options={monthOptions}
+                value={selectedMonths}
+                onChange={newValue => setSelectedMonths(Array.isArray(newValue) ? [...newValue] : [])}
+                placeholder="Filter by month..."
+                classNamePrefix="react-select"
+              />
             </div>
             <button
               className="ml-2 px-5 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow hover:bg-blue-700 transition-colors"

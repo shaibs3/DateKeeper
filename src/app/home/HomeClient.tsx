@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { AuthenticatedHeader } from '@/components/layout/AuthenticatedHeader';
 import { AddDateModal } from '@/components/events/AddDateModal';
 import { DateList } from '@/components/events/DateList';
-import Select from 'react-select';
+import Select, { MultiValue } from 'react-select';
 import type { DateEvent } from '@/components/events/DateList';
 
 const MONTHS = [
@@ -84,7 +84,7 @@ export default function HomeClient() {
                 isMulti
                 options={monthOptions}
                 value={selectedMonths}
-                onChange={newValue => setSelectedMonths(Array.isArray(newValue) ? [...newValue] : [])}
+                onChange={(newValue: MultiValue<{ value: number; label: string }>) => setSelectedMonths(Array.isArray(newValue) ? [...newValue] : [])}
                 placeholder="Filter by month..."
                 classNamePrefix="react-select"
               />

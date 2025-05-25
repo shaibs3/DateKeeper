@@ -64,16 +64,29 @@ export function DateList({ events, onEventDeleted }: { events: DateEvent[], onEv
     setShowDeleteConfirm(false);
   };
 
-  const now = new Date();
-  const threeMonthsFromNow = new Date(now.getFullYear(), now.getMonth() + 3, now.getDate());
-  
-  const upcomingEvents = events
-    .filter(event => new Date(event.date) <= threeMonthsFromNow)
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  
-  const laterEvents = events
-    .filter(event => new Date(event.date) > threeMonthsFromNow)
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  // Group events by month
+  const eventsByMonth: { [month: number]: DateEvent[] } = {};
+  events.forEach(event => {
+    const month = new Date(event.date).getMonth();
+    if (!eventsByMonth[month]) eventsByMonth[month] = [];
+    eventsByMonth[month].push(event);
+  });
+  // Sort events within each month by date ascending
+  Object.keys(eventsByMonth).forEach(monthIdxStr => {
+    const monthIdx = Number(monthIdxStr);
+    eventsByMonth[monthIdx] = eventsByMonth[monthIdx].sort((a: DateEvent, b: DateEvent) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  });
+
+  const MONTHS = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  const currentMonth = new Date().getMonth();
+
+  // Compute ordered months: current, then next, wrapping around
+  const orderedMonths = [
+    ...Array.from({ length: 12 }, (_, i) => (currentMonth + i) % 12)
+  ];
 
   const EventCard = ({ event }: { event: DateEvent }) => {
     const eventDate = new Date(event.date);
@@ -155,27 +168,30 @@ export function DateList({ events, onEventDeleted }: { events: DateEvent[], onEv
   return (
     <>
       <div className="space-y-8">
-        {upcomingEvents.length > 0 && (
+        {/* Coming Up Soon: current month */}
+        {eventsByMonth[currentMonth] && eventsByMonth[currentMonth].length > 0 && (
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Coming Up Soon</h2>
             <div className="space-y-3">
-              {upcomingEvents.map(event => (
+              {eventsByMonth[currentMonth].map(event => (
                 <EventCard key={event.id} event={event} />
               ))}
             </div>
           </section>
         )}
-        
-        {laterEvents.length > 0 && (
-          <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Later This Year</h2>
-            <div className="space-y-3">
-              {laterEvents.map(event => (
-                <EventCard key={event.id} event={event} />
-              ))}
-            </div>
-          </section>
-        )}
+        {/* Other months in calendar order after current */}
+        {orderedMonths
+          .filter(monthIdx => monthIdx !== currentMonth && eventsByMonth[monthIdx] && eventsByMonth[monthIdx].length > 0)
+          .map(monthIdx => (
+            <section key={monthIdx}>
+              <h2 className="text-xl font-semibold text-blue-700 mb-4">{MONTHS[monthIdx]}</h2>
+              <div className="space-y-3">
+                {eventsByMonth[monthIdx].map(event => (
+                  <EventCard key={event.id} event={event} />
+                ))}
+              </div>
+            </section>
+          ))}
       </div>
 
       <ConfirmDialog

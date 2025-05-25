@@ -97,6 +97,8 @@ export default function HomeClient() {
     if (selectedMonths.length > 0) {
       filteredEvents = filteredEvents.filter(event => selectedMonths.some(m => m.value === new Date(event.date).getMonth()));
     }
+    // Filter to only events in the current year
+    filteredEvents = filteredEvents.filter(event => new Date(event.date).getFullYear() === currentYear);
   } else {
     const yearNum = Number(selectedYear);
     filteredEvents = events.flatMap(event => {

@@ -79,8 +79,20 @@ export function DateList({ events, onEventDeleted }: { events: DateEvent[], onEv
     const eventDate = new Date(event.date);
     const isToday = new Date().toDateString() === eventDate.toDateString();
     
+    // Helper to prevent click propagation from menu button
+    const handleMenuButtonClick = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      setOpenMenuId(openMenuId === event.id ? null : event.id);
+    };
+
     return (
-      <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100 flex items-center justify-between">
+      <div
+        className="bg-white rounded-lg p-4 shadow-sm border border-gray-100 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition"
+        onClick={() => {
+          setSelectedEvent(event);
+          setShowEditModal(true);
+        }}
+      >
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 flex items-center justify-center">
             {getEventIcon(event.category)}
@@ -104,7 +116,7 @@ export function DateList({ events, onEventDeleted }: { events: DateEvent[], onEv
           <div className="relative">
             <button 
               className="text-gray-400 hover:text-gray-600 p-1"
-              onClick={() => setOpenMenuId(openMenuId === event.id ? null : event.id)}
+              onClick={handleMenuButtonClick}
             >
               <FiMoreVertical />
             </button>

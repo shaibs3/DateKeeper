@@ -112,7 +112,9 @@ export default function Dashboard() {
                               event={{
                                 ...event,
                                 date: new Date(event.date),
-                                type: event.category?.toUpperCase() || 'OTHER',
+                                type: (["BIRTHDAY", "ANNIVERSARY", "OTHER"].includes(event.category?.toUpperCase() ?? "")
+                                  ? event.category?.toUpperCase()
+                                  : "OTHER") as "BIRTHDAY" | "ANNIVERSARY" | "OTHER",
                               }}
                               onDelete={handleEventDelete}
                             />

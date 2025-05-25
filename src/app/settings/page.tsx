@@ -78,15 +78,6 @@ export default function SettingsPage() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="font-semibold">Import Data</div>
-                  <div className="text-gray-600 text-sm">Restore from a previously exported backup</div>
-                </div>
-                <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">
-                  <FiUpload /> Import
-                </button>
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
                   <div className="font-semibold">Clear All Data</div>
                   <div className="text-gray-600 text-sm">Delete all your dates and reset preferences</div>
                 </div>

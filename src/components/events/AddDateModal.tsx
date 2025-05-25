@@ -40,7 +40,7 @@ const reminderOptions = [
   '30 days before',
 ];
 
-const categoryOptions = ['Birthday', 'Anniversary', 'Holiday'];
+const categoryOptions = ['Birthday', 'Anniversary', 'Other'];
 const recurrenceOptions = ['Yearly', 'Monthly', 'One-time'];
 
 export function AddDateModal({ open, onClose, event, onSaved }: AddDateModalProps) {
@@ -156,7 +156,12 @@ export function AddDateModal({ open, onClose, event, onSaved }: AddDateModalProp
             <select
               className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100"
               value={category}
-              onChange={e => setCategory(e.target.value)}
+              onChange={e => {
+                setCategory(e.target.value);
+                if (e.target.value === 'Anniversary' || e.target.value === 'Birthday') {
+                  setRecurrence('Yearly');
+                }
+              }}
             >
               {categoryOptions.map(opt => (
                 <option key={opt} value={opt}>{opt}</option>
@@ -200,6 +205,7 @@ export function AddDateModal({ open, onClose, event, onSaved }: AddDateModalProp
               className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100"
               value={recurrence}
               onChange={e => setRecurrence(e.target.value)}
+              disabled={category === 'Anniversary' || category === 'Birthday'}
             >
               {recurrenceOptions.map(opt => (
                 <option key={opt} value={opt}>{opt}</option>

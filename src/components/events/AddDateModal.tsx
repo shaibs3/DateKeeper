@@ -41,7 +41,7 @@ const reminderOptions = [
 ];
 
 const categoryOptions = ['Birthday', 'Anniversary', 'Other'];
-const recurrenceOptions = ['Yearly', 'Monthly', 'One-time'];
+const recurrenceOptions = ['Yearly', 'Monthly'];
 
 export function AddDateModal({ open, onClose, event, onSaved }: AddDateModalProps) {
   const [name, setName] = useState('');

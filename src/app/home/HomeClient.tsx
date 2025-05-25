@@ -24,6 +24,12 @@ export default function HomeClient() {
   const [loading, setLoading] = useState(true);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [selectedMonths, setSelectedMonths] = useState<{ value: number; label: string }[]>([]);
+  const [selectedYear, setSelectedYear] = useState<string>('All');
+
+  // Extract years from events and add next 5 years
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 6 }, (_, i) => currentYear + i);
+  const yearOptions = [{ value: 'All', label: 'All' }, ...years.map(y => ({ value: String(y), label: String(y) }))];
 
   const fetchEvents = async () => {
     try {
@@ -47,10 +53,88 @@ export default function HomeClient() {
     fetchEvents();
   };
 
-  // Filter events by selected months
-  const filteredEvents = selectedMonths.length === 0
-    ? events
-    : events.filter((event: DateEvent) => selectedMonths.some(m => m.value === new Date(event.date).getMonth()));
+  // Filter events by selected year and months
+  let filteredEvents: DateEvent[] = [];
+  if (selectedYear === 'All') {
+    // Duplicate monthly events for every month
+    filteredEvents = events.flatMap(event => {
+      if (event.recurrence === 'Monthly') {
+        // Add a copy of the event to every month, always using the last valid day if needed
+        return Array.from({ length: 12 }, (_, m) => {
+          const origDate = new Date(event.date);
+          const year = new Date().getFullYear();
+          const daysInMonth = new Date(year, m + 1, 0).getDate();
+          const day = Math.min(origDate.getDate(), daysInMonth);
+          const adjustedDate = new Date(origDate);
+          adjustedDate.setFullYear(year);
+          adjustedDate.setMonth(m);
+          adjustedDate.setDate(day);
+          return { ...event, date: adjustedDate.toISOString(), id: event.id + '-y' + year + '-m' + m, originalDate: event.date };
+        });
+      } else if (event.recurrence === 'Yearly') {
+        // Show the next occurrence (this year or next year if already passed)
+        const origDate = new Date(event.date);
+        const today = new Date();
+        let year = today.getFullYear();
+        let nextOccurrence = new Date(origDate);
+        nextOccurrence.setFullYear(year);
+        if (
+          today.getMonth() > origDate.getMonth() ||
+          (today.getMonth() === origDate.getMonth() && today.getDate() > origDate.getDate())
+        ) {
+          year++;
+          nextOccurrence = new Date(origDate);
+          nextOccurrence.setFullYear(year);
+        }
+        return [{ ...event, date: nextOccurrence.toISOString(), id: event.id + '-y' + year, originalDate: event.date }];
+      } else {
+        const eventMonth = new Date(event.date).getMonth();
+        const monthMatch = selectedMonths.length === 0 || selectedMonths.some(m => m.value === eventMonth);
+        return monthMatch ? [{ ...event, originalDate: event.date }] : [];
+      }
+    });
+    // Filter by selected months if any
+    if (selectedMonths.length > 0) {
+      filteredEvents = filteredEvents.filter(event => selectedMonths.some(m => m.value === new Date(event.date).getMonth()));
+    }
+  } else {
+    const yearNum = Number(selectedYear);
+    filteredEvents = events.flatMap(event => {
+      if (event.recurrence === 'Yearly') {
+        // Clone the event and set its date to the selected year
+        const origDate = new Date(event.date);
+        const adjustedDate = new Date(origDate);
+        adjustedDate.setFullYear(yearNum);
+        const eventMonth = adjustedDate.getMonth();
+        const monthMatch = selectedMonths.length === 0 || selectedMonths.some(m => m.value === eventMonth);
+        if (monthMatch) {
+          return [{ ...event, date: adjustedDate.toISOString(), originalDate: event.date }];
+        }
+        return [];
+      } else if (event.recurrence === 'Monthly') {
+        // Add a copy of the event to every month in the selected year, always using the last valid day if needed
+        return Array.from({ length: 12 }, (_, m) => {
+          const origDate = new Date(event.date);
+          const daysInMonth = new Date(yearNum, m + 1, 0).getDate();
+          const day = Math.min(origDate.getDate(), daysInMonth);
+          const adjustedDate = new Date(origDate);
+          adjustedDate.setFullYear(yearNum);
+          adjustedDate.setMonth(m);
+          adjustedDate.setDate(day);
+          return { ...event, date: adjustedDate.toISOString(), id: event.id + '-y' + yearNum + '-m' + m, originalDate: event.date };
+        }).filter(event => {
+          const eventMonth = new Date(event.date).getMonth();
+          return selectedMonths.length === 0 || selectedMonths.some(m => m.value === eventMonth);
+        });
+      } else {
+        const eventYear = new Date(event.date).getFullYear();
+        const eventMonth = new Date(event.date).getMonth();
+        const yearMatch = eventYear === yearNum;
+        const monthMatch = selectedMonths.length === 0 || selectedMonths.some(m => m.value === eventMonth);
+        return yearMatch && monthMatch ? [{ ...event, originalDate: event.date }] : [];
+      }
+    });
+  }
 
   if (status === 'loading' || loading) {
     return (
@@ -79,6 +163,16 @@ export default function HomeClient() {
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Your Important Dates</h1>
           <div className="flex gap-2 items-center">
+            <div className="min-w-[120px]">
+              <Select
+                options={yearOptions}
+                value={yearOptions.find(opt => opt.value === selectedYear)}
+                onChange={opt => setSelectedYear(opt?.value || 'All')}
+                isSearchable={false}
+                placeholder="Year"
+                classNamePrefix="react-select"
+              />
+            </div>
             <div className="min-w-[220px]">
               <Select
                 isMulti

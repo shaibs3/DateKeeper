@@ -16,6 +16,7 @@ export interface DateEvent {
   recurrence: string;
   notes?: string;
   reminders: string[];
+  originalDate?: string;
 }
 
 function calculateAge(birthDate: Date, eventDate: Date): number {
@@ -91,7 +92,14 @@ export function DateList({ events, onEventDeleted }: { events: DateEvent[], onEv
   const EventCard = ({ event }: { event: DateEvent }) => {
     const eventDate = new Date(event.date);
     const isToday = new Date().toDateString() === eventDate.toDateString();
-    
+    // For birthdays, calculate the age they will turn on this occurrence
+    let birthdayAge: number | null = null;
+    if (event.category === 'Birthday') {
+      const birthDate = new Date(event.originalDate || event.date);
+      birthdayAge = eventDate.getFullYear() - birthDate.getFullYear();
+      if (birthdayAge < 0) birthdayAge = 0;
+    }
+
     // Helper to prevent click propagation from menu button
     const handleMenuButtonClick = (e: React.MouseEvent) => {
       e.stopPropagation();
@@ -115,9 +123,11 @@ export function DateList({ events, onEventDeleted }: { events: DateEvent[], onEv
             <div className="text-sm text-gray-500">
               {eventDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
             </div>
-            <div className="text-sm text-gray-600">
-              Turning {calculateAge(new Date(event.date), eventDate)} years old
-            </div>
+            {event.category === 'Birthday' && (
+              <div className="text-sm text-gray-600">
+                Turning {birthdayAge} years old
+              </div>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-2">

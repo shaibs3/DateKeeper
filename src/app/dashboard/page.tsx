@@ -7,7 +7,7 @@ import { EventCard, Event } from '@/components/events/EventCard';
 import { EventForm } from '@/components/events/EventForm';
 import type { DateEvent } from '@/components/events/DateList';
 
-export const dynamic = 'force-dynamic';
+console.log('DASHBOARD FILE LOADED');
 
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -20,13 +20,19 @@ export default function Dashboard() {
   const [events, setEvents] = useState<DateEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Debug: log events on every render
+  console.log('Dashboard events state:', events);
+
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth/signin');
     } else if (status === 'authenticated') {
       fetch('/api/events')
         .then(res => res.json())
-        .then(data => setEvents(data))
+        .then(data => {
+          setEvents(data);
+          console.log('Fetched events:', data);
+        })
         .finally(() => setLoading(false));
     }
   }, [status, router]);
@@ -47,12 +53,48 @@ export default function Dashboard() {
     );
   }
 
-  // Group events by month
+  // Group events by month, duplicating monthly recurring events for each month
   const eventsByMonth: { [month: number]: DateEvent[] } = {};
   events.forEach(event => {
-    const month = new Date(event.date).getMonth();
-    if (!eventsByMonth[month]) eventsByMonth[month] = [];
-    eventsByMonth[month].push(event);
+    if (event.recurrence === 'Monthly') {
+      // Add a copy of the event to every month
+      for (let m = 0; m < 12; m++) {
+        const origDate = new Date(event.date);
+        const year = new Date().getFullYear();
+        const daysInMonth = new Date(year, m + 1, 0).getDate();
+        const day = Math.min(origDate.getDate(), daysInMonth);
+        const adjustedDate = new Date(origDate);
+        adjustedDate.setFullYear(year);
+        adjustedDate.setMonth(m);
+        adjustedDate.setDate(day);
+        const eventCopy = { ...event, date: adjustedDate.toISOString(), id: event.id + '-y' + year + '-m' + m, originalDate: event.date };
+        if (!eventsByMonth[m]) eventsByMonth[m] = [];
+        eventsByMonth[m].push(eventCopy);
+      }
+    } else if (event.recurrence === 'Yearly') {
+      // Show the next occurrence (this year or next year if already passed)
+      const origDate = new Date(event.date);
+      const today = new Date();
+      let year = today.getFullYear();
+      let nextOccurrence = new Date(origDate);
+      nextOccurrence.setFullYear(year);
+      if (
+        today.getMonth() > origDate.getMonth() ||
+        (today.getMonth() === origDate.getMonth() && today.getDate() > origDate.getDate())
+      ) {
+        year++;
+        nextOccurrence = new Date(origDate);
+        nextOccurrence.setFullYear(year);
+      }
+      const month = nextOccurrence.getMonth();
+      const eventCopy = { ...event, date: nextOccurrence.toISOString(), id: event.id + '-y' + year, originalDate: event.date };
+      if (!eventsByMonth[month]) eventsByMonth[month] = [];
+      eventsByMonth[month].push(eventCopy);
+    } else {
+      const month = new Date(event.date).getMonth();
+      if (!eventsByMonth[month]) eventsByMonth[month] = [];
+      eventsByMonth[month].push({ ...event, originalDate: event.date });
+    }
   });
   // Sort events within each month by date ascending
   Object.keys(eventsByMonth).forEach(monthIdxStr => {
@@ -108,7 +150,7 @@ export default function Dashboard() {
                         <div className="space-y-4">
                           {eventsByMonth[Number(monthIdx)].map(event => (
                             <EventCard
-                              key={event.id}
+                              key={event.id + '-' + new Date(event.date).getMonth()}
                               event={{
                                 ...event,
                                 date: new Date(event.date),

@@ -1,5 +1,10 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
+import { CookieConsentBanner } from '@/components/CookieConsentBanner';
+
+function CookieConsentBannerClient() {
+  return <CookieConsentBanner />;
+}
 
 export default async function RootPage() {
   const session = await auth();
@@ -11,6 +16,7 @@ export default async function RootPage() {
   // Full landing page for unauthenticated users
   return (
     <main className="bg-gray-50 min-h-screen">
+      <CookieConsentBannerClient />
       {/* Header */}
       <header className="w-full flex items-center justify-between px-8 py-4 bg-white shadow-sm">
         <div className="flex items-center gap-2 cursor-pointer select-none">

@@ -177,9 +177,16 @@ export function DateList({ events, originalEvents, onEventDeleted }: { events: D
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Coming Up Soon</h2>
             <div className="space-y-3">
-              {eventsByMonth[currentMonth].map(event => (
-                <EventCard key={event.id} event={event} />
-              ))}
+              {eventsByMonth[currentMonth]
+                .filter(event => {
+                  const eventDate = new Date(event.date);
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  return eventDate >= today;
+                })
+                .map(event => (
+                  <EventCard key={event.id} event={event} />
+                ))}
             </div>
           </section>
         )}

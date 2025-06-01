@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import { DateEvent } from '@prisma/client';
 
 export const runtime = 'edge';
@@ -27,39 +27,30 @@ export async function POST(request: Request) {
       },
     });
 
-    // Create email transporter
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+    const resend = new Resend(process.env.RESEND_API_KEY);
 
     // Send emails to users with upcoming events
     for (const user of users) {
       if (user.dateEvents.length > 0 && user.email) {
-        const mailOptions = {
-          from: process.env.EMAIL_USER,
-          to: user.email,
-          subject: 'Your Upcoming Events',
-          html: `
-            <h1>Your Upcoming Events</h1>
-            <p>Here are your events for next month:</p>
-            <ul>
-              ${user.dateEvents.map((event: DateEvent) => `
-                <li>
-                  <strong>${event.name}</strong><br>
-                  Date: ${new Date(event.date).toLocaleDateString()}<br>
-                  ${event.notes ? `Notes: ${event.notes}` : ''}
-                </li>
-              `).join('')}
-            </ul>
-          `,
-        };
-
         try {
-          await transporter.sendMail(mailOptions);
+          await resend.emails.send({
+            from: 'DateKeeper <noreply@yourdomain.com>',
+            to: user.email,
+            subject: 'Your Upcoming Events',
+            html: `
+              <h1>Your Upcoming Events</h1>
+              <p>Here are your events for next month:</p>
+              <ul>
+                ${user.dateEvents.map((event: DateEvent) => `
+                  <li>
+                    <strong>${event.name}</strong><br>
+                    Date: ${new Date(event.date).toLocaleDateString()}<br>
+                    ${event.notes ? `Notes: ${event.notes}` : ''}
+                  </li>
+                `).join('')}
+              </ul>
+            `,
+          });
           console.log(`Email sent to ${user.email}`);
         } catch (error) {
           console.error(`Error sending email to ${user.email}:`, error);

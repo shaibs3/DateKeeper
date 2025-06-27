@@ -13,14 +13,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get all users with their events
+    // Calculate tomorrow's date range
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(now.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    const tomorrowEnd = new Date(tomorrow);
+    tomorrowEnd.setHours(23, 59, 59, 999);
+
+    // Get all users with events tomorrow and "1 day before" reminder
     const users = await prisma.user.findMany({
       include: {
         dateEvents: {
           where: {
             date: {
-              gte: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1),
-              lt: new Date(new Date().getFullYear(), new Date().getMonth() + 2, 1),
+              gte: tomorrow,
+              lte: tomorrowEnd,
+            },
+            reminders: {
+              has: "1 day before",
             },
           },
         },
@@ -29,17 +40,17 @@ export async function POST(request: Request) {
 
     const resend = new Resend(process.env.RESEND_API_KEY);
 
-    // Send emails to users with upcoming events
+    // Send emails to users with events tomorrow
     for (const user of users) {
       if (user.dateEvents.length > 0 && user.email) {
         try {
           await resend.emails.send({
             from: 'DateKeeper <noreply@yourdomain.com>',
             to: user.email,
-            subject: 'Your Upcoming Events',
+            subject: 'Reminder: Your Event(s) Tomorrow!',
             html: `
-              <h1>Your Upcoming Events</h1>
-              <p>Here are your events for next month:</p>
+              <h1>Upcoming Event Reminder</h1>
+              <p>These events are happening <strong>tomorrow</strong>:</p>
               <ul>
                 ${user.dateEvents.map((event: DateEvent) => `
                   <li>
@@ -51,14 +62,14 @@ export async function POST(request: Request) {
               </ul>
             `,
           });
-          console.log(`Email sent to ${user.email}`);
+          console.log(`1-day-before email sent to ${user.email}`);
         } catch (error) {
           console.error(`Error sending email to ${user.email}:`, error);
         }
       }
     }
 
-    return NextResponse.json({ message: 'Cron job executed successfully' });
+    return NextResponse.json({ message: '1-day-before notifications sent' });
   } catch (error) {
     console.error('Cron job error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

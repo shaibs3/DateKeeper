@@ -62,7 +62,7 @@ export async function POST(request: Request) {
               </ul>
             `,
           });
-          console.log(`1-day-before email sent to ${user.email}`);
+          // console.log(`1-day-before email sent to ${user.email}`);
         } catch (error) {
           console.error(`Error sending email to ${user.email}:`, error);
         }

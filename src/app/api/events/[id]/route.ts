@@ -2,14 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session || !session.user?.email) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+
+  const params = await context.params;
 
   try {
     const event = await prisma.dateEvent.findUnique({
@@ -32,21 +31,17 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Failed to delete event:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete event', details: error },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete event', details: error }, { status: 500 });
   }
 }
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session || !session.user?.email) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+
+  const params = await context.params;
 
   try {
     const event = await prisma.dateEvent.findUnique({
@@ -62,7 +57,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const data = await req.json();
+    const data = await request.json();
     const { name, date, category, color, recurrence, notes, reminders } = data;
 
     const updatedEvent = await prisma.dateEvent.update({
@@ -78,12 +73,9 @@ export async function PUT(
       },
     });
 
-    return NextResponse.json(updatedEvent);
+    return NextResponse.json({ message: `Event with ID ${params.id} updated successfully.` });
   } catch (error) {
     console.error('Failed to update event:', error);
-    return NextResponse.json(
-      { error: 'Failed to update event', details: error },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update event', details: error }, { status: 500 });
   }
-} 
+}

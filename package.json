@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:setup": "./scripts/dev.sh",
     "dev:staging": "APP_ENV=staging next dev",
     "build": "prisma generate && next build",
     "build:staging": "APP_ENV=staging npm run build",
@@ -22,10 +23,16 @@
     "test:e2e:debug": "playwright test --debug",
     "test:e2e:staging": "BASE_URL=https://datekeeper-staging.vercel.app playwright test",
     "test:e2e:production": "BASE_URL=https://datekeeper.vercel.app playwright test --grep \"smoke\"",
-    "db:migrate": "prisma migrate deploy",
+    "db:up": "docker-compose up -d postgres",
+    "db:down": "docker-compose down",
+    "db:logs": "docker-compose logs -f postgres",
+    "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
     "db:generate": "prisma generate",
     "db:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
+    "db:reset": "prisma migrate reset --force",
+    "db:push": "prisma db push",
     "type-check": "tsc --noEmit",
     "env:check": "node scripts/check-env.js"
   },
@@ -69,6 +76,7 @@
     "prettier": "^3.2.5",
     "prisma": "^5.14.0",
     "tailwindcss": "^3.4.1",
+    "tsx": "^4.20.4",
     "typescript": "^5.4.2"
   }
 }

@@ -53,18 +53,21 @@ async function main() {
   ];
 
   for (const event of events) {
-    const created = await prisma.dateEvent.upsert({
-      where: { 
-        userId_name_date: {
-          userId: event.userId,
-          name: event.name,
-          date: event.date,
-        }
+    const existingEvent = await prisma.dateEvent.findFirst({
+      where: {
+        userId: event.userId,
+        name: event.name,
       },
-      update: {},
-      create: event,
     });
-    console.log('✅ Created event:', created.name);
+
+    if (!existingEvent) {
+      const created = await prisma.dateEvent.create({
+        data: event,
+      });
+      console.log('✅ Created event:', created.name);
+    } else {
+      console.log('⚪ Event already exists:', event.name);
+    }
   }
 
   console.log('🎉 Database seeded successfully!');

@@ -21,6 +21,8 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:debug": "playwright test --debug",
+    "test:e2e:registration": "playwright test registration-flow-complete.spec.ts user-registration.spec.ts",
+    "test:e2e:auth": "playwright test auth-flow.spec.ts auth-flow-mocked.spec.ts registration-flow-complete.spec.ts",
     "test:e2e:staging": "BASE_URL=https://datekeeper-staging.vercel.app playwright test",
     "test:e2e:production": "BASE_URL=https://datekeeper.vercel.app playwright test --grep \"smoke\"",
     "db:up": "docker-compose up -d postgres",

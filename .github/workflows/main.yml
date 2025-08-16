@@ -1,0 +1,192 @@
+name: Main Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # Step 1: Run CI Pipeline (quality checks)
+  ci:
+    name: Quality Checks
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
+
+  # Step 2: Deploy to Staging (only on main branch push)
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: ci
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment:
+      name: staging
+      url: https://datekeeper-staging.vercel.app
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Install Vercel CLI
+      run: npm install --global vercel@latest
+
+    - name: Pull Vercel Environment Information (Staging)
+      run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+    - name: Build Project Artifacts (Staging)
+      run: |
+        export APP_ENV=staging
+        vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+    - name: Deploy to Vercel (Staging)
+      id: deploy-staging
+      run: |
+        DEPLOYMENT_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+        echo "deployment-url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+        echo "✅ Staging deployed to: $DEPLOYMENT_URL"
+
+    - name: Assign to Staging Domain
+      run: |
+        vercel alias ${{ steps.deploy-staging.outputs.deployment-url }} datekeeper-staging.vercel.app --token=${{ secrets.VERCEL_TOKEN }}
+        echo "✅ Staging available at: https://datekeeper-staging.vercel.app"
+
+    - name: Wait for Deployment
+      run: |
+        echo "⏳ Waiting for staging deployment to be ready..."
+        sleep 30
+
+    - name: Run Staging Health Check
+      run: |
+        echo "🏥 Running health check..."
+        curl -f https://datekeeper-staging.vercel.app/api/health || exit 1
+        echo "✅ Staging deployment is healthy!"
+
+    - name: Run E2E Tests on Staging
+      run: |
+        echo "🧪 Running E2E tests on staging..."
+        npm run test:e2e:staging
+      env:
+        CI: true
+
+  # Step 3: Deploy to Production (only after staging success)
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [ci, deploy-staging]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment:
+      name: production
+      url: https://datekeeper.vercel.app
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Install Vercel CLI
+      run: npm install --global vercel@latest
+
+    - name: Pull Vercel Environment Information (Production)
+      run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+    - name: Build Project Artifacts (Production)
+      run: |
+        export APP_ENV=production
+        vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+    - name: Deploy to Vercel (Production)
+      id: deploy-production
+      run: |
+        DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+        echo "deployment-url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+        echo "✅ Production deployed to: $DEPLOYMENT_URL"
+
+    - name: Wait for Deployment
+      run: |
+        echo "⏳ Waiting for production deployment to be ready..."
+        sleep 30
+
+    - name: Run Production Health Check
+      run: |
+        echo "🏥 Running health check..."
+        curl -f https://datekeeper.vercel.app/api/health || exit 1
+        echo "✅ Production deployment is healthy!"
+
+    - name: Run Production Smoke Tests
+      run: |
+        echo "💨 Running smoke tests..."
+        npm run test:e2e:production
+      env:
+        CI: true
+
+    - name: Create GitHub Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ github.run_number }}
+        release_name: Release v${{ github.run_number }}
+        body: |
+          🚀 **Production Deployment v${{ github.run_number }}**
+          
+          **Deployed URLs:**
+          - 🌐 Production: https://datekeeper.vercel.app
+          - 🧪 Staging: https://datekeeper-staging.vercel.app
+          
+          **Pipeline Status:**
+          ✅ CI checks passed
+          ✅ Staging deployment successful
+          ✅ Staging E2E tests passed
+          ✅ Production deployment successful
+          ✅ Production health check passed
+          ✅ Production smoke tests passed
+          
+          **Latest Changes:**
+          ```
+          ${{ github.event.head_commit.message }}
+          ```
+          
+          **Commit:** [`${{ github.sha }}`](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
+        draft: false
+        prerelease: false
+
+    - name: Deployment Summary
+      run: |
+        echo "🎉 =================================="
+        echo "🎉 DEPLOYMENT COMPLETED SUCCESSFULLY"
+        echo "🎉 =================================="
+        echo ""
+        echo "📊 Pipeline Summary:"
+        echo "✅ Quality checks passed"
+        echo "✅ Staging deployment successful"
+        echo "✅ E2E tests on staging passed"
+        echo "✅ Production deployment successful"
+        echo "✅ Health checks passed"
+        echo "✅ Smoke tests passed"
+        echo ""
+        echo "🌐 Live URLs:"
+        echo "   Production: https://datekeeper.vercel.app"
+        echo "   Staging:    https://datekeeper-staging.vercel.app"
+        echo ""
+        echo "📝 Release: v${{ github.run_number }}"

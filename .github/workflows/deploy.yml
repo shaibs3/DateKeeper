@@ -1,0 +1,199 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+          - both
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  # Job 1: Deploy to Staging
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.environment == 'staging' || github.event.inputs.environment == 'both'))
+    environment:
+      name: staging
+      url: https://datekeeper-staging.vercel.app
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Install Vercel CLI
+      run: npm install --global vercel@latest
+
+    - name: Pull Vercel Environment Information (Staging)
+      run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+    - name: Build Project Artifacts (Staging)
+      run: |
+        export APP_ENV=staging
+        vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+    - name: Deploy to Vercel (Staging)
+      id: deploy-staging
+      run: |
+        DEPLOYMENT_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+        echo "deployment-url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+        echo "Staging deployment URL: $DEPLOYMENT_URL"
+
+    - name: Assign to Staging Domain
+      run: |
+        vercel alias ${{ steps.deploy-staging.outputs.deployment-url }} datekeeper-staging.vercel.app --token=${{ secrets.VERCEL_TOKEN }}
+
+    - name: Run Staging Health Check
+      run: |
+        echo "Waiting for staging deployment to be ready..."
+        sleep 30
+        curl -f https://datekeeper-staging.vercel.app/api/health || exit 1
+        echo "✅ Staging deployment is healthy!"
+
+    - name: Run E2E Tests on Staging
+      run: |
+        npm run test:e2e:staging
+      env:
+        CI: true
+
+    - name: Comment on PR (if applicable)
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: '🚀 **Staging Deployment Ready!**\n\n✅ Deployed to: https://datekeeper-staging.vercel.app\n✅ Health check passed\n✅ E2E tests passed\n\nReady for production deployment!'
+          })
+
+  # Job 2: Deploy to Production (depends on staging success)
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.environment == 'production' || github.event.inputs.environment == 'both'))
+    environment:
+      name: production
+      url: https://datekeeper.vercel.app
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Install Vercel CLI
+      run: npm install --global vercel@latest
+
+    - name: Pull Vercel Environment Information (Production)
+      run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+    - name: Build Project Artifacts (Production)
+      run: |
+        export APP_ENV=production
+        vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+    - name: Deploy to Vercel (Production)
+      id: deploy-production
+      run: |
+        DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+        echo "deployment-url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+        echo "Production deployment URL: $DEPLOYMENT_URL"
+
+    - name: Run Production Health Check
+      run: |
+        echo "Waiting for production deployment to be ready..."
+        sleep 30
+        curl -f https://datekeeper.vercel.app/api/health || exit 1
+        echo "✅ Production deployment is healthy!"
+
+    - name: Run Production Smoke Tests
+      run: |
+        npm run test:e2e:production
+      env:
+        CI: true
+
+    - name: Create GitHub Release
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ github.run_number }}
+        release_name: Release v${{ github.run_number }}
+        body: |
+          🚀 **Production Deployment v${{ github.run_number }}**
+          
+          **Deployed URLs:**
+          - Production: https://datekeeper.vercel.app
+          - Staging: https://datekeeper-staging.vercel.app
+          
+          **Changes:**
+          ${{ github.event.head_commit.message }}
+          
+          **Commit:** ${{ github.sha }}
+          
+          **Status:**
+          ✅ Staging tests passed
+          ✅ Production health check passed
+          ✅ Smoke tests passed
+        draft: false
+        prerelease: false
+
+    - name: Notify Deployment Success
+      run: |
+        echo "🎉 Successfully deployed to production!"
+        echo "Production URL: https://datekeeper.vercel.app"
+        echo "Staging URL: https://datekeeper-staging.vercel.app"
+
+  # Job 3: Rollback (manual trigger only)
+  rollback:
+    name: Rollback Production
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'rollback'
+    environment:
+      name: production
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Vercel CLI
+      run: npm install --global vercel@latest
+
+    - name: Rollback Production
+      run: |
+        echo "🔄 Rolling back production deployment..."
+        vercel rollback --token=${{ secrets.VERCEL_TOKEN }}
+        echo "✅ Production rollback completed!"

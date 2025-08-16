@@ -39,7 +39,8 @@
     "db:push": "prisma db push",
     "type-check": "tsc --noEmit",
     "env:check": "node scripts/check-env.js",
-    "oauth:setup": "./scripts/setup-oauth.sh"
+    "oauth:setup": "./scripts/setup-oauth.sh",
+    "vercel:setup": "./scripts/setup-vercel-ci.sh"
   },
   "dependencies": {
     "@auth/core": "^0.39.0",

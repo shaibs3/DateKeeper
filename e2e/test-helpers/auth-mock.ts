@@ -1,4 +1,5 @@
 import { Page } from '@playwright/test';
+import { TestDatabase } from './test-database';
 
 /**
  * Test helpers for mocking authentication flows in E2E tests
@@ -12,7 +13,11 @@ export interface MockUser {
 }
 
 export class AuthMock {
-  constructor(private page: Page) {}
+  private testDb: TestDatabase;
+
+  constructor(private page: Page) {
+    this.testDb = new TestDatabase();
+  }
 
   /**
    * Set up OAuth mocking for the page
@@ -35,12 +40,28 @@ export class AuthMock {
   }
 
   /**
+   * Clean up test data
+   */
+  async cleanup() {
+    await this.testDb.disconnect();
+  }
+
+  /**
    * Set the mock user scenario for testing
    */
   async setMockUserScenario(
     scenario: 'new-user' | 'existing-user',
     userEmail = 'test@example.com'
   ) {
+    // Set up the database state for the scenario
+    if (scenario === 'existing-user') {
+      // Create the user in the database
+      await this.testDb.createTestUser(userEmail, 'Test User');
+    } else {
+      // Ensure the user doesn't exist
+      await this.testDb.deleteTestUser(userEmail);
+    }
+
     await this.page.addInitScript(
       data => {
         window.mockUserScenario = data.scenario;

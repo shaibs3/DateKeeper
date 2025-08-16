@@ -9,6 +9,10 @@ test.describe('Complete Registration Flow Tests', () => {
     await authMock.setupOAuthMocking();
   });
 
+  test.afterEach(async () => {
+    await authMock.cleanup();
+  });
+
   test.describe('New User Scenarios', () => {
     test('new user attempting sign-in gets redirected to error page', async ({ page }) => {
       await authMock.setMockUserScenario('new-user', 'newuser@example.com');
@@ -147,15 +151,19 @@ test.describe('Complete Registration Flow Tests', () => {
       let oauthUrl = '';
       await page.route('**/api/auth/signin/google**', async route => {
         oauthUrl = route.request().url();
+        // Use JavaScript redirect instead of HTTP 302
         await route.fulfill({
-          status: 302,
-          headers: { Location: '/auth/signup' },
+          status: 200,
+          contentType: 'text/html',
+          body: '<script>history.back();</script>',
         });
       });
 
       await page.click('button:has-text("Sign up with Google")');
 
       // Verify OAuth request includes signup parameter in callback URL
+      // The parameter should be in the callbackUrl parameter: callbackUrl=/home?signup=true
+      expect(oauthUrl).toContain('callbackUrl');
       expect(oauthUrl).toContain('signup%3Dtrue');
     });
   });

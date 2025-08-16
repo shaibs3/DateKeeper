@@ -90,6 +90,8 @@ jobs:
       run: |
         # Generate Prisma client for build
         npx prisma generate
+      env:
+        DATABASE_URL: file:./test.db
 
     - name: Build application
       run: npm run build
@@ -145,6 +147,8 @@ jobs:
         npx prisma generate
         # Create and migrate the test database
         npx prisma db push --force-reset
+      env:
+        DATABASE_URL: file:./test.db
 
     - name: Run Playwright tests
       run: npx playwright test --project=${{ matrix.browser }}

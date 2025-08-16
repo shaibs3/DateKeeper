@@ -49,17 +49,17 @@ test.describe('User Registration Flow', () => {
     // Mock the OAuth request to check parameters
     let oauthRequestUrl = '';
     let requestsCaptured = 0;
-    
+
     await page.route('**/api/auth/**', async route => {
       const url = route.request().url();
       console.log('Captured request:', url);
       requestsCaptured++;
-      
+
       if (url.includes('/signin/google')) {
         oauthRequestUrl = url;
         console.log('OAuth URL captured:', oauthRequestUrl);
       }
-      
+
       // Prevent actual OAuth redirect
       await route.fulfill({
         status: 200,
@@ -69,10 +69,10 @@ test.describe('User Registration Flow', () => {
 
     console.log('Clicking sign up button...');
     await page.click('button:has-text("Sign up with Google")');
-    
+
     // Wait a bit for async operations
     await page.waitForTimeout(1000);
-    
+
     console.log('Requests captured:', requestsCaptured);
     console.log('Final OAuth URL:', oauthRequestUrl);
 

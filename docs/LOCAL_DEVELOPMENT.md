@@ -5,11 +5,13 @@ This guide helps you set up and run DateKeeper locally with a PostgreSQL databas
 ## 🚀 Quick Start
 
 ### Option 1: Automated Setup (Recommended)
+
 ```bash
 npm run dev:setup
 ```
 
 This will:
+
 - Start PostgreSQL database with Docker
 - Run database migrations
 - Generate Prisma client
@@ -18,21 +20,25 @@ This will:
 ### Option 2: Manual Setup
 
 1. **Start the database:**
+
    ```bash
    npm run db:up
    ```
 
 2. **Run migrations:**
+
    ```bash
    DATABASE_URL="postgresql://datekeeper:dev_password_123@localhost:5432/datekeeper_dev?schema=public" npm run db:migrate
    ```
 
 3. **Generate Prisma client:**
+
    ```bash
    npm run db:generate
    ```
 
 4. **Seed the database:**
+
    ```bash
    DATABASE_URL="postgresql://datekeeper:dev_password_123@localhost:5432/datekeeper_dev?schema=public" npm run db:seed
    ```
@@ -45,6 +51,7 @@ This will:
 ## 🗄️ Database Access
 
 ### Database Credentials
+
 - **Host:** localhost:5432
 - **Database:** datekeeper_dev
 - **Username:** datekeeper
@@ -53,12 +60,14 @@ This will:
 ### Database UIs
 
 **Adminer (Web-based):**
+
 ```bash
 docker-compose up -d adminer
 # Open: http://localhost:8080
 ```
 
 **Prisma Studio:**
+
 ```bash
 npm run db:studio
 # Open: http://localhost:5555
@@ -67,6 +76,7 @@ npm run db:studio
 ## 🛠️ Available Commands
 
 ### Database Commands
+
 ```bash
 npm run db:up          # Start PostgreSQL with Docker
 npm run db:down        # Stop all Docker services
@@ -79,6 +89,7 @@ npm run db:reset       # Reset database (danger!)
 ```
 
 ### Development Commands
+
 ```bash
 npm run dev            # Start Next.js development server
 npm run dev:setup      # Full development environment setup
@@ -114,6 +125,7 @@ APP_URL=http://localhost:3000
 ## 🧪 Test Data
 
 The database is seeded with:
+
 - **Test User:** test@example.com
 - **Sample Events:**
   - John's Birthday (March 15)
@@ -125,6 +137,7 @@ The database is seeded with:
 ### Database Issues
 
 **Database not starting:**
+
 ```bash
 # Check Docker is running
 docker --version
@@ -137,6 +150,7 @@ npm run db:down && npm run db:up
 ```
 
 **Connection refused:**
+
 ```bash
 # Wait for database to be ready (takes ~10 seconds)
 sleep 10
@@ -146,6 +160,7 @@ docker exec datekeeper-postgres pg_isready -U datekeeper -d datekeeper_dev
 ```
 
 **Schema out of sync:**
+
 ```bash
 # Reset and recreate database
 npm run db:reset
@@ -157,6 +172,7 @@ DATABASE_URL="postgresql://datekeeper:dev_password_123@localhost:5432/datekeeper
 ### Environment Issues
 
 **Environment variables not loaded:**
+
 ```bash
 # Check environment
 npm run env:check
@@ -166,6 +182,7 @@ source .env.local && npm run dev
 ```
 
 **Google OAuth not working:**
+
 - Set up OAuth credentials in Google Cloud Console
 - Add redirect URI: `http://localhost:3000/api/auth/callback/google`
 - Update `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in `.env.local`
@@ -173,6 +190,7 @@ source .env.local && npm run dev
 ### Application Issues
 
 **Build failures:**
+
 ```bash
 # Clear Next.js cache
 rm -rf .next
@@ -185,6 +203,7 @@ npm run type-check
 ```
 
 **Port conflicts:**
+
 - PostgreSQL: 5432 (change in docker-compose.yml)
 - Next.js: 3000 (change with `npm run dev -- -p 3001`)
 - Adminer: 8080
@@ -193,6 +212,7 @@ npm run type-check
 ## 📊 Monitoring
 
 ### Database Monitoring
+
 ```bash
 # Connection count
 docker exec datekeeper-postgres psql -U datekeeper -d datekeeper_dev -c "SELECT count(*) FROM pg_stat_activity;"
@@ -205,6 +225,7 @@ npm run db:studio
 ```
 
 ### Application Monitoring
+
 - Next.js dev server shows real-time compilation
 - Check browser console for client-side errors
 - Check terminal for server-side errors
@@ -212,12 +233,14 @@ npm run db:studio
 ## 🔄 Git Workflow
 
 1. **Start development:**
+
    ```bash
    git checkout -b feature/your-feature-name
    npm run dev:setup
    ```
 
 2. **Make changes and test:**
+
    ```bash
    npm run lint
    npm run type-check

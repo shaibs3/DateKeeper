@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import { useEffect, useState } from 'react';
 
 export function CookieConsentBanner() {
@@ -31,4 +31,4 @@ export function CookieConsentBanner() {
       </button>
     </div>
   );
-} 
+}

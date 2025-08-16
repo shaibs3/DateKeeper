@@ -10,7 +10,7 @@ import { Page, expect } from '@playwright/test';
  */
 export async function mockAuthenticatedUser(page: Page, userEmail = 'test@example.com') {
   // Option 1: Set session storage/local storage
-  await page.addInitScript((email) => {
+  await page.addInitScript(email => {
     localStorage.setItem('test-user-email', email);
   }, userEmail);
 
@@ -90,7 +90,7 @@ export async function expectErrorMessage(page: Page, message?: string) {
       '.text-red-500',
       '.text-red-600',
     ];
-    
+
     let errorFound = false;
     for (const selector of errorSelectors) {
       try {
@@ -101,7 +101,7 @@ export async function expectErrorMessage(page: Page, message?: string) {
         // Continue to next selector
       }
     }
-    
+
     if (!errorFound) {
       throw new Error('No error message found');
     }
@@ -116,13 +116,8 @@ export async function expectSuccessMessage(page: Page, message?: string) {
     await expect(page.locator(`text=${message}`)).toBeVisible();
   } else {
     // Look for common success indicators
-    const successSelectors = [
-      '.success',
-      '.alert-success',
-      '.text-green-500',
-      '.text-green-600',
-    ];
-    
+    const successSelectors = ['.success', '.alert-success', '.text-green-500', '.text-green-600'];
+
     let successFound = false;
     for (const selector of successSelectors) {
       try {
@@ -133,7 +128,7 @@ export async function expectSuccessMessage(page: Page, message?: string) {
         // Continue to next selector
       }
     }
-    
+
     if (!successFound) {
       throw new Error('No success message found');
     }

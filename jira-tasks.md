@@ -3,11 +3,14 @@
 ## Epic Structure
 
 ### 🔐 Epic 1: Authentication & User Management
+
 **Epic Key:** DK-AUTH  
 **Description:** Complete user authentication system with Google OAuth
 
 #### Stories:
+
 1. **DK-1: Set up Google OAuth credentials**
+
    - Type: Story
    - Priority: High
    - Description: Configure Google OAuth in Google Cloud Console and add credentials to environment
@@ -19,6 +22,7 @@
      - [ ] Authentication flow working locally
 
 2. **DK-2: Implement user profile management**
+
    - Type: Story
    - Priority: Medium
    - Description: Allow users to view and edit their profile information
@@ -39,11 +43,14 @@
      - [ ] Settings persist across sessions
 
 ### 🎂 Epic 2: Event Management
+
 **Epic Key:** DK-EVENTS  
 **Description:** Core functionality for managing birthdays and special events
 
 #### Stories:
+
 4. **DK-4: Create event management system**
+
    - Type: Story
    - Priority: High
    - Description: Full CRUD operations for events
@@ -55,6 +62,7 @@
      - [ ] Event search functionality
 
 5. **DK-5: Implement recurring events**
+
    - Type: Story
    - Priority: High
    - Description: Support for yearly recurring events (birthdays, anniversaries)
@@ -66,6 +74,7 @@
      - [ ] Bulk recurring event management
 
 6. **DK-6: Add event categories and colors**
+
    - Type: Story
    - Priority: Medium
    - Description: Organize events with categories and visual indicators
@@ -88,11 +97,14 @@
      - [ ] Bulk import preview
 
 ### 🔔 Epic 3: Notifications & Reminders
+
 **Epic Key:** DK-NOTIFY  
 **Description:** Multi-channel reminder system
 
 #### Stories:
+
 8. **DK-8: Email notification system**
+
    - Type: Story
    - Priority: High
    - Description: Send email reminders for upcoming events
@@ -104,6 +116,7 @@
      - [ ] Unsubscribe functionality
 
 9. **DK-9: SMS notification integration**
+
    - Type: Story
    - Priority: Medium
    - Description: Send SMS reminders via Twilio or similar
@@ -115,6 +128,7 @@
      - [ ] Opt-out mechanism
 
 10. **DK-10: WhatsApp notification integration**
+
     - Type: Story
     - Priority: Medium
     - Description: Send WhatsApp messages via API
@@ -136,11 +150,14 @@
       - [ ] Browser compatibility
 
 ### 📱 Epic 4: User Interface & Experience
+
 **Epic Key:** DK-UI  
 **Description:** Modern, responsive user interface
 
 #### Stories:
+
 12. **DK-12: Responsive dashboard design**
+
     - Type: Story
     - Priority: High
     - Description: Main dashboard with upcoming events and quick actions
@@ -152,6 +169,7 @@
       - [ ] Stats overview (total events, upcoming this month)
 
 13. **DK-13: Calendar view implementation**
+
     - Type: Story
     - Priority: Medium
     - Description: Calendar interface for viewing events by month/week
@@ -174,11 +192,14 @@
       - [ ] Theme persistence
 
 ### 🧪 Epic 5: Testing & Quality Assurance
+
 **Epic Key:** DK-QA  
 **Description:** Comprehensive testing suite
 
 #### Stories:
+
 15. **DK-15: Expand E2E test coverage**
+
     - Type: Story
     - Priority: Medium
     - Description: Complete E2E testing for all user flows
@@ -190,6 +211,7 @@
       - [ ] Cross-browser compatibility tests
 
 16. **DK-16: Unit test implementation**
+
     - Type: Story
     - Priority: Medium
     - Description: Unit tests for business logic and components
@@ -212,11 +234,14 @@
       - [ ] Performance monitoring setup
 
 ### 🚀 Epic 6: Deployment & DevOps
+
 **Epic Key:** DK-DEPLOY  
 **Description:** Production deployment and monitoring
 
 #### Stories:
+
 18. **DK-18: Production database setup**
+
     - Type: Story
     - Priority: High
     - Description: Set up production PostgreSQL database
@@ -228,6 +253,7 @@
       - [ ] Database monitoring
 
 19. **DK-19: Environment configuration**
+
     - Type: Story
     - Priority: High
     - Description: Production environment variables and secrets
@@ -252,6 +278,7 @@
 ## Bugs & Technical Debt
 
 ### 🐛 Bug Fixes
+
 21. **DK-21: Fix Google OAuth environment variable error**
     - Type: Bug
     - Priority: Critical
@@ -259,7 +286,9 @@
     - Status: ✅ RESOLVED
 
 ### 🔧 Technical Tasks
+
 22. **DK-22: Database schema optimization**
+
     - Type: Technical Task
     - Priority: Medium
     - Description: Optimize database schema and add indexes
@@ -270,6 +299,7 @@
     - Description: Add comprehensive code documentation and README updates
 
 ## Kanban Board Columns
+
 - **Backlog** - All unstarted tasks
 - **To Do** - Ready for development
 - **In Progress** - Currently being worked on
@@ -277,6 +307,7 @@
 - **Done** - Completed tasks
 
 ## Priority Legend
+
 - **Critical** - Blocking issues, production down
 - **High** - Core functionality, major features
 - **Medium** - Important features, non-blocking issues

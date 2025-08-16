@@ -6,57 +6,58 @@ test.describe('Authentication Flow with Mocked OAuth', () => {
 
   test.beforeEach(async ({ page }) => {
     // Mock Google OAuth endpoints
-    await page.route('**/auth/signin/google**', async (route) => {
+    await page.route('**/auth/signin/google**', async route => {
       // Simulate Google OAuth redirect with test data
       const url = new URL(route.request().url());
       const callbackUrl = url.searchParams.get('callbackUrl') || '/home';
       const isSignup = callbackUrl.includes('signup=true');
-      
+
       // Redirect to our callback with mock data
       await route.fulfill({
         status: 302,
         headers: {
-          'Location': `/api/auth/callback/google?${new URLSearchParams({
+          Location: `/api/auth/callback/google?${new URLSearchParams({
             code: 'mock-auth-code',
             state: isSignup ? 'signup=true' : 'signin=true',
-            callbackUrl: callbackUrl
-          })}`
-        }
+            callbackUrl: callbackUrl,
+          })}`,
+        },
       });
     });
 
     // Mock the OAuth callback to simulate different user scenarios
-    await page.route('**/api/auth/callback/google**', async (route) => {
+    await page.route('**/api/auth/callback/google**', async route => {
       const url = new URL(route.request().url());
-      const isSignup = url.searchParams.get('callbackUrl')?.includes('signup=true') || 
-                       url.searchParams.get('state')?.includes('signup=true');
-      
+      const isSignup =
+        url.searchParams.get('callbackUrl')?.includes('signup=true') ||
+        url.searchParams.get('state')?.includes('signup=true');
+
       // Get test scenario from page context or use default
       const testUser = await page.evaluate(() => window.testUserScenario);
-      
+
       if (testUser === 'new-user' && !isSignup) {
         // New user trying to sign in - should fail
         await route.fulfill({
           status: 302,
           headers: {
-            'Location': '/auth/error?error=UserNotRegistered'
-          }
+            Location: '/auth/error?error=UserNotRegistered',
+          },
         });
       } else if (testUser === 'existing-user' && isSignup) {
         // Existing user trying to sign up - should fail
         await route.fulfill({
           status: 302,
           headers: {
-            'Location': '/auth/error?error=UserAlreadyExists'
-          }
+            Location: '/auth/error?error=UserAlreadyExists',
+          },
         });
       } else {
         // Successful flow
         await route.fulfill({
           status: 302,
           headers: {
-            'Location': '/home'
-          }
+            Location: '/home',
+          },
         });
       }
     });
@@ -69,10 +70,10 @@ test.describe('Authentication Flow with Mocked OAuth', () => {
     });
 
     await page.goto('/auth/signin');
-    
+
     // Click sign in button
     await page.click('button:has-text("Sign in with Google")');
-    
+
     // Should be redirected to error page
     await expect(page).toHaveURL('/auth/error?error=UserNotRegistered');
     await expect(page.locator('h2')).toContainText('Account Not Found');
@@ -86,10 +87,10 @@ test.describe('Authentication Flow with Mocked OAuth', () => {
     });
 
     await page.goto('/auth/signup');
-    
+
     // Click sign up button
     await page.click('button:has-text("Sign up with Google")');
-    
+
     // Should be redirected to error page
     await expect(page).toHaveURL('/auth/error?error=UserAlreadyExists');
     await expect(page.locator('h2')).toContainText('Account Already Exists');
@@ -103,10 +104,10 @@ test.describe('Authentication Flow with Mocked OAuth', () => {
     });
 
     await page.goto('/auth/signup');
-    
+
     // Click sign up button
     await page.click('button:has-text("Sign up with Google")');
-    
+
     // Should be redirected to home page
     await expect(page).toHaveURL('/home');
   });
@@ -118,10 +119,10 @@ test.describe('Authentication Flow with Mocked OAuth', () => {
     });
 
     await page.goto('/auth/signin');
-    
+
     // Click sign in button
     await page.click('button:has-text("Sign in with Google")');
-    
+
     // Should be redirected to home page
     await expect(page).toHaveURL('/home');
   });
@@ -134,14 +135,14 @@ test.describe('Authentication Flow with Mocked OAuth', () => {
 
     await page.goto('/auth/signin');
     await page.click('button:has-text("Sign in with Google")');
-    
+
     // Should be on error page
     await expect(page).toHaveURL('/auth/error?error=UserNotRegistered');
-    
+
     // Click "Sign Up" button
     await page.click('a:has-text("Sign Up")');
     await expect(page).toHaveURL('/auth/signup');
-    
+
     // Verify we're on the sign-up page
     await expect(page.locator('h2')).toContainText('Create your account');
   });
@@ -154,14 +155,14 @@ test.describe('Authentication Flow with Mocked OAuth', () => {
     // Start with incorrect flow (sign-in for new user)
     await page.goto('/auth/signin');
     await page.click('button:has-text("Sign in with Google")');
-    
+
     // Should get error
     await expect(page).toHaveURL('/auth/error?error=UserNotRegistered');
-    
+
     // Follow the correct path
     await page.click('a:has-text("Sign Up")');
     await expect(page).toHaveURL('/auth/signup');
-    
+
     // Now sign up successfully
     await page.click('button:has-text("Sign up with Google")');
     await expect(page).toHaveURL('/home');

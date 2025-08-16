@@ -17,16 +17,11 @@ export default function Header() {
           <div className="flex items-center space-x-4">
             {session ? (
               <>
-                <span className="text-sm text-gray-600">
-                  {session.user?.name}
-                </span>
+                <span className="text-sm text-gray-600">{session.user?.name}</span>
                 <SignOutButton />
               </>
             ) : (
-              <Link
-                href="/auth/signin"
-                className="text-sm text-gray-600 hover:text-gray-900"
-              >
+              <Link href="/auth/signin" className="text-sm text-gray-600 hover:text-gray-900">
                 Sign in
               </Link>
             )}
@@ -35,4 +30,4 @@ export default function Header() {
       </div>
     </header>
   );
-} 
+}

@@ -11,8 +11,18 @@ import Select, { MultiValue } from 'react-select';
 import type { DateEvent } from '@/components/events/DateList';
 
 const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ];
 
 const monthOptions = MONTHS.map((month, idx) => ({ value: idx, label: month }));
@@ -29,7 +39,10 @@ export default function HomeClient() {
   // Extract years from events and add next 5 years
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 6 }, (_, i) => currentYear + i);
-  const yearOptions = [{ value: 'All', label: 'All' }, ...years.map(y => ({ value: String(y), label: String(y) }))];
+  const yearOptions = [
+    { value: 'All', label: 'All' },
+    ...years.map(y => ({ value: String(y), label: String(y) })),
+  ];
 
   const fetchEvents = async () => {
     try {
@@ -69,7 +82,12 @@ export default function HomeClient() {
           adjustedDate.setFullYear(year);
           adjustedDate.setMonth(m);
           adjustedDate.setDate(day);
-          return { ...event, date: adjustedDate.toISOString(), id: event.id + '-y' + year + '-m' + m, originalDate: event.date };
+          return {
+            ...event,
+            date: adjustedDate.toISOString(),
+            id: event.id + '-y' + year + '-m' + m,
+            originalDate: event.date,
+          };
         });
       } else if (event.recurrence === 'Yearly') {
         // Show the next occurrence (this year or next year if already passed)
@@ -86,19 +104,31 @@ export default function HomeClient() {
           nextOccurrence = new Date(origDate);
           nextOccurrence.setFullYear(year);
         }
-        return [{ ...event, date: nextOccurrence.toISOString(), id: event.id + '-y' + year, originalDate: event.date }];
+        return [
+          {
+            ...event,
+            date: nextOccurrence.toISOString(),
+            id: event.id + '-y' + year,
+            originalDate: event.date,
+          },
+        ];
       } else {
         const eventMonth = new Date(event.date).getMonth();
-        const monthMatch = selectedMonths.length === 0 || selectedMonths.some(m => m.value === eventMonth);
+        const monthMatch =
+          selectedMonths.length === 0 || selectedMonths.some(m => m.value === eventMonth);
         return monthMatch ? [{ ...event, originalDate: event.date }] : [];
       }
     });
     // Filter by selected months if any
     if (selectedMonths.length > 0) {
-      filteredEvents = filteredEvents.filter(event => selectedMonths.some(m => m.value === new Date(event.date).getMonth()));
+      filteredEvents = filteredEvents.filter(event =>
+        selectedMonths.some(m => m.value === new Date(event.date).getMonth())
+      );
     }
     // Filter to only events in the current year
-    filteredEvents = filteredEvents.filter(event => new Date(event.date).getFullYear() === currentYear);
+    filteredEvents = filteredEvents.filter(
+      event => new Date(event.date).getFullYear() === currentYear
+    );
   } else {
     const yearNum = Number(selectedYear);
     filteredEvents = events.flatMap(event => {
@@ -108,7 +138,8 @@ export default function HomeClient() {
         const adjustedDate = new Date(origDate);
         adjustedDate.setFullYear(yearNum);
         const eventMonth = adjustedDate.getMonth();
-        const monthMatch = selectedMonths.length === 0 || selectedMonths.some(m => m.value === eventMonth);
+        const monthMatch =
+          selectedMonths.length === 0 || selectedMonths.some(m => m.value === eventMonth);
         if (monthMatch) {
           return [{ ...event, date: adjustedDate.toISOString(), originalDate: event.date }];
         }
@@ -123,7 +154,12 @@ export default function HomeClient() {
           adjustedDate.setFullYear(yearNum);
           adjustedDate.setMonth(m);
           adjustedDate.setDate(day);
-          return { ...event, date: adjustedDate.toISOString(), id: event.id + '-y' + yearNum + '-m' + m, originalDate: event.date };
+          return {
+            ...event,
+            date: adjustedDate.toISOString(),
+            id: event.id + '-y' + yearNum + '-m' + m,
+            originalDate: event.date,
+          };
         }).filter(event => {
           const eventMonth = new Date(event.date).getMonth();
           return selectedMonths.length === 0 || selectedMonths.some(m => m.value === eventMonth);
@@ -132,7 +168,8 @@ export default function HomeClient() {
         const eventYear = new Date(event.date).getFullYear();
         const eventMonth = new Date(event.date).getMonth();
         const yearMatch = eventYear === yearNum;
-        const monthMatch = selectedMonths.length === 0 || selectedMonths.some(m => m.value === eventMonth);
+        const monthMatch =
+          selectedMonths.length === 0 || selectedMonths.some(m => m.value === eventMonth);
         return yearMatch && monthMatch ? [{ ...event, originalDate: event.date }] : [];
       }
     });
@@ -154,12 +191,12 @@ export default function HomeClient() {
   return (
     <div className="min-h-screen bg-[#f6fcfb]">
       <AuthenticatedHeader />
-      <AddDateModal 
-        open={addModalOpen} 
+      <AddDateModal
+        open={addModalOpen}
         onClose={() => {
           setAddModalOpen(false);
           handleEventUpdated();
-        }} 
+        }}
       />
       <main className="max-w-6xl mx-auto py-10 px-4">
         <div className="flex items-center justify-between mb-8">
@@ -180,7 +217,9 @@ export default function HomeClient() {
                 isMulti
                 options={monthOptions}
                 value={selectedMonths}
-                onChange={(newValue: MultiValue<{ value: number; label: string }>) => setSelectedMonths(Array.isArray(newValue) ? [...newValue] : [])}
+                onChange={(newValue: MultiValue<{ value: number; label: string }>) =>
+                  setSelectedMonths(Array.isArray(newValue) ? [...newValue] : [])
+                }
                 placeholder="Filter by month..."
                 classNamePrefix="react-select"
               />
@@ -200,7 +239,9 @@ export default function HomeClient() {
               <FiGift className="text-blue-500 text-4xl" />
             </div>
             <h2 className="text-2xl font-bold mb-2">No dates added yet</h2>
-            <p className="text-gray-600 mb-6">Start adding important dates to never miss a special occasion again.</p>
+            <p className="text-gray-600 mb-6">
+              Start adding important dates to never miss a special occasion again.
+            </p>
             <button
               className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow hover:bg-blue-700 transition-colors"
               onClick={() => setAddModalOpen(true)}
@@ -209,9 +250,13 @@ export default function HomeClient() {
             </button>
           </div>
         ) : (
-          <DateList events={filteredEvents} originalEvents={events} onEventDeleted={handleEventUpdated} />
+          <DateList
+            events={filteredEvents}
+            originalEvents={events}
+            onEventDeleted={handleEventUpdated}
+          />
         )}
       </main>
     </div>
   );
-} 
+}

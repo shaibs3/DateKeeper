@@ -14,11 +14,13 @@ Never miss an important date again! DateKeeper helps you remember birthdays, ann
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
+
+- Node.js 18+
 - Docker Desktop
 - Git
 
 ### 1. Clone and Install
+
 ```bash
 git clone <your-repo-url>
 cd DateKeeper
@@ -26,19 +28,22 @@ npm install
 ```
 
 ### 2. Start Development Environment
+
 ```bash
 # Automated setup (recommended)
 npm run dev:setup
 ```
 
 This will:
+
 - ✅ Start PostgreSQL database with Docker
-- ✅ Run database migrations  
+- ✅ Run database migrations
 - ✅ Generate Prisma client
 - ✅ Seed with test data
 - ✅ Optionally start the development server
 
 ### 3. Access Your Application
+
 - **App:** http://localhost:3000
 - **Database UI:** http://localhost:5555 (Prisma Studio)
 - **Health Check:** http://localhost:3000/api/health
@@ -46,12 +51,14 @@ This will:
 ## 🛠️ Development Commands
 
 ### Quick Start
+
 ```bash
 npm run dev:setup      # Complete environment setup
 npm run dev           # Start Next.js development server
 ```
 
 ### Database Management
+
 ```bash
 npm run db:up         # Start PostgreSQL with Docker
 npm run db:down       # Stop database
@@ -62,9 +69,10 @@ npm run db:logs       # View database logs
 ```
 
 ### Testing & Quality
+
 ```bash
 npm run test          # Unit tests
-npm run test:e2e      # End-to-end tests  
+npm run test:e2e      # End-to-end tests
 npm run test:e2e:ui   # E2E tests with UI
 npm run lint          # ESLint
 npm run type-check    # TypeScript validation
@@ -74,6 +82,7 @@ npm run env:check     # Environment validation
 ## 🏗️ Architecture
 
 ### Tech Stack
+
 - **Frontend:** Next.js 15, React, TypeScript, Tailwind CSS
 - **Backend:** Next.js API routes, NextAuth.js
 - **Database:** PostgreSQL with Prisma ORM
@@ -82,6 +91,7 @@ npm run env:check     # Environment validation
 - **Deployment:** Vercel with CI/CD
 
 ### Project Structure
+
 ```
 DateKeeper/
 ├── src/
@@ -98,11 +108,14 @@ DateKeeper/
 ## 🗄️ Database
 
 ### Local Development
+
 Your local database includes:
+
 - **Test User:** `test@example.com`
 - **Sample Events:** 3 pre-loaded events for testing
 
 ### Schema
+
 - **Users** - Google OAuth user profiles
 - **DateEvents** - Birthdays, anniversaries, etc.
 - **Sessions/Accounts** - NextAuth.js authentication
@@ -110,6 +123,7 @@ Your local database includes:
 ## 🔧 Configuration
 
 ### Required Environment Variables
+
 ```bash
 # Authentication
 NEXTAUTH_SECRET=your-secret-here
@@ -122,6 +136,7 @@ DATABASE_URL=postgresql://datekeeper:dev_password_123@localhost:5432/datekeeper_
 ```
 
 ### Optional Environment Variables
+
 ```bash
 # Email notifications
 RESEND_API_KEY=your-resend-api-key
@@ -134,27 +149,31 @@ SENTRY_DSN=your-sentry-dsn
 ## 🚀 Deployment
 
 ### Staging Environment
+
 - **URL:** https://datekeeper-staging.vercel.app
 - **Trigger:** Push to `develop` branch
 - **Database:** Separate staging database
 
-### Production Environment  
+### Production Environment
+
 - **URL:** https://datekeeper.vercel.app
 - **Trigger:** Push to `main` branch
 - **Database:** Production database
 
 ### Manual Deployment
+
 ```bash
 # Deploy to staging
 git push origin develop
 
-# Deploy to production  
+# Deploy to production
 git push origin main
 ```
 
 ## 🧪 Testing
 
 ### Running Tests Locally
+
 ```bash
 # Unit tests
 npm test
@@ -170,6 +189,7 @@ npm run test:e2e:staging
 ```
 
 ### Test Coverage
+
 - ✅ Authentication flows
 - ✅ Event management
 - ✅ Database operations
@@ -192,6 +212,7 @@ npm run test:e2e:staging
 6. **Open a Pull Request**
 
 ### Development Workflow
+
 - `develop` branch for staging
 - `main` branch for production
 - Feature branches for new development
@@ -202,6 +223,7 @@ npm run test:e2e:staging
 ### Common Issues
 
 **Database not starting:**
+
 ```bash
 # Check Docker is running
 docker --version
@@ -211,6 +233,7 @@ npm run db:down && npm run db:up
 ```
 
 **Environment variables missing:**
+
 ```bash
 # Check what's missing
 npm run env:check
@@ -220,6 +243,7 @@ cp .env.example .env.local
 ```
 
 **Authentication not working:**
+
 - Set up Google OAuth credentials
 - Check redirect URLs match
 - Verify environment variables

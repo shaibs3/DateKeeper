@@ -36,13 +36,13 @@ export const {
   callbacks: {
     async signIn({ user, account, profile }) {
       if (!user.email) return false;
-      
+
       const existingUser = await prisma.user.findUnique({ where: { email: user.email } });
-      
+
       // Check the callbackUrl to determine if this is sign-up or sign-in
       const callbackUrl = account?.callbackUrl || '';
       const isSignUpFlow = callbackUrl.includes('signup=true');
-      
+
       if (!existingUser) {
         // User doesn't exist
         if (isSignUpFlow) {
@@ -88,4 +88,4 @@ export const {
     error: '/auth/error',
   },
   secret: config.auth.secret,
-}); 
+});

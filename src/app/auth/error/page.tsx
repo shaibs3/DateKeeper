@@ -48,13 +48,9 @@ function AuthErrorContent() {
             {errorInfo.title}
           </h2>
           <div className="mt-4 p-4 bg-red-50 rounded-md">
-            <p className="text-sm text-red-700">
-              {errorInfo.message}
-            </p>
+            <p className="text-sm text-red-700">{errorInfo.message}</p>
             {errorDescription && (
-              <p className="mt-2 text-sm text-red-700">
-                Details: {errorDescription}
-              </p>
+              <p className="mt-2 text-sm text-red-700">Details: {errorDescription}</p>
             )}
           </div>
         </div>
@@ -85,4 +81,4 @@ export default function AuthError() {
       <AuthErrorContent />
     </Suspense>
   );
-} 
+}

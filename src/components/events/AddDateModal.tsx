@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, useEffect } from 'react';
 import { FiX, FiCalendar } from 'react-icons/fi';
@@ -79,33 +79,40 @@ export function AddDateModal({ open, onClose, event, onSaved }: AddDateModalProp
   if (!open) return null;
 
   const handleReminderToggle = (reminder: string) => {
-    setReminders((prev) =>
-      prev.includes(reminder)
-        ? prev.filter((r) => r !== reminder)
-        : [...prev, reminder]
+    setReminders(prev =>
+      prev.includes(reminder) ? prev.filter(r => r !== reminder) : [...prev, reminder]
     );
   };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
+
     // Force recurrence to 'Yearly' for Birthday and Anniversary
-    const finalRecurrence = (category === 'Birthday' || category === 'Anniversary') ? 'Yearly' : recurrence;
+    const finalRecurrence =
+      category === 'Birthday' || category === 'Anniversary' ? 'Yearly' : recurrence;
     try {
       const url = event ? `/api/events/${event.id}` : '/api/date-event';
       const method = event ? 'PUT' : 'POST';
-      
+
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, date, category, color, recurrence: finalRecurrence, notes, reminders }),
+        body: JSON.stringify({
+          name,
+          date,
+          category,
+          color,
+          recurrence: finalRecurrence,
+          notes,
+          reminders,
+        }),
       });
-      
+
       if (!res.ok) {
         throw new Error('Failed to save');
       }
-      
+
       toast.success(event ? 'Event updated successfully!' : 'Date saved successfully!');
       onClose();
       if (onSaved) onSaved();
@@ -143,7 +150,9 @@ export function AddDateModal({ open, onClose, event, onSaved }: AddDateModalProp
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><FiCalendar /></span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <FiCalendar />
+              </span>
               <input
                 type="date"
                 className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100"
@@ -168,7 +177,9 @@ export function AddDateModal({ open, onClose, event, onSaved }: AddDateModalProp
               }}
             >
               {categoryOptions.map(opt => (
-                <option key={opt} value={opt}>{opt}</option>
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
               ))}
             </select>
           </div>
@@ -212,7 +223,9 @@ export function AddDateModal({ open, onClose, event, onSaved }: AddDateModalProp
               disabled={category === 'Anniversary' || category === 'Birthday'}
             >
               {recurrenceOptions.map(opt => (
-                <option key={opt} value={opt}>{opt}</option>
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
               ))}
             </select>
           </div>
@@ -246,4 +259,4 @@ export function AddDateModal({ open, onClose, event, onSaved }: AddDateModalProp
       </div>
     </div>
   );
-} 
+}

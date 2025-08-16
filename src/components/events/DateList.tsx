@@ -22,17 +22,41 @@ export interface DateEvent {
 function getEventIcon(category: string) {
   switch (category) {
     case 'Birthday':
-      return <span className="bg-blue-100 rounded-full p-2"><FaBirthdayCake className="text-blue-500" /></span>;
+      return (
+        <span className="bg-blue-100 rounded-full p-2">
+          <FaBirthdayCake className="text-blue-500" />
+        </span>
+      );
     case 'Anniversary':
-      return <span className="bg-blue-100 rounded-full p-2"><FiHeart className="text-blue-500" /></span>;
+      return (
+        <span className="bg-blue-100 rounded-full p-2">
+          <FiHeart className="text-blue-500" />
+        </span>
+      );
     case 'Holiday':
-      return <span className="bg-blue-100 rounded-full p-2"><FiGift className="text-blue-500" /></span>;
+      return (
+        <span className="bg-blue-100 rounded-full p-2">
+          <FiGift className="text-blue-500" />
+        </span>
+      );
     default:
-      return <span className="bg-blue-100 rounded-full p-2"><FiCalendar className="text-blue-500" /></span>;
+      return (
+        <span className="bg-blue-100 rounded-full p-2">
+          <FiCalendar className="text-blue-500" />
+        </span>
+      );
   }
 }
 
-export function DateList({ events, originalEvents, onEventDeleted }: { events: DateEvent[], originalEvents: DateEvent[], onEventDeleted: () => void }) {
+export function DateList({
+  events,
+  originalEvents,
+  onEventDeleted,
+}: {
+  events: DateEvent[];
+  originalEvents: DateEvent[];
+  onEventDeleted: () => void;
+}) {
   const [selectedEvent, setSelectedEvent] = useState<DateEvent | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -66,19 +90,29 @@ export function DateList({ events, originalEvents, onEventDeleted }: { events: D
   // Sort events within each month by date ascending
   Object.keys(eventsByMonth).forEach(monthIdxStr => {
     const monthIdx = Number(monthIdxStr);
-    eventsByMonth[monthIdx] = eventsByMonth[monthIdx].sort((a: DateEvent, b: DateEvent) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    eventsByMonth[monthIdx] = eventsByMonth[monthIdx].sort(
+      (a: DateEvent, b: DateEvent) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
   });
 
   const MONTHS = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
   const currentMonth = new Date().getMonth();
 
   // Compute ordered months: current, then next, wrapping around
-  const orderedMonths = [
-    ...Array.from({ length: 12 }, (_, i) => (currentMonth + i) % 12)
-  ];
+  const orderedMonths = [...Array.from({ length: 12 }, (_, i) => (currentMonth + i) % 12)];
 
   const EventCard = ({ event }: { event: DateEvent }) => {
     const eventDate = new Date(event.date);
@@ -102,7 +136,7 @@ export function DateList({ events, originalEvents, onEventDeleted }: { events: D
         className="bg-white rounded-lg p-4 shadow-sm border border-gray-100 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition"
         onClick={() => {
           // Always use the original event (with the real DB ID) for editing
-          const realEvent = originalEvents.find(e => e.id === (event.id.split('-')[0]));
+          const realEvent = originalEvents.find(e => e.id === event.id.split('-')[0]);
           setSelectedEvent(realEvent || event);
           setShowEditModal(true);
         }}
@@ -114,12 +148,14 @@ export function DateList({ events, originalEvents, onEventDeleted }: { events: D
           <div>
             <h3 className="font-semibold text-gray-900">{event.name}</h3>
             <div className="text-sm text-gray-500">
-              {eventDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+              {eventDate.toLocaleDateString('en-US', {
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric',
+              })}
             </div>
             {event.category === 'Birthday' && (
-              <div className="text-sm text-gray-600">
-                Turning {birthdayAge} years old
-              </div>
+              <div className="text-sm text-gray-600">Turning {birthdayAge} years old</div>
             )}
           </div>
         </div>
@@ -130,7 +166,7 @@ export function DateList({ events, originalEvents, onEventDeleted }: { events: D
             </span>
           )}
           <div className="relative">
-            <button 
+            <button
               className="text-gray-400 hover:text-gray-600 p-1"
               onClick={handleMenuButtonClick}
             >
@@ -141,7 +177,7 @@ export function DateList({ events, originalEvents, onEventDeleted }: { events: D
                 <button
                   className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                   onClick={() => {
-                    const realEvent = originalEvents.find(e => e.id === (event.id.split('-')[0]));
+                    const realEvent = originalEvents.find(e => e.id === event.id.split('-')[0]);
                     setSelectedEvent(realEvent || event);
                     setShowEditModal(true);
                     setOpenMenuId(null);
@@ -192,7 +228,12 @@ export function DateList({ events, originalEvents, onEventDeleted }: { events: D
         )}
         {/* Other months in calendar order after current */}
         {orderedMonths
-          .filter(monthIdx => monthIdx !== currentMonth && eventsByMonth[monthIdx] && eventsByMonth[monthIdx].length > 0)
+          .filter(
+            monthIdx =>
+              monthIdx !== currentMonth &&
+              eventsByMonth[monthIdx] &&
+              eventsByMonth[monthIdx].length > 0
+          )
           .map(monthIdx => (
             <section key={monthIdx}>
               <h2 className="text-xl font-semibold text-blue-700 mb-4">{MONTHS[monthIdx]}</h2>
@@ -230,4 +271,4 @@ export function DateList({ events, originalEvents, onEventDeleted }: { events: D
       )}
     </>
   );
-} 
+}

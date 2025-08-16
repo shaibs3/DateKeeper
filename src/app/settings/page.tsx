@@ -50,7 +50,9 @@ export default function SettingsPage() {
             </div>
             <div>
               <div className="font-semibold mb-1">Default Color Scheme</div>
-              <div className="text-gray-600 text-sm mb-2">Choose your preferred color for new dates</div>
+              <div className="text-gray-600 text-sm mb-2">
+                Choose your preferred color for new dates
+              </div>
               <div className="flex gap-4 mt-2">
                 {colorOptions.map(opt => (
                   <button
@@ -72,7 +74,9 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-semibold">Export Your Data</div>
-                  <div className="text-gray-600 text-sm">Download a backup of all your dates and settings</div>
+                  <div className="text-gray-600 text-sm">
+                    Download a backup of all your dates and settings
+                  </div>
                 </div>
                 <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">
                   <FiDownload /> Export
@@ -81,11 +85,19 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-semibold">Clear All Data</div>
-                  <div className="text-gray-600 text-sm">Delete all your dates and reset preferences</div>
+                  <div className="text-gray-600 text-sm">
+                    Delete all your dates and reset preferences
+                  </div>
                 </div>
-                <button className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700"
+                <button
+                  className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700"
                   onClick={async () => {
-                    if (!window.confirm('Are you sure you want to delete all your dates? This cannot be undone.')) return;
+                    if (
+                      !window.confirm(
+                        'Are you sure you want to delete all your dates? This cannot be undone.'
+                      )
+                    )
+                      return;
                     setClearLoading(true);
                     try {
                       const res = await fetch('/api/events', { method: 'DELETE' });
@@ -112,4 +124,4 @@ export default function SettingsPage() {
       </main>
     </div>
   );
-} 
+}

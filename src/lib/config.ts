@@ -8,7 +8,7 @@ export const config = {
   NODE_ENV: process.env.NODE_ENV || 'development',
   APP_ENV: process.env.APP_ENV || 'local',
   APP_URL: process.env.APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000',
-  
+
   // Authentication
   auth: {
     secret: process.env.NEXTAUTH_SECRET!,
@@ -18,28 +18,28 @@ export const config = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     },
   },
-  
+
   // Database
   database: {
     url: process.env.DATABASE_URL!,
   },
-  
+
   // Email
   email: {
     resendApiKey: process.env.RESEND_API_KEY,
     from: process.env.EMAIL_FROM || 'noreply@datekeeper.app',
   },
-  
+
   // Analytics
   analytics: {
     googleAnalyticsId: process.env.GOOGLE_ANALYTICS_ID,
   },
-  
+
   // Error Tracking
   sentry: {
     dsn: process.env.SENTRY_DSN,
   },
-  
+
   // Feature Flags (environment-specific)
   features: {
     enableAnalytics: process.env.APP_ENV === 'production',
@@ -53,14 +53,14 @@ export const config = {
 export function validateEnvironment() {
   const requiredVars = [
     'NEXTAUTH_SECRET',
-    'NEXTAUTH_URL', 
+    'NEXTAUTH_URL',
     'GOOGLE_CLIENT_ID',
     'GOOGLE_CLIENT_SECRET',
     'DATABASE_URL',
   ];
-  
+
   const missing = requiredVars.filter(varName => !process.env[varName]);
-  
+
   if (missing.length > 0) {
     throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
   }

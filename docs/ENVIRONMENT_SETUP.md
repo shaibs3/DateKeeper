@@ -18,6 +18,7 @@ This guide will help you set up staging and production environments for DateKeep
 ## 📋 Environment Variables by Environment
 
 ### 🟢 Local Development (.env.local)
+
 ```bash
 NODE_ENV=development
 APP_ENV=local
@@ -29,6 +30,7 @@ DATABASE_URL=postgresql://localhost:5432/datekeeper_dev
 ```
 
 ### 🟡 Staging Environment
+
 ```bash
 NODE_ENV=production
 APP_ENV=staging
@@ -41,6 +43,7 @@ RESEND_API_KEY=your-resend-api-key
 ```
 
 ### 🔴 Production Environment
+
 ```bash
 NODE_ENV=production
 APP_ENV=production
@@ -59,6 +62,7 @@ SENTRY_DSN=your-sentry-dsn
 ### Option 1: Vercel Postgres (Recommended)
 
 1. **Create Staging Database:**
+
    ```bash
    # In Vercel Dashboard
    Project → Storage → Create Database → Postgres
@@ -66,8 +70,9 @@ SENTRY_DSN=your-sentry-dsn
    ```
 
 2. **Create Production Database:**
+
    ```bash
-   # In Vercel Dashboard  
+   # In Vercel Dashboard
    Project → Storage → Create Database → Postgres
    Name: datekeeper-production
    ```
@@ -79,6 +84,7 @@ SENTRY_DSN=your-sentry-dsn
 ### Option 2: External PostgreSQL
 
 1. **Staging Database:**
+
    ```sql
    CREATE DATABASE datekeeper_staging;
    CREATE USER staging_user WITH PASSWORD 'secure_password';
@@ -100,6 +106,7 @@ SENTRY_DSN=your-sentry-dsn
 2. **Create separate OAuth credentials for each environment:**
 
 #### Local Development
+
 ```
 Application name: DateKeeper (Local)
 Authorized redirect URIs:
@@ -107,6 +114,7 @@ Authorized redirect URIs:
 ```
 
 #### Staging
+
 ```
 Application name: DateKeeper (Staging)
 Authorized redirect URIs:
@@ -114,8 +122,9 @@ Authorized redirect URIs:
 ```
 
 #### Production
+
 ```
-Application name: DateKeeper (Production)  
+Application name: DateKeeper (Production)
 Authorized redirect URIs:
 - https://datekeeper.vercel.app/api/auth/callback/google
 - https://your-custom-domain.com/api/auth/callback/google
@@ -124,12 +133,14 @@ Authorized redirect URIs:
 ## 🚀 Vercel Deployment Setup
 
 ### 1. Install Vercel CLI
+
 ```bash
 npm i -g vercel
 vercel login
 ```
 
 ### 2. Link Project
+
 ```bash
 vercel link
 ```
@@ -137,6 +148,7 @@ vercel link
 ### 3. Set Environment Variables
 
 #### For Staging:
+
 ```bash
 vercel env add NEXTAUTH_SECRET staging
 vercel env add NEXTAUTH_URL staging
@@ -147,6 +159,7 @@ vercel env add APP_ENV staging
 ```
 
 #### For Production:
+
 ```bash
 vercel env add NEXTAUTH_SECRET production
 vercel env add NEXTAUTH_URL production
@@ -162,6 +175,7 @@ vercel env add SENTRY_DSN production
 ## 🔄 Git Workflow
 
 ### Branch Strategy
+
 ```
 main (production)
 ├── develop (staging)
@@ -171,6 +185,7 @@ main (production)
 ```
 
 ### Deployment Flow
+
 1. **Development:** Work on feature branches
 2. **Staging:** Merge to `develop` → auto-deploy to staging
 3. **Production:** Merge `develop` to `main` → auto-deploy to production
@@ -178,6 +193,7 @@ main (production)
 ## 🧪 Testing Strategy
 
 ### Local Development
+
 ```bash
 npm run dev                 # Start local dev server
 npm run test:e2e           # Run E2E tests locally
@@ -185,11 +201,13 @@ npm run env:check          # Validate environment variables
 ```
 
 ### Staging Testing
+
 ```bash
 npm run test:e2e:staging   # Run E2E tests against staging
 ```
 
 ### Production Testing
+
 ```bash
 npm run test:e2e:production # Run smoke tests against production
 ```
@@ -197,11 +215,13 @@ npm run test:e2e:production # Run smoke tests against production
 ## 📊 Monitoring & Analytics
 
 ### Staging Environment
+
 - **Error Tracking:** Sentry (optional)
 - **Analytics:** Disabled
 - **Logging:** Debug mode enabled
 
-### Production Environment  
+### Production Environment
+
 - **Error Tracking:** Sentry (required)
 - **Analytics:** Google Analytics (required)
 - **Logging:** Error level only
@@ -210,11 +230,13 @@ npm run test:e2e:production # Run smoke tests against production
 ## 🛠️ Utility Scripts
 
 ### Check Environment Variables
+
 ```bash
 npm run env:check
 ```
 
 ### Database Operations
+
 ```bash
 npm run db:migrate          # Run database migrations
 npm run db:generate         # Generate Prisma client
@@ -223,6 +245,7 @@ npm run db:seed            # Seed database with test data
 ```
 
 ### Build Commands
+
 ```bash
 npm run build:staging      # Build for staging
 npm run build:production   # Build for production
@@ -233,18 +256,21 @@ npm run build:production   # Build for production
 ### Common Issues
 
 1. **Environment Variable Not Found**
+
    ```bash
    npm run env:check
    # Check which variables are missing
    ```
 
 2. **Database Connection Failed**
+
    ```bash
    # Test database connection
    npx prisma db pull
    ```
 
 3. **OAuth Redirect Mismatch**
+
    - Verify redirect URIs in Google Cloud Console
    - Check NEXTAUTH_URL matches deployment URL
 
@@ -258,6 +284,7 @@ npm run build:production   # Build for production
 ### Environment Validation
 
 Before deploying, always run:
+
 ```bash
 npm run env:check           # Check environment variables
 npm run type-check         # TypeScript validation
@@ -269,16 +296,19 @@ npm run test:e2e          # E2E tests
 ## 📚 Quick Reference
 
 ### Environment URLs
+
 - **Local:** http://localhost:3000
-- **Staging:** https://datekeeper-staging.vercel.app  
+- **Staging:** https://datekeeper-staging.vercel.app
 - **Production:** https://datekeeper.vercel.app
 
 ### Database Studios
+
 - **Local:** http://localhost:5555 (npm run db:studio)
 - **Staging:** Vercel Dashboard → Storage → Staging DB
 - **Production:** Vercel Dashboard → Storage → Production DB
 
 ### CI/CD Status
+
 - **Staging:** Auto-deploy on push to `develop`
 - **Production:** Auto-deploy on push to `main`
 - **Tests:** Run on all PRs and deployments

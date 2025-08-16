@@ -13,6 +13,7 @@ DateKeeper now enforces a proper registration flow:
 ## 🔐 How It Works
 
 ### Sign In Flow (`/auth/signin`)
+
 1. User clicks "Sign in with Google"
 2. Google OAuth completes
 3. System checks if user exists in database
@@ -20,6 +21,7 @@ DateKeeper now enforces a proper registration flow:
 5. **If user doesn't exist:** ❌ Redirected to error page with "Account Not Found" message
 
 ### Sign Up Flow (`/auth/signup`)
+
 1. User clicks "Sign up with Google"
 2. Google OAuth completes with `signup=true` parameter
 3. System checks if user exists in database
@@ -29,6 +31,7 @@ DateKeeper now enforces a proper registration flow:
 ## 🛠️ Technical Implementation
 
 ### Authentication Callback
+
 The system uses the `callbackUrl` parameter to determine the flow:
 
 ```typescript
@@ -40,6 +43,7 @@ await signIn('google', { callbackUrl: '/home?signup=true' });
 ```
 
 ### Database Check
+
 In the `signIn` callback:
 
 ```typescript
@@ -58,24 +62,28 @@ if (existingUser && isSignUpFlow) {
 ## 📱 User Experience
 
 ### Scenario 1: New User Tries to Sign In
+
 1. Goes to `/auth/signin`
 2. Clicks "Sign in with Google"
 3. Gets error: "Account Not Found"
 4. Button to "Sign Up" redirects to `/auth/signup`
 
 ### Scenario 2: Existing User Tries to Sign Up
+
 1. Goes to `/auth/signup`
 2. Clicks "Sign up with Google"
 3. Gets error: "Account Already Exists"
 4. Button to "Sign In" redirects to `/auth/signin`
 
 ### Scenario 3: Correct Flow
+
 1. **New users** → Sign Up → Account Created → Home
 2. **Existing users** → Sign In → Authenticated → Home
 
 ## 🧪 Testing the Flow
 
 ### Test New User Registration
+
 1. Clear your database or use a new email
 2. Go to http://localhost:3000/auth/signin
 3. Try to sign in → Should get "Account Not Found" error
@@ -83,6 +91,7 @@ if (existingUser && isSignUpFlow) {
 5. Sign up → Should create account and sign in
 
 ### Test Existing User Sign In
+
 1. Use an email that exists in the database
 2. Go to http://localhost:3000/auth/signup
 3. Try to sign up → Should get "Account Already Exists" error
@@ -90,6 +99,7 @@ if (existingUser && isSignUpFlow) {
 5. Sign in → Should authenticate successfully
 
 ### Test Normal Flows
+
 1. **New user on signup page** → Creates account ✅
 2. **Existing user on signin page** → Signs in ✅
 

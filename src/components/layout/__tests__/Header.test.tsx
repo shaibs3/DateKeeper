@@ -12,7 +12,7 @@ describe('Header', () => {
     render(<Header />);
     const loginLink = screen.getByText(/Log In/i);
     const signupLink = screen.getByText(/Sign Up/i);
-    
+
     expect(loginLink).toBeInTheDocument();
     expect(signupLink).toBeInTheDocument();
     expect(loginLink).toHaveAttribute('href', '/auth/login');
@@ -23,8 +23,8 @@ describe('Header', () => {
     render(<Header />);
     const header = screen.getByRole('banner');
     const signupButton = screen.getByText(/Sign Up/i);
-    
+
     expect(header).toHaveClass('bg-white', 'border-b');
     expect(signupButton).toHaveClass('btn-primary');
   });
-}); 
+});

@@ -5,11 +5,11 @@ export async function GET() {
   try {
     // Test database connection
     await prisma.$connect();
-    
+
     // Get database stats
     const userCount = await prisma.user.count();
     const eventCount = await prisma.dateEvent.count();
-    
+
     return NextResponse.json({
       status: 'healthy',
       timestamp: new Date().toISOString(),
@@ -22,7 +22,7 @@ export async function GET() {
     });
   } catch (error) {
     console.error('Health check failed:', error);
-    
+
     return NextResponse.json(
       {
         status: 'unhealthy',

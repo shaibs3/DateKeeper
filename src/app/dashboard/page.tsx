@@ -8,8 +8,18 @@ import { EventForm } from '@/components/events/EventForm';
 import type { DateEvent } from '@/components/events/DateList';
 
 const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ];
 
 export default function Dashboard() {
@@ -61,7 +71,12 @@ export default function Dashboard() {
         adjustedDate.setFullYear(year);
         adjustedDate.setMonth(m);
         adjustedDate.setDate(day);
-        const eventCopy = { ...event, date: adjustedDate.toISOString(), id: event.id + '-y' + year + '-m' + m, originalDate: event.date };
+        const eventCopy = {
+          ...event,
+          date: adjustedDate.toISOString(),
+          id: event.id + '-y' + year + '-m' + m,
+          originalDate: event.date,
+        };
         if (!eventsByMonth[m]) eventsByMonth[m] = [];
         eventsByMonth[m].push(eventCopy);
       }
@@ -81,7 +96,12 @@ export default function Dashboard() {
         nextOccurrence.setFullYear(year);
       }
       const month = nextOccurrence.getMonth();
-      const eventCopy = { ...event, date: nextOccurrence.toISOString(), id: event.id + '-y' + year, originalDate: event.date };
+      const eventCopy = {
+        ...event,
+        date: nextOccurrence.toISOString(),
+        id: event.id + '-y' + year,
+        originalDate: event.date,
+      };
       if (!eventsByMonth[month]) eventsByMonth[month] = [];
       eventsByMonth[month].push(eventCopy);
     } else {
@@ -93,7 +113,9 @@ export default function Dashboard() {
   // Sort events within each month by date ascending
   Object.keys(eventsByMonth).forEach(monthIdxStr => {
     const monthIdx = Number(monthIdxStr);
-    eventsByMonth[monthIdx] = eventsByMonth[monthIdx].sort((a: DateEvent, b: DateEvent) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    eventsByMonth[monthIdx] = eventsByMonth[monthIdx].sort(
+      (a: DateEvent, b: DateEvent) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
   });
 
   return (
@@ -140,7 +162,9 @@ export default function Dashboard() {
                     .sort((a, b) => Number(a) - Number(b))
                     .map(monthIdx => (
                       <div key={monthIdx}>
-                        <h3 className="text-xl font-semibold text-blue-700 mb-4">{MONTHS[Number(monthIdx)]}</h3>
+                        <h3 className="text-xl font-semibold text-blue-700 mb-4">
+                          {MONTHS[Number(monthIdx)]}
+                        </h3>
                         <div className="space-y-4">
                           {eventsByMonth[Number(monthIdx)].map(event => (
                             <EventCard
@@ -148,9 +172,11 @@ export default function Dashboard() {
                               event={{
                                 ...event,
                                 date: new Date(event.date),
-                                type: (["BIRTHDAY", "ANNIVERSARY", "OTHER"].includes(event.category?.toUpperCase() ?? "")
+                                type: (['BIRTHDAY', 'ANNIVERSARY', 'OTHER'].includes(
+                                  event.category?.toUpperCase() ?? ''
+                                )
                                   ? event.category?.toUpperCase()
-                                  : "OTHER") as "BIRTHDAY" | "ANNIVERSARY" | "OTHER",
+                                  : 'OTHER') as 'BIRTHDAY' | 'ANNIVERSARY' | 'OTHER',
                               }}
                               onDelete={handleEventDelete}
                             />
@@ -166,4 +192,4 @@ export default function Dashboard() {
       </main>
     </div>
   );
-} 
+}

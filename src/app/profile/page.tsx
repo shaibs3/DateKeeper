@@ -14,7 +14,9 @@ export default function ProfilePage() {
         <Header />
         <div className="max-w-6xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900">Please sign in to view your profile</h1>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Please sign in to view your profile
+            </h1>
           </div>
         </div>
       </div>
@@ -65,4 +67,4 @@ export default function ProfilePage() {
       </div>
     </div>
   );
-} 
+}

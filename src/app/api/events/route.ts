@@ -9,11 +9,11 @@ export async function GET(_req: NextRequest) {
   }
 
   try {
-    const user = await prisma.user.findUnique({ 
+    const user = await prisma.user.findUnique({
       where: { email: session.user.email },
       include: {
-        dateEvents: true
-      }
+        dateEvents: true,
+      },
     });
 
     if (!user) {
@@ -23,10 +23,7 @@ export async function GET(_req: NextRequest) {
     return NextResponse.json(user.dateEvents);
   } catch (error) {
     console.error('Failed to fetch events:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch events', details: error },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch events', details: error }, { status: 500 });
   }
 }
 
@@ -50,4 +47,4 @@ export async function DELETE(_req: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}

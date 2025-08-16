@@ -50,15 +50,11 @@ export function EventCard({ event, onDelete }: EventCardProps) {
       <div className="flex justify-between items-start">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">{event.name}</h3>
-          <p className="text-sm text-gray-500 mt-1">
-            {format(event.date, 'MMMM d, yyyy')}
-          </p>
+          <p className="text-sm text-gray-500 mt-1">{format(event.date, 'MMMM d, yyyy')}</p>
         </div>
-        <span className={`badge ${getBadgeClass()}`}>
-          {event.type.toLowerCase()}
-        </span>
+        <span className={`badge ${getBadgeClass()}`}>{event.type.toLowerCase()}</span>
       </div>
-      
+
       <div className="mt-4 flex items-center justify-between">
         <span className="text-sm font-medium text-gray-700">
           {getDaysText()} until next occurrence
@@ -74,4 +70,4 @@ export function EventCard({ event, onDelete }: EventCardProps) {
       </div>
     </div>
   );
-} 
+}

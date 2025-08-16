@@ -17,7 +17,7 @@ export default function SignIn() {
 
   const handleGoogleSignIn = async () => {
     try {
-      await signIn('google', { 
+      await signIn('google', {
         callbackUrl: '/home',
         redirect: true,
       });
@@ -47,4 +47,4 @@ export default function SignIn() {
       </div>
     </div>
   );
-} 
+}

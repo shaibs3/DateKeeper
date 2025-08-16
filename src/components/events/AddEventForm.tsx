@@ -5,11 +5,7 @@ import { useState } from 'react';
 type EventType = 'BIRTHDAY' | 'ANNIVERSARY' | 'OTHER';
 
 interface AddEventFormProps {
-  onSubmit: (event: {
-    name: string;
-    date: Date;
-    type: EventType;
-  }) => void;
+  onSubmit: (event: { name: string; date: Date; type: EventType }) => void;
 }
 
 export function AddEventForm({ onSubmit }: AddEventFormProps) {
@@ -46,13 +42,13 @@ export function AddEventForm({ onSubmit }: AddEventFormProps) {
             type="text"
             id="name"
             value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            onChange={e => setFormData({ ...formData, name: e.target.value })}
             className="input-field"
             placeholder="Enter name"
             required
           />
         </div>
-        
+
         <div>
           <label htmlFor="date" className="block text-sm font-medium text-gray-700">
             Date
@@ -61,12 +57,12 @@ export function AddEventForm({ onSubmit }: AddEventFormProps) {
             type="date"
             id="date"
             value={formData.date}
-            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+            onChange={e => setFormData({ ...formData, date: e.target.value })}
             className="input-field"
             required
           />
         </div>
-        
+
         <div>
           <label htmlFor="type" className="block text-sm font-medium text-gray-700">
             Event Type
@@ -74,7 +70,7 @@ export function AddEventForm({ onSubmit }: AddEventFormProps) {
           <select
             id="type"
             value={formData.type}
-            onChange={(e) => {
+            onChange={e => {
               const value = e.target.value as EventType;
               setFormData({ ...formData, type: value });
             }}
@@ -85,11 +81,11 @@ export function AddEventForm({ onSubmit }: AddEventFormProps) {
             <option value="OTHER">Other</option>
           </select>
         </div>
-        
+
         <button type="submit" className="btn-primary w-full">
           Add Event
         </button>
       </div>
     </form>
   );
-} 
+}

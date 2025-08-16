@@ -19,7 +19,7 @@ export class AuthMock {
    */
   async setupOAuthMocking() {
     // Intercept NextAuth API routes
-    await this.page.route('**/api/auth/**', async (route) => {
+    await this.page.route('**/api/auth/**', async route => {
       const url = new URL(route.request().url());
       const pathname = url.pathname;
 
@@ -37,18 +37,24 @@ export class AuthMock {
   /**
    * Set the mock user scenario for testing
    */
-  async setMockUserScenario(scenario: 'new-user' | 'existing-user', userEmail = 'test@example.com') {
-    await this.page.addInitScript((data) => {
-      window.mockUserScenario = data.scenario;
-      window.mockUserEmail = data.userEmail;
-    }, { scenario, userEmail });
+  async setMockUserScenario(
+    scenario: 'new-user' | 'existing-user',
+    userEmail = 'test@example.com'
+  ) {
+    await this.page.addInitScript(
+      data => {
+        window.mockUserScenario = data.scenario;
+        window.mockUserEmail = data.userEmail;
+      },
+      { scenario, userEmail }
+    );
   }
 
   /**
    * Mock a successful OAuth flow with user creation
    */
   async mockSuccessfulSignUp(user: MockUser) {
-    await this.page.addInitScript((userData) => {
+    await this.page.addInitScript(userData => {
       window.mockUserData = userData;
       window.mockUserScenario = 'new-user-success';
     }, user);
@@ -58,7 +64,7 @@ export class AuthMock {
    * Mock a successful OAuth flow with existing user
    */
   async mockSuccessfulSignIn(user: MockUser) {
-    await this.page.addInitScript((userData) => {
+    await this.page.addInitScript(userData => {
       window.mockUserData = userData;
       window.mockUserScenario = 'existing-user-success';
     }, user);
@@ -68,16 +74,16 @@ export class AuthMock {
     // Extract parameters from the OAuth request
     const callbackUrl = url.searchParams.get('callbackUrl') || '/home';
     const isSignup = callbackUrl.includes('signup=true');
-    
+
     // Redirect to our mocked callback
     await route.fulfill({
       status: 302,
       headers: {
-        'Location': `/api/auth/callback/google?${new URLSearchParams({
+        Location: `/api/auth/callback/google?${new URLSearchParams({
           code: 'mock-oauth-code',
           state: `callbackUrl=${encodeURIComponent(callbackUrl)}`,
-        })}`
-      }
+        })}`,
+      },
     });
   }
 
@@ -85,12 +91,12 @@ export class AuthMock {
     const callbackUrl = url.searchParams.get('state')?.match(/callbackUrl=([^&]+)/)?.[1];
     const decodedCallbackUrl = callbackUrl ? decodeURIComponent(callbackUrl) : '/home';
     const isSignup = decodedCallbackUrl.includes('signup=true');
-    
+
     // Get the mock scenario
     const scenario = await this.page.evaluate(() => window.mockUserScenario);
-    
+
     let redirectUrl: string;
-    
+
     switch (scenario) {
       case 'new-user':
         // New user attempting different flows
@@ -102,7 +108,7 @@ export class AuthMock {
           redirectUrl = '/auth/error?error=UserNotRegistered';
         }
         break;
-        
+
       case 'existing-user':
         // Existing user attempting different flows
         if (isSignup) {
@@ -113,13 +119,13 @@ export class AuthMock {
           redirectUrl = '/home';
         }
         break;
-        
+
       case 'new-user-success':
       case 'existing-user-success':
         // Force success for specific test scenarios
         redirectUrl = '/home';
         break;
-        
+
       default:
         // Default to sign-in success
         redirectUrl = '/home';
@@ -128,8 +134,8 @@ export class AuthMock {
     await route.fulfill({
       status: 302,
       headers: {
-        'Location': redirectUrl
-      }
+        Location: redirectUrl,
+      },
     });
   }
 }

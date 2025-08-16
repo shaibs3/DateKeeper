@@ -31,7 +31,7 @@ export async function POST(request: Request) {
               lte: tomorrowEnd,
             },
             reminders: {
-              has: "1 day before",
+              has: '1 day before',
             },
           },
         },
@@ -52,13 +52,17 @@ export async function POST(request: Request) {
               <h1>Upcoming Event Reminder</h1>
               <p>These events are happening <strong>tomorrow</strong>:</p>
               <ul>
-                ${user.dateEvents.map((event: DateEvent) => `
+                ${user.dateEvents
+                  .map(
+                    (event: DateEvent) => `
                   <li>
                     <strong>${event.name}</strong><br>
                     Date: ${new Date(event.date).toLocaleDateString()}<br>
                     ${event.notes ? `Notes: ${event.notes}` : ''}
                   </li>
-                `).join('')}
+                `
+                  )
+                  .join('')}
               </ul>
             `,
           });
@@ -74,4 +78,4 @@ export async function POST(request: Request) {
     console.error('Cron job error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-} 
+}

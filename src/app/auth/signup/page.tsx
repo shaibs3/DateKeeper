@@ -7,7 +7,7 @@ export default function SignUp() {
   const handleGoogleSignUp = async () => {
     try {
       // Pass signup flag in the callback URL
-      await signIn('google', { 
+      await signIn('google', {
         callbackUrl: '/home?signup=true',
         redirect: true,
       });
@@ -25,10 +25,7 @@ export default function SignUp() {
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             Or{' '}
-            <Link
-              href="/auth/signin"
-              className="font-medium text-blue-600 hover:text-blue-500"
-            >
+            <Link href="/auth/signin" className="font-medium text-blue-600 hover:text-blue-500">
               sign in to your account
             </Link>
           </p>
@@ -44,4 +41,4 @@ export default function SignUp() {
       </div>
     </div>
   );
-} 
+}

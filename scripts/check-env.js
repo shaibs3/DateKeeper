@@ -22,7 +22,7 @@ const requiredVars = {
     'RESEND_API_KEY',
   ],
   production: [
-    'NEXTAUTH_SECRET', 
+    'NEXTAUTH_SECRET',
     'NEXTAUTH_URL',
     'GOOGLE_CLIENT_ID',
     'GOOGLE_CLIENT_SECRET',
@@ -33,24 +33,19 @@ const requiredVars = {
   ],
 };
 
-const optionalVars = [
-  'RESEND_API_KEY',
-  'GOOGLE_ANALYTICS_ID', 
-  'SENTRY_DSN',
-  'EMAIL_FROM',
-];
+const optionalVars = ['RESEND_API_KEY', 'GOOGLE_ANALYTICS_ID', 'SENTRY_DSN', 'EMAIL_FROM'];
 
 function checkEnvironment() {
   const env = process.env.NODE_ENV || 'development';
   const appEnv = process.env.APP_ENV || 'local';
-  
+
   console.log(`🔍 Checking environment variables for: ${env} (${appEnv})`);
   console.log('================================================');
-  
+
   const requiredForEnv = requiredVars[env] || requiredVars.development;
   const missing = [];
   const present = [];
-  
+
   requiredForEnv.forEach(varName => {
     if (process.env[varName]) {
       present.push(varName);
@@ -60,10 +55,10 @@ function checkEnvironment() {
       console.log(`❌ ${varName} - MISSING`);
     }
   });
-  
+
   console.log('\n📋 Optional variables:');
   console.log('======================');
-  
+
   optionalVars.forEach(varName => {
     if (process.env[varName]) {
       console.log(`✅ ${varName}`);
@@ -71,12 +66,12 @@ function checkEnvironment() {
       console.log(`⚪ ${varName} - not set (optional)`);
     }
   });
-  
+
   console.log('\n📊 Summary:');
   console.log('===========');
   console.log(`✅ Required present: ${present.length}/${requiredForEnv.length}`);
   console.log(`❌ Required missing: ${missing.length}`);
-  
+
   if (missing.length > 0) {
     console.log('\n🚨 Missing required environment variables:');
     missing.forEach(varName => {
@@ -85,9 +80,9 @@ function checkEnvironment() {
     console.log('\n💡 Copy .env.example to .env.local and fill in the values');
     process.exit(1);
   }
-  
+
   console.log('\n🎉 All required environment variables are set!');
-  
+
   // Environment-specific warnings
   if (env === 'production') {
     if (!process.env.GOOGLE_ANALYTICS_ID) {

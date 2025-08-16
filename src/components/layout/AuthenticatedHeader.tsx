@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useRouter } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
@@ -31,19 +31,30 @@ export function AuthenticatedHeader() {
   return (
     <header className="flex items-center justify-between px-8 py-4 bg-white shadow-sm">
       <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push('/home')}>
-        <div className="text-2xl text-blue-500"><FiCalendar /></div>
-        <span className="text-xl font-bold bg-gradient-to-r from-purple-500 to-blue-500 bg-clip-text text-transparent">Datekeeper</span>
+        <div className="text-2xl text-blue-500">
+          <FiCalendar />
+        </div>
+        <span className="text-xl font-bold bg-gradient-to-r from-purple-500 to-blue-500 bg-clip-text text-transparent">
+          Datekeeper
+        </span>
       </div>
       <nav className="flex items-center gap-6">
         <div className="flex items-center gap-4">
-          <button onClick={() => router.push('/home')} className="text-blue-600 bg-blue-100 px-3 py-1 rounded-lg flex items-center gap-1 font-semibold"><FiCalendar className="text-lg" /> Dashboard</button>
-          <button onClick={() => router.push('/reminders')} className="text-gray-500 hover:text-blue-600"><FiBell className="text-xl" /></button>
+          <button
+            onClick={() => router.push('/home')}
+            className="text-blue-600 bg-blue-100 px-3 py-1 rounded-lg flex items-center gap-1 font-semibold"
+          >
+            <FiCalendar className="text-lg" /> Dashboard
+          </button>
+          <button
+            onClick={() => router.push('/reminders')}
+            className="text-gray-500 hover:text-blue-600"
+          >
+            <FiBell className="text-xl" />
+          </button>
           <div className="relative" ref={menuRef}>
             {session?.user?.image ? (
-              <button
-                className="focus:outline-none"
-                onClick={() => setMenuOpen((open) => !open)}
-              >
+              <button className="focus:outline-none" onClick={() => setMenuOpen(open => !open)}>
                 <Image
                   src={session.user.image}
                   alt="Profile"
@@ -55,7 +66,7 @@ export function AuthenticatedHeader() {
             ) : (
               <button
                 className="text-gray-500 hover:text-blue-600 focus:outline-none"
-                onClick={() => setMenuOpen((open) => !open)}
+                onClick={() => setMenuOpen(open => !open)}
               >
                 <FiSettings className="text-xl" />
               </button>
@@ -63,7 +74,10 @@ export function AuthenticatedHeader() {
             {menuOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
                 <button
-                  onClick={() => { setMenuOpen(false); router.push('/settings'); }}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    router.push('/settings');
+                  }}
                   className="w-full flex items-center gap-2 text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-t-lg"
                 >
                   <FiSettings className="text-lg" /> Settings
@@ -77,9 +91,11 @@ export function AuthenticatedHeader() {
               </div>
             )}
           </div>
-          <button className="text-gray-500 hover:text-blue-600"><FiMoon className="text-xl" /></button>
+          <button className="text-gray-500 hover:text-blue-600">
+            <FiMoon className="text-xl" />
+          </button>
         </div>
       </nav>
     </header>
   );
-} 
+}

@@ -5,20 +5,24 @@ This guide will help you set up Google OAuth for local development.
 ## 🚀 Quick Setup (5 minutes)
 
 ### Step 1: Go to Google Cloud Console
+
 1. Visit: https://console.cloud.google.com/
 2. Sign in with your Google account
 
 ### Step 2: Create a Project
+
 1. Click "Select a project" → "New Project"
 2. **Project name:** `DateKeeper Development`
 3. Click "Create"
 
 ### Step 3: Enable Google+ API
+
 1. Go to "APIs & Services" → "Library"
 2. Search for "Google+ API"
 3. Click on it and click "Enable"
 
 ### Step 4: Create OAuth Credentials
+
 1. Go to "APIs & Services" → "Credentials"
 2. Click "Create Credentials" → "OAuth 2.0 Client IDs"
 3. If prompted, configure OAuth consent screen:
@@ -31,6 +35,7 @@ This guide will help you set up Google OAuth for local development.
    - Click "Save and Continue"
 
 ### Step 5: Configure OAuth Client
+
 1. **Application type:** Web application
 2. **Name:** DateKeeper Local Development
 3. **Authorized JavaScript origins:**
@@ -44,6 +49,7 @@ This guide will help you set up Google OAuth for local development.
 5. Click "Create"
 
 ### Step 6: Copy Credentials
+
 1. Copy the **Client ID** and **Client Secret**
 2. Add them to your `.env.local` file
 
@@ -60,6 +66,7 @@ GOOGLE_CLIENT_SECRET=your-actual-client-secret-here
 ## ✅ Test Your Setup
 
 1. **Start your development server:**
+
    ```bash
    npm run dev
    ```
@@ -74,11 +81,13 @@ GOOGLE_CLIENT_SECRET=your-actual-client-secret-here
 ## 🔒 Security Notes
 
 ### For Local Development
+
 - ✅ Use localhost URLs only
 - ✅ Separate from staging/production credentials
 - ✅ Add team members as test users if needed
 
 ### Important
+
 - 🚨 **Never commit real credentials to git**
 - 🚨 **Use different credentials for each environment**
 - 🚨 **Keep your `.env.local` file private**
@@ -101,21 +110,23 @@ export const {
 } = NextAuth({
   providers: [
     // Add a development-only mock provider
-    ...(isDevelopment ? [
-      {
-        id: "dev-mock",
-        name: "Development Mock",
-        type: "credentials",
-        credentials: {},
-        authorize: async () => ({
-          id: "dev-user-123",
-          name: "Dev User",
-          email: "dev@localhost",
-          image: null,
-        }),
-      }
-    ] : []),
-    
+    ...(isDevelopment
+      ? [
+          {
+            id: 'dev-mock',
+            name: 'Development Mock',
+            type: 'credentials',
+            credentials: {},
+            authorize: async () => ({
+              id: 'dev-user-123',
+              name: 'Dev User',
+              email: 'dev@localhost',
+              image: null,
+            }),
+          },
+        ]
+      : []),
+
     GoogleProvider({
       clientId: config.auth.google.clientId,
       clientSecret: config.auth.google.clientSecret,
@@ -151,18 +162,22 @@ export const config = {
 ## 🆘 Troubleshooting
 
 ### "redirect_uri_mismatch" Error
+
 - Check that `http://localhost:3000/api/auth/callback/google` is in your authorized redirect URIs
 - Make sure there are no trailing slashes
 
 ### "invalid_client" Error
+
 - Verify your Client ID and Client Secret are correct
 - Check that the OAuth consent screen is configured
 
 ### "access_blocked" Error
+
 - Add your email to test users in OAuth consent screen
 - Make sure the app is in "Testing" mode for development
 
 ### Can't Access Consent Screen
+
 - Try incognito/private browsing mode
 - Clear browser cookies for Google
 

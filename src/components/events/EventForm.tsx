@@ -35,7 +35,7 @@ export function EventForm({ onSubmit }: EventFormProps) {
           type="text"
           id="name"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={e => setName(e.target.value)}
           className="input-field"
           placeholder="Enter name"
           required
@@ -50,7 +50,7 @@ export function EventForm({ onSubmit }: EventFormProps) {
           type="date"
           id="date"
           value={date}
-          onChange={(e) => setDate(e.target.value)}
+          onChange={e => setDate(e.target.value)}
           className="input-field"
           required
         />
@@ -63,7 +63,7 @@ export function EventForm({ onSubmit }: EventFormProps) {
         <select
           id="type"
           value={type}
-          onChange={(e) => setType(e.target.value as Event['type'])}
+          onChange={e => setType(e.target.value as Event['type'])}
           className="input-field"
         >
           <option value="BIRTHDAY">Birthday</option>
@@ -77,4 +77,4 @@ export function EventForm({ onSubmit }: EventFormProps) {
       </button>
     </form>
   );
-} 
+}

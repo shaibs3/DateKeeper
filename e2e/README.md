@@ -36,6 +36,7 @@ npx playwright test --project=chromium
 ### Test Setup Requirements
 
 1. **Environment Variables**: Make sure your `.env.local` has the required variables:
+
    ```
    NEXTAUTH_SECRET=your-secret
    NEXTAUTH_URL=http://localhost:3000
@@ -96,6 +97,7 @@ For tests that require database interactions:
 ## Debugging Tests
 
 ### Visual Debugging
+
 ```bash
 # Run with headed browser
 npm run test:e2e:headed
@@ -105,6 +107,7 @@ npm run test:e2e:debug
 ```
 
 ### Screenshots and Videos
+
 - Screenshots are automatically taken on failure
 - Videos can be enabled in `playwright.config.ts`
 - Trace files are generated for failed tests
@@ -134,6 +137,7 @@ npm run test:e2e:debug
 ## Continuous Integration
 
 When running in CI:
+
 - Tests run in headless mode
 - Retries are enabled for flaky tests
 - Parallel execution is disabled for stability

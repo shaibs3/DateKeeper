@@ -1,0 +1,62 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches: [ develop ]
+  workflow_dispatch:
+
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+    environment: staging
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run linting
+      run: npm run lint
+
+    - name: Run type checking
+      run: npm run type-check
+
+    - name: Run unit tests
+      run: npm test -- --coverage --watchAll=false
+
+    - name: Deploy to Vercel (Staging)
+      uses: amondnet/vercel-action@v25
+      with:
+        vercel-token: ${{ secrets.VERCEL_TOKEN }}
+        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+        working-directory: ./
+        scope: ${{ secrets.VERCEL_ORG_ID }}
+        alias-domains: |
+          datekeeper-staging.vercel.app
+
+    - name: Run E2E tests against staging
+      run: npm run test:e2e
+      env:
+        CI: true
+        BASE_URL: https://datekeeper-staging.vercel.app
+
+    - name: Notify deployment success
+      if: success()
+      run: |
+        echo "✅ Staging deployment successful!"
+        echo "🔗 URL: https://datekeeper-staging.vercel.app"
+
+    - name: Notify deployment failure
+      if: failure()
+      run: |
+        echo "❌ Staging deployment failed!"
+        exit 1

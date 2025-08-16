@@ -1,0 +1,61 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run full test suite
+      run: |
+        npm run lint
+        npm run type-check
+        npm test -- --coverage --watchAll=false
+
+    - name: Build application
+      run: npm run build
+
+    - name: Deploy to Vercel (Production)
+      uses: amondnet/vercel-action@v25
+      with:
+        vercel-token: ${{ secrets.VERCEL_TOKEN }}
+        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+        vercel-args: '--prod'
+        working-directory: ./
+        scope: ${{ secrets.VERCEL_ORG_ID }}
+
+    - name: Run E2E smoke tests against production
+      run: npm run test:e2e -- --grep "smoke"
+      env:
+        CI: true
+        BASE_URL: https://datekeeper.vercel.app
+
+    - name: Notify deployment success
+      if: success()
+      run: |
+        echo "🚀 Production deployment successful!"
+        echo "🔗 URL: https://datekeeper.vercel.app"
+
+    - name: Notify deployment failure
+      if: failure()
+      run: |
+        echo "❌ Production deployment failed!"
+        exit 1

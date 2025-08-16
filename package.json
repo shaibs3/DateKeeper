@@ -4,7 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:staging": "APP_ENV=staging next dev",
     "build": "prisma generate && next build",
+    "build:staging": "APP_ENV=staging npm run build",
+    "build:production": "APP_ENV=production npm run build",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
@@ -17,7 +20,14 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:debug": "playwright test --debug",
-    "type-check": "tsc --noEmit"
+    "test:e2e:staging": "BASE_URL=https://datekeeper-staging.vercel.app playwright test",
+    "test:e2e:production": "BASE_URL=https://datekeeper.vercel.app playwright test --grep \"smoke\"",
+    "db:migrate": "prisma migrate deploy",
+    "db:generate": "prisma generate",
+    "db:studio": "prisma studio",
+    "db:seed": "tsx prisma/seed.ts",
+    "type-check": "tsc --noEmit",
+    "env:check": "node scripts/check-env.js"
   },
   "dependencies": {
     "@auth/core": "^0.39.0",

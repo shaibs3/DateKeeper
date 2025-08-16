@@ -1,6 +1,7 @@
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import { prisma } from '@/lib/prisma';
+import { config, validateEnvironment } from '@/lib/config';
 
 declare module 'next-auth' {
   interface Session {
@@ -13,19 +14,8 @@ declare module 'next-auth' {
   }
 }
 
-// Verify required environment variables
-if (!process.env.GOOGLE_CLIENT_ID) {
-  throw new Error('GOOGLE_CLIENT_ID is not set');
-}
-if (!process.env.GOOGLE_CLIENT_SECRET) {
-  throw new Error('GOOGLE_CLIENT_SECRET is not set');
-}
-if (!process.env.NEXTAUTH_SECRET) {
-  throw new Error('NEXTAUTH_SECRET is not set');
-}
-if (!process.env.NEXTAUTH_URL) {
-  throw new Error('NEXTAUTH_URL is not set');
-}
+// Validate environment variables on startup
+validateEnvironment();
 
 export const {
   handlers: { GET, POST },
@@ -33,8 +23,8 @@ export const {
 } = NextAuth({
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: config.auth.google.clientId,
+      clientSecret: config.auth.google.clientSecret,
       authorization: {
         params: {
           prompt: 'select_account consent',
@@ -42,7 +32,7 @@ export const {
       },
     }),
   ],
-  debug: true,
+  debug: config.features.debugMode,
   callbacks: {
     async signIn({ user, account: _account, profile: _profile }) {
       if (!user.email) return false;
@@ -75,5 +65,5 @@ export const {
     signIn: '/auth/signin',
     error: '/auth/error',
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: config.auth.secret,
 }); 

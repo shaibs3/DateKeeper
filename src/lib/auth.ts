@@ -40,7 +40,7 @@ export const {
       const existingUser = await prisma.user.findUnique({ where: { email: user.email } });
 
       // Check the callbackUrl to determine if this is sign-up or sign-in
-      const callbackUrl = account?.callbackUrl || '';
+      const callbackUrl = typeof account?.callbackUrl === 'string' ? account.callbackUrl : '';
       const isSignUpFlow = callbackUrl.includes('signup=true');
 
       if (!existingUser) {

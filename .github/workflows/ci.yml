@@ -61,6 +61,22 @@ jobs:
   # Job 3: Build
   build:
     runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -81,7 +97,7 @@ jobs:
         NEXTAUTH_URL=http://localhost:3000
         GOOGLE_CLIENT_ID=test-client-id
         GOOGLE_CLIENT_SECRET=test-client-secret
-        DATABASE_URL=file:./test.db
+        DATABASE_URL=postgresql://test_user:test_password@localhost:5432/test_db
         RESEND_API_KEY=mock-resend-key
         CRON_SECRET=mock-cron-secret
         EOF
@@ -91,7 +107,7 @@ jobs:
         # Generate Prisma client for build
         npx prisma generate
       env:
-        DATABASE_URL: file:./test.db
+        DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
 
     - name: Build application
       run: npm run build
@@ -112,6 +128,21 @@ jobs:
       fail-fast: false
       matrix:
         browser: [chromium, firefox]
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
     
     steps:
     - name: Checkout code
@@ -136,7 +167,7 @@ jobs:
         NEXTAUTH_URL=http://localhost:3000
         GOOGLE_CLIENT_ID=mock-client-id-for-testing
         GOOGLE_CLIENT_SECRET=mock-client-secret-for-testing
-        DATABASE_URL=file:./test.db
+        DATABASE_URL=postgresql://test_user:test_password@localhost:5432/test_db
         RESEND_API_KEY=mock-resend-key
         CRON_SECRET=mock-cron-secret
         EOF
@@ -148,7 +179,7 @@ jobs:
         # Create and migrate the test database
         npx prisma db push --force-reset
       env:
-        DATABASE_URL: file:./test.db
+        DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
 
     - name: Run Playwright tests
       run: npx playwright test --project=${{ matrix.browser }}

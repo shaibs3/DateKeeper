@@ -14,7 +14,13 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
+  reporter: process.env.CI ? [['github'], ['html']] : 'html',
+  /* Global timeout for tests */
+  timeout: 30 * 1000,
+  /* Global timeout for expect() calls */
+  expect: {
+    timeout: 5 * 1000,
+  },
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
@@ -25,6 +31,15 @@ export default defineConfig({
     
     /* Take screenshot on failure */
     screenshot: 'only-on-failure',
+    
+    /* Record video for failed tests */
+    video: process.env.CI ? 'retain-on-failure' : 'off',
+    
+    /* Action timeout */
+    actionTimeout: 10 * 1000,
+    
+    /* Navigation timeout */
+    navigationTimeout: 30 * 1000,
   },
 
   /* Configure projects for major browsers */
@@ -44,15 +59,17 @@ export default defineConfig({
       use: { ...devices['Desktop Safari'] },
     },
 
-    /* Test against mobile viewports. */
-    {
-      name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
-    },
-    {
-      name: 'Mobile Safari',
-      use: { ...devices['iPhone 12'] },
-    },
+    /* Test against mobile viewports - only run in local, not CI */
+    ...(process.env.CI ? [] : [
+      {
+        name: 'Mobile Chrome',
+        use: { ...devices['Pixel 5'] },
+      },
+      {
+        name: 'Mobile Safari',
+        use: { ...devices['iPhone 12'] },
+      },
+    ]),
   ],
 
   /* Run your local dev server before starting the tests */

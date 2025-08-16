@@ -1,5 +1,12 @@
 import { test, expect } from '@playwright/test';
 
+// Type definitions for test window object
+declare global {
+  interface Window {
+    testUserScenario?: string;
+  }
+}
+
 test.describe('Authentication Flow with Mocked OAuth', () => {
   // This test suite uses route interception to mock OAuth responses
   // allowing us to test the complete registration flow in CI

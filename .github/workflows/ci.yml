@@ -82,7 +82,14 @@ jobs:
         GOOGLE_CLIENT_ID=test-client-id
         GOOGLE_CLIENT_SECRET=test-client-secret
         DATABASE_URL=file:./test.db
+        RESEND_API_KEY=mock-resend-key
+        CRON_SECRET=mock-cron-secret
         EOF
+
+    - name: Setup test database for build
+      run: |
+        # Generate Prisma client for build
+        npx prisma generate
 
     - name: Build application
       run: npm run build
@@ -125,18 +132,30 @@ jobs:
         cat > .env.local << EOF
         NEXTAUTH_SECRET=test-secret-for-ci-only-not-secure
         NEXTAUTH_URL=http://localhost:3000
-        GOOGLE_CLIENT_ID=test-client-id
-        GOOGLE_CLIENT_SECRET=test-client-secret
+        GOOGLE_CLIENT_ID=mock-client-id-for-testing
+        GOOGLE_CLIENT_SECRET=mock-client-secret-for-testing
         DATABASE_URL=file:./test.db
+        RESEND_API_KEY=mock-resend-key
+        CRON_SECRET=mock-cron-secret
         EOF
+
+    - name: Setup test database
+      run: |
+        # Generate Prisma client
+        npx prisma generate
+        # Create and migrate the test database
+        npx prisma db push --force-reset
 
     - name: Run Playwright tests
       run: npx playwright test --project=${{ matrix.browser }}
       env:
         CI: true
         # Mock OAuth credentials for testing
-        GOOGLE_CLIENT_ID=mock-client-id-for-testing
-        GOOGLE_CLIENT_SECRET=mock-client-secret-for-testing
+        GOOGLE_CLIENT_ID: mock-client-id-for-testing
+        GOOGLE_CLIENT_SECRET: mock-client-secret-for-testing
+        NEXTAUTH_SECRET: test-secret-for-ci-only-not-secure
+        NEXTAUTH_URL: http://localhost:3000
+        DATABASE_URL: file:./test.db
 
     - name: Upload Playwright Report
       uses: actions/upload-artifact@v4

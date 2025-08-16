@@ -75,15 +75,18 @@ export class AuthMock {
     const callbackUrl = url.searchParams.get('callbackUrl') || '/home';
     const isSignup = callbackUrl.includes('signup=true');
 
-    // Redirect to our mocked callback
+    // Instead of using 302 redirect, we'll simulate the OAuth flow
+    // by directly navigating to the callback URL
+    const callbackTarget = `/api/auth/callback/google?${new URLSearchParams({
+      code: 'mock-oauth-code',
+      state: `callbackUrl=${encodeURIComponent(callbackUrl)}`,
+    })}`;
+
+    // Fulfill with a simple response and let the test handle navigation
     await route.fulfill({
-      status: 302,
-      headers: {
-        Location: `/api/auth/callback/google?${new URLSearchParams({
-          code: 'mock-oauth-code',
-          state: `callbackUrl=${encodeURIComponent(callbackUrl)}`,
-        })}`,
-      },
+      status: 200,
+      contentType: 'text/html',
+      body: `<script>window.location.href = '${callbackTarget}';</script>`,
     });
   }
 
@@ -131,11 +134,11 @@ export class AuthMock {
         redirectUrl = '/home';
     }
 
+    // Use JavaScript redirect instead of HTTP 302
     await route.fulfill({
-      status: 302,
-      headers: {
-        Location: redirectUrl,
-      },
+      status: 200,
+      contentType: 'text/html',
+      body: `<script>window.location.href = '${redirectUrl}';</script>`,
     });
   }
 }

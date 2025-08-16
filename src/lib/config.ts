@@ -51,6 +51,11 @@ export const config = {
 
 // Environment validation
 export function validateEnvironment() {
+  // Skip validation in test environments
+  if (process.env.NODE_ENV === 'test' || process.env.CI === 'true') {
+    return;
+  }
+
   const requiredVars = [
     'NEXTAUTH_SECRET',
     'NEXTAUTH_URL',

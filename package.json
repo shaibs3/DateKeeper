@@ -34,7 +34,8 @@
     "db:reset": "prisma migrate reset --force",
     "db:push": "prisma db push",
     "type-check": "tsc --noEmit",
-    "env:check": "node scripts/check-env.js"
+    "env:check": "node scripts/check-env.js",
+    "oauth:setup": "./scripts/setup-oauth.sh"
   },
   "dependencies": {
     "@auth/core": "^0.39.0",

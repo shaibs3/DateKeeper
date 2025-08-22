@@ -73,10 +73,12 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  webServer: {
-    command: process.env.CI ? 'npm run dev:next' : 'npm run dev',
+  webServer: process.env.BASE_URL ? undefined : {
+    command: 'npm run dev:next',
     url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
+    reuseExistingServer: true, // Always reuse existing server to avoid conflicts
+    timeout: 60 * 1000,
+    stdout: 'pipe',
+    stderr: 'pipe',
   },
 });

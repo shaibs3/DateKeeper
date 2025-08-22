@@ -60,26 +60,26 @@ jobs:
           const currentDate = new Date().toISOString().split('T')[0];
           const currentTime = new Date().toISOString();
           
+          const issueTitle = "🔄 Production Rollback - " + currentDate;
+          const issueBody = "## Production Rollback Alert\n\n" +
+            "**Reason:** " + rollbackReason + "\n" +
+            "**Triggered by:** @" + actor + "\n" +
+            "**Time:** " + currentTime + "\n" +
+            "**Commit:** " + commitSha + "\n\n" +
+            "### Next Steps\n" +
+            "- [ ] Investigate the issue that caused the rollback\n" +
+            "- [ ] Fix the problem in a new branch\n" +
+            "- [ ] Test thoroughly in staging\n" +
+            "- [ ] Deploy the fix to production\n\n" +
+            "### Links\n" +
+            "- Production URL: https://datekeeper.vercel.app\n" +
+            "- Staging URL: https://datekeeper-staging.vercel.app";
+          
           github.rest.issues.create({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            title: `🔄 Production Rollback - ${currentDate}`,
-            body: `## Production Rollback Alert
-
-**Reason:** ${rollbackReason}
-**Triggered by:** @${actor}
-**Time:** ${currentTime}
-**Commit:** ${commitSha}
-
-### Next Steps
-- [ ] Investigate the issue that caused the rollback
-- [ ] Fix the problem in a new branch
-- [ ] Test thoroughly in staging
-- [ ] Deploy the fix to production
-
-### Links
-- Production URL: https://datekeeper.vercel.app
-- Staging URL: https://datekeeper-staging.vercel.app`,
+            title: issueTitle,
+            body: issueBody,
             labels: ['rollback', 'production', 'urgent']
           })
 

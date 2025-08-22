@@ -1,160 +1,192 @@
-# CI/CD Workflows
+# 🚀 Deployment Workflows Documentation
 
-This directory contains GitHub Actions workflows for continuous integration and deployment.
+## Overview
 
-## Workflows
+This repository uses a modern CI/CD pipeline with GitHub Actions and Vercel for deployments. Here's how the workflows are organized:
 
-### 🔄 `ci.yml` - Full CI Pipeline
+## 📋 Workflow Files
 
-**Triggers:** Push/PR to `main` or `develop` branches
+### 1. `ci.yml` - Continuous Integration
+**Triggers:** Push/PR to `main` or `develop`
 
-**Jobs:**
-1. **Lint & Type Check** - ESLint, TypeScript, Prettier
-2. **Unit Tests** - Jest tests with coverage
-3. **Build** - Next.js application build
-4. **E2E Tests** - Playwright tests across browsers
+**What it does:**
+- ✅ Code quality checks (linting, formatting, type checking)
+- ✅ Unit tests with coverage
+- ✅ Build verification
+- ✅ E2E tests with database
+- ✅ Security audit
 
-**Matrix Strategy:** Tests run on `chromium` and `firefox` in parallel
+### 2. `deploy-staging.yml` - Staging Deployment
+**Triggers:** 
+- Push to `develop` branch
+- Pull requests to `main` branch
+- Manual dispatch
 
-### 🧪 `e2e-tests.yml` - E2E Only
+**What it does:**
+- ✅ Runs quality checks
+- ✅ Deploys to staging environment
+- ✅ Assigns custom domain (`datekeeper-staging.vercel.app`)
+- ✅ Runs health checks
+- ✅ Runs E2E tests against staging
+- ✅ Comments on PRs with staging URL
 
-**Triggers:** Push/PR to `main` or `develop` branches
+### 3. `deploy-production.yml` - Production Deployment
+**Triggers:**
+- Push to `main` branch
+- Manual dispatch (with option to skip tests)
 
-**Purpose:** Standalone E2E testing workflow for faster feedback
+**Environment:** `production` (requires approval)
 
-## Environment Variables
+**What it does:**
+- ✅ Runs full test suite
+- ✅ Deploys to production environment
+- ✅ Runs health checks
+- ✅ Runs smoke tests
+- ✅ Creates GitHub release
+- ✅ Emergency deployment option (skip tests)
 
-### Required for CI
+### 4. `rollback.yml` - Emergency Rollback
+**Triggers:** Manual dispatch only
 
-The workflows automatically create test environment variables:
+**What it does:**
+- 🔄 Rolls back to previous production deployment
+- ✅ Verifies rollback with health check
+- 📝 Creates issue to track follow-up
+- 🚨 Emergency response workflow
 
-```bash
-NEXTAUTH_SECRET=test-secret-for-ci-only-not-secure
-NEXTAUTH_URL=http://localhost:3000
-GOOGLE_CLIENT_ID=test-client-id
-GOOGLE_CLIENT_SECRET=test-client-secret
-DATABASE_URL=file:./test.db
+### 5. `e2e-tests.yml` - Standalone E2E Tests
+**Triggers:** Push/PR to `main` or `develop`
+
+**What it does:**
+- 🧪 Runs full E2E test suite
+- 📊 Uploads test reports on failure
+- 🔍 Independent test verification
+
+## 🔐 Required Secrets
+
+### Repository Secrets
+Add these in **Settings → Secrets and variables → Actions**:
+
+```
+VERCEL_TOKEN          # Vercel deployment token
+VERCEL_ORG_ID         # Your Vercel organization ID
+VERCEL_PROJECT_ID     # Your Vercel project ID
 ```
 
-### Production Secrets
+### Getting Vercel Secrets
 
-For production deployments, add these secrets in GitHub:
-- Repository Settings → Secrets and Variables → Actions
+1. **VERCEL_TOKEN**:
+   - Go to [Vercel Dashboard → Settings → Tokens](https://vercel.com/account/tokens)
+   - Create token named "GitHub Actions"
 
-**Required Secrets:**
-- `NEXTAUTH_SECRET` - Secure random string
-- `GOOGLE_CLIENT_ID` - Your Google OAuth client ID
-- `GOOGLE_CLIENT_SECRET` - Your Google OAuth client secret
-- `DATABASE_URL` - Your production database URL
+2. **VERCEL_ORG_ID**:
+   - Go to [Vercel Dashboard → Settings → General](https://vercel.com/account)
+   - Copy "Team ID"
 
-## Test Optimization
+3. **VERCEL_PROJECT_ID**:
+   - Go to your project → Settings → General
+   - Copy "Project ID"
 
-### Browser Matrix
+## 🌍 GitHub Environments
 
-**CI Environment:**
-- Chromium ✅
-- Firefox ✅  
-- WebKit ✅ (Safari)
+### Staging Environment
+- **Name:** `staging`
+- **URL:** `https://datekeeper-staging.vercel.app`
+- **Protection:** None (auto-deploy)
 
-**Local Development:**
-- All desktop browsers ✅
-- Mobile Chrome ✅
-- Mobile Safari ✅
+### Production Environment
+- **Name:** `production`
+- **URL:** `https://datekeeper.vercel.app`
+- **Protection:** 
+  - ✅ Required reviewers
+  - ✅ Wait timer (optional)
+  - ✅ Deployment branches: `main` only
 
-### Performance Optimizations
+## 🔄 Deployment Flow
 
-- **Parallel Jobs** - Linting, building, and testing run concurrently
-- **Caching** - Node modules and build outputs cached
-- **Selective Browser Testing** - Mobile tests only run locally
-- **Retry Logic** - Failed tests retry 2x in CI
-- **Artifacts** - Test reports uploaded on failure
+### Normal Development Flow
 
-## Artifacts
+1. **Feature Development**
+   ```
+   develop branch → Push → Staging Deployment
+   ```
 
-When tests fail, the following artifacts are uploaded:
+2. **Pull Request**
+   ```
+   PR to main → CI checks + Staging deployment → Review
+   ```
 
-- **Playwright Report** - HTML test report with traces
-- **Test Results** - Screenshots and videos
-- **Coverage Reports** - Code coverage data
+3. **Production Release**
+   ```
+   Merge to main → Production deployment (requires approval)
+   ```
 
-**Retention:** 30 days
+### Emergency Deployment
 
-## Monitoring
-
-### Status Badges
-
-Add to your README.md:
-
-```markdown
-![CI](https://github.com/yourusername/DateKeeper/workflows/CI/badge.svg)
-![E2E Tests](https://github.com/yourusername/DateKeeper/workflows/E2E%20Tests/badge.svg)
+```
+Manual dispatch → Production deployment (skip tests) → Health check
 ```
 
-### Notifications
+### Emergency Rollback
 
-Configure notifications in GitHub:
-- Repository Settings → Notifications
-- Set up Slack/Discord webhooks for failures
-
-## Local Testing
-
-Before pushing, run the same checks locally:
-
-```bash
-# Full CI simulation
-npm run lint
-npm run type-check
-npm run format:check
-npm test -- --coverage --watchAll=false
-npm run build
-npm run test:e2e
-
-# Quick checks
-npm run test:e2e -- --project=chromium
+```
+Manual dispatch → Rollback → Health check → Issue creation
 ```
 
-## Troubleshooting
+## 📊 Deployment URLs
+
+- **Production:** https://datekeeper.vercel.app
+- **Staging:** https://datekeeper-staging.vercel.app
+
+## 🛠️ Manual Actions
+
+### Deploy to Staging
+1. Go to **Actions** tab
+2. Select "Deploy to Staging"
+3. Click "Run workflow"
+
+### Deploy to Production
+1. Go to **Actions** tab
+2. Select "Deploy to Production"
+3. Click "Run workflow"
+4. Approve the deployment (if protection rules are enabled)
+
+### Emergency Rollback
+1. Go to **Actions** tab
+2. Select "Rollback Production"
+3. Click "Run workflow"
+4. Enter rollback reason
+5. Approve the rollback
+
+## 🔍 Monitoring
+
+- **GitHub Actions:** Monitor workflow runs in the Actions tab
+- **Vercel Dashboard:** Monitor deployments and analytics
+- **GitHub Releases:** Track production deployments
+- **Issues:** Rollback tracking and incident management
+
+## 🚨 Troubleshooting
 
 ### Common Issues
 
-1. **E2E Test Timeouts**
-   - Increase timeout in `playwright.config.ts`
-   - Check if dev server starts properly
+1. **Deployment fails:**
+   - Check logs in Actions tab
+   - Verify secrets are correct
+   - Check Vercel project settings
 
-2. **Build Failures**
-   - Verify all environment variables are set
-   - Check for TypeScript errors
+2. **Health checks fail:**
+   - Verify API endpoints are working
+   - Check environment variables in Vercel
+   - Review application logs
 
-3. **Flaky Tests**
-   - Review test selectors for specificity
-   - Add proper wait conditions
-   - Use data-testid attributes
+3. **E2E tests fail:**
+   - Check staging environment
+   - Review test configuration
+   - Verify test data setup
 
-### Debug Failed Tests
+### Getting Help
 
-1. Download artifacts from failed workflow
-2. Open Playwright HTML report
-3. Review traces and screenshots
-4. Fix issues and push again
-
-## Adding New Workflows
-
-Create new `.yml` files in this directory following this pattern:
-
-```yaml
-name: Workflow Name
-on: [trigger]
-jobs:
-  job-name:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      # ... your steps
-```
-
-## Security Notes
-
-- Never commit real secrets to workflows
-- Use GitHub Secrets for sensitive data
-- Test environment uses dummy credentials
-- Production secrets managed separately
+1. Check workflow logs in GitHub Actions
+2. Review Vercel deployment logs
+3. Check this documentation
+4. Create an issue with the error details

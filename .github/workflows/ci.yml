@@ -253,31 +253,30 @@ jobs:
             const highCount = auditData.metadata?.vulnerabilities?.high || 0;
             
             if (criticalCount > 0) {
-              github.rest.issues.create({
+              const issueTitle = "🚨 Critical Security Vulnerabilities Found - " + criticalCount + " critical, " + highCount + " high";
+              const issueBody = "## Security Alert\n\n" +
+                "**Critical vulnerabilities:** " + criticalCount + "\n" +
+                "**High vulnerabilities:** " + highCount + "\n" +
+                "**Workflow:** " + context.workflow + "\n" +
+                "**Commit:** " + context.sha + "\n\n" +
+                "### Action Required\n" +
+                "- [ ] Review the security audit results\n" +
+                "- [ ] Run `npm audit fix` to fix automatically fixable issues\n" +
+                "- [ ] Manually update packages with breaking changes\n" +
+                "- [ ] Test thoroughly after updates\n\n" +
+                "### Commands to run:\n" +
+                "```bash\n" +
+                "npm audit\n" +
+                "npm audit fix\n" +
+                "npm audit fix --force  # if needed for breaking changes\n" +
+                "```\n\n" +
+                "**Note:** This issue was created automatically by the CI pipeline.";
+              
+              await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                title: `🚨 Critical Security Vulnerabilities Found - ${criticalCount} critical, ${highCount} high`,
-                body: `## Security Alert
-                
-**Critical vulnerabilities:** ${criticalCount}
-**High vulnerabilities:** ${highCount}
-**Workflow:** ${context.workflow}
-**Commit:** ${context.sha}
-
-### Action Required
-- [ ] Review the security audit results
-- [ ] Run \`npm audit fix\` to fix automatically fixable issues
-- [ ] Manually update packages with breaking changes
-- [ ] Test thoroughly after updates
-
-### Commands to run:
-\`\`\`bash
-npm audit
-npm audit fix
-npm audit fix --force  # if needed for breaking changes
-\`\`\`
-
-**Note:** This issue was created automatically by the CI pipeline.`,
+                title: issueTitle,
+                body: issueBody,
                 labels: ['security', 'critical', 'vulnerability']
               });
             }

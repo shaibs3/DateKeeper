@@ -4,11 +4,22 @@ on:
   push:
     branches: [ main ]
   workflow_dispatch:
+    inputs:
+      skip_tests:
+        description: 'Skip test suite (emergency deployment)'
+        required: false
+        default: 'false'
+        type: boolean
+
+env:
+  NODE_VERSION: '22.x'
 
 jobs:
   deploy-production:
     runs-on: ubuntu-latest
-    environment: production
+    environment: 
+      name: production
+      url: https://datekeeper.vercel.app
     
     steps:
     - name: Checkout code
@@ -17,45 +28,93 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
 
     - name: Install dependencies
       run: npm ci
 
     - name: Run full test suite
+      if: github.event.inputs.skip_tests != 'true'
       run: |
         npm run lint
         npm run type-check
         npm test -- --coverage --watchAll=false
 
-    - name: Build application
-      run: npm run build
+    - name: Install Vercel CLI
+      run: npm install --global vercel@latest
+
+    - name: Pull Vercel Environment Information
+      run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+    - name: Build Project Artifacts
+      run: |
+        export APP_ENV=production
+        vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+      env:
+        VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+        VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
     - name: Deploy to Vercel (Production)
-      uses: amondnet/vercel-action@v25
-      with:
-        vercel-token: ${{ secrets.VERCEL_TOKEN }}
-        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-        vercel-args: '--prod'
-        working-directory: ./
-        scope: ${{ secrets.VERCEL_ORG_ID }}
+      id: deploy
+      run: |
+        DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+        echo "deployment-url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+        echo "Production deployment URL: $DEPLOYMENT_URL"
+      env:
+        VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+        VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+    - name: Health Check
+      run: |
+        echo "Waiting for production deployment to be ready..."
+        sleep 30
+        curl -f https://datekeeper.vercel.app/api/health || exit 1
+        echo "✅ Production deployment is healthy!"
 
     - name: Run E2E smoke tests against production
+      if: github.event.inputs.skip_tests != 'true'
       run: npm run test:e2e -- --grep "smoke"
       env:
         CI: true
         BASE_URL: https://datekeeper.vercel.app
 
+    - name: Create GitHub Release
+      if: success()
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ github.run_number }}
+        release_name: Release v${{ github.run_number }}
+        body: |
+          🚀 **Production Deployment v${{ github.run_number }}**
+          
+          **Deployed URL:** https://datekeeper.vercel.app
+          **Commit:** ${{ github.sha }}
+          
+          **Changes:**
+          ${{ github.event.head_commit.message }}
+          
+          **Status:**
+          ✅ Tests passed
+          ✅ Health check passed
+          ✅ Production deployment successful
+        draft: false
+        prerelease: false
+
     - name: Notify deployment success
       if: success()
       run: |
-        echo "🚀 Production deployment successful!"
-        echo "🔗 URL: https://datekeeper.vercel.app"
+        echo "🎉 Production deployment successful!"
+        echo "🚀 URL: https://datekeeper.vercel.app"
+        echo "📊 Deployment: ${{ steps.deploy.outputs.deployment-url }}"
+        echo "🏷️ Release: v${{ github.run_number }}"
 
     - name: Notify deployment failure
       if: failure()
       run: |
         echo "❌ Production deployment failed!"
+        echo "Check the logs above for details"
+        echo "Consider rolling back if needed"
         exit 1

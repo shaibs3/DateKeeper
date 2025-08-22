@@ -1,0 +1,84 @@
+name: Rollback Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      rollback_reason:
+        description: 'Reason for rollback'
+        required: true
+        type: string
+      
+env:
+  NODE_VERSION: '22.x'
+
+jobs:
+  rollback-production:
+    name: Rollback Production Deployment
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://datekeeper.vercel.app
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Vercel CLI
+      run: npm install --global vercel@latest
+
+    - name: List recent deployments
+      run: |
+        echo "📋 Recent deployments:"
+        vercel ls --token=${{ secrets.VERCEL_TOKEN }} --scope=${{ secrets.VERCEL_ORG_ID }}
+      env:
+        VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+        VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+    - name: Rollback to previous deployment
+      run: |
+        echo "🔄 Rolling back production deployment..."
+        echo "Reason: ${{ github.event.inputs.rollback_reason }}"
+        vercel rollback --token=${{ secrets.VERCEL_TOKEN }} --scope=${{ secrets.VERCEL_ORG_ID }}
+      env:
+        VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+        VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+    - name: Verify rollback
+      run: |
+        echo "Waiting for rollback to complete..."
+        sleep 30
+        curl -f https://datekeeper.vercel.app/api/health || exit 1
+        echo "✅ Rollback completed successfully!"
+
+    - name: Create rollback issue
+      uses: actions/github-script@v7
+      with:
+        script: |
+          github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: `🔄 Production Rollback - ${new Date().toISOString().split('T')[0]}`,
+            body: `## Production Rollback Alert
+
+**Reason:** ${{ github.event.inputs.rollback_reason }}
+**Triggered by:** @${{ github.actor }}
+**Time:** ${new Date().toISOString()}
+**Commit:** ${{ github.sha }}
+
+### Next Steps
+- [ ] Investigate the issue that caused the rollback
+- [ ] Fix the problem in a new branch
+- [ ] Test thoroughly in staging
+- [ ] Deploy the fix to production
+
+### Links
+- Production URL: https://datekeeper.vercel.app
+- Staging URL: https://datekeeper-staging.vercel.app`,
+            labels: ['rollback', 'production', 'urgent']
+          })
+
+    - name: Notify rollback completion
+      run: |
+        echo "🎯 Production rollback completed!"
+        echo "📋 Issue created to track follow-up actions"
+        echo "🔗 Production URL: https://datekeeper.vercel.app"

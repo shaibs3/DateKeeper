@@ -11,7 +11,6 @@ Never miss an important date again! DateKeeper helps you remember birthdays, ann
 - 📱 **Responsive Design** - Works on desktop and mobile
 - 🧪 **Comprehensive Testing** - Unit and E2E tests with Playwright
 
-
 ## 🚀 Quick Start
 
 ### Prerequisites

@@ -2,9 +2,10 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, test ]
   pull_request:
     branches: [ main, develop ]
+    types: [ opened, synchronize, reopened ]
 
 env:
   NODE_VERSION: '22.x'

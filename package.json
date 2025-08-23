@@ -18,6 +18,7 @@
     "format:check": "prettier --check \"src/**/*.{ts,tsx,css,json}\" \"e2e/**/*.{ts,tsx,js,json}\" \"*.{js,json,md}\"",
     "pre-commit": "./scripts/pre-commit-check.sh",
     "setup:prod-db": "./scripts/setup-production-db.sh",
+    "setup:neon": "./scripts/neon-setup-helper.sh",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",

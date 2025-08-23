@@ -120,12 +120,12 @@ jobs:
 
     - name: Create GitHub Release
       if: success()
-      uses: actions/create-release@v1
+      uses: softprops/action-gh-release@v2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: v${{ github.run_number }}
-        release_name: Release v${{ github.run_number }}
+        name: Release v${{ github.run_number }}
         body: |
           🚀 **Production Deployment v${{ github.run_number }}**
           
@@ -137,7 +137,6 @@ jobs:
           
           **Status:**
           ✅ Tests passed
-          ✅ Health check passed
           ✅ Production deployment successful
         draft: false
         prerelease: false

@@ -5,7 +5,7 @@ on:
     branches: [ main, develop, test ]
   pull_request:
     branches: [ main, develop ]
-    # Note: test branch excluded from PR trigger to avoid duplicate runs
+    types: [ opened, synchronize, reopened ]
 
 env:
   NODE_VERSION: '22.x'

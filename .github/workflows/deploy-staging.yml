@@ -1,12 +1,10 @@
 name: Deploy to Staging
 
 on:
-  # Trigger after CI pipeline completes successfully
-  workflow_run:
-    workflows: ["CI Pipeline"]
-    types:
-      - completed
-    # No branch restriction - allows staging deployment from any branch
+  # Trigger only on pull requests for staging preview
+  pull_request:
+    branches: [ main, develop ]
+    types: [ opened, synchronize, reopened ]
   # Allow manual deployment
   workflow_dispatch:
 
@@ -19,12 +17,7 @@ env:
 jobs:
   deploy-staging:
     runs-on: ubuntu-latest
-    # Deploy to staging when:
-    # 1. CI passes on any branch (for testing)
-    # 2. Manual trigger
-    if: |
-      (github.event.workflow_run.conclusion == 'success') ||
-      github.event_name == 'workflow_dispatch'
+    # Deploy to staging for PR preview and testing
     environment: 
       name: staging
       url: https://datekeeper-staging.vercel.app

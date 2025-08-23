@@ -51,8 +51,32 @@ jobs:
     - name: Install Vercel CLI
       run: npm install --global vercel@latest
 
+    - name: Debug Environment Access
+      run: |
+        echo "🔍 GitHub Environment Debug:"
+        echo "Current environment: ${{ github.environment }}"
+        echo "Repository: ${{ github.repository }}"
+        echo "Event: ${{ github.event_name }}"
+        echo "Ref: ${{ github.ref }}"
+
     - name: Pull Vercel Environment Information
-      run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      run: |
+        echo "🔍 Vercel Configuration Debug Info:"
+        echo "Environment: production"
+        echo "VERCEL_ORG_ID is set: $([[ -n "$VERCEL_ORG_ID" ]] && echo "✅ Yes (${#VERCEL_ORG_ID} chars)" || echo "❌ No")"
+        echo "VERCEL_PROJECT_ID is set: $([[ -n "$VERCEL_PROJECT_ID" ]] && echo "✅ Yes (${#VERCEL_PROJECT_ID} chars)" || echo "❌ No")"
+        echo "VERCEL_TOKEN is set: $([[ -n "$VERCEL_TOKEN" ]] && echo "✅ Yes (${#VERCEL_TOKEN} chars)" || echo "❌ No")"
+        echo ""
+        echo "🔧 If secrets are missing, check:"
+        echo "1. GitHub → Settings → Environments → production → Environment secrets"
+        echo "2. Ensure no protection rules are blocking the deployment"
+        echo "3. Verify secret names match exactly: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID"
+        echo "🚀 Pulling Vercel environment information..."
+        vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      env:
+        VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+        VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
     - name: Build Project Artifacts
       run: |

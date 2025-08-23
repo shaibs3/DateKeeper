@@ -6,7 +6,7 @@ on:
     workflows: ["CI Pipeline"]
     types:
       - completed
-    branches: [ develop, main ]
+    # No branch restriction - allows staging deployment from any branch
   # Allow manual deployment
   workflow_dispatch:
 

@@ -19,6 +19,7 @@
     "pre-commit": "./scripts/pre-commit-check.sh",
     "setup:prod-db": "./scripts/setup-production-db.sh",
     "setup:neon": "./scripts/neon-setup-helper.sh",
+    "setup:vercel-env": "./scripts/vercel-env-setup.sh",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",

@@ -18,6 +18,8 @@ on:
 
 env:
   NODE_VERSION: '22.x'
+  VERCEL_ORG_ID: 'team_shaibs3_8f8f8f8f8f8f8f8f'  # Replace with your actual org ID
+  VERCEL_PROJECT_ID: 'datekeeper'  # Replace with your actual project ID
 
 jobs:
   deploy-production:
@@ -63,14 +65,14 @@ jobs:
       run: |
         echo "🔍 Vercel Configuration Debug Info:"
         echo "Environment: production"
-        echo "VERCEL_ORG_ID is set: $([[ -n "$VERCEL_ORG_ID" ]] && echo "✅ Yes (${#VERCEL_ORG_ID} chars) - ${VERCEL_ORG_ID:0:8}..." || echo "❌ No")"
-        echo "VERCEL_PROJECT_ID is set: $([[ -n "$VERCEL_PROJECT_ID" ]] && echo "✅ Yes (${#VERCEL_PROJECT_ID} chars) - ${VERCEL_PROJECT_ID:0:8}..." || echo "❌ No")"
+        echo "VERCEL_ORG_ID: $VERCEL_ORG_ID"
+        echo "VERCEL_PROJECT_ID: $VERCEL_PROJECT_ID"
         echo "VERCEL_TOKEN is set: $([[ -n "$VERCEL_TOKEN" ]] && echo "✅ Yes (${#VERCEL_TOKEN} chars) - ${VERCEL_TOKEN:0:8}..." || echo "❌ No")"
         echo ""
-        echo "🔧 If secrets are missing, check:"
-        echo "1. GitHub → Settings → Environments → production → Environment secrets"
-        echo "2. Ensure no protection rules are blocking the deployment"
-        echo "3. Verify secret names match exactly: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID"
+        echo "🔧 Configuration:"
+        echo "1. VERCEL_ORG_ID and VERCEL_PROJECT_ID are set as environment variables in workflow"
+        echo "2. VERCEL_TOKEN should be in GitHub → Settings → Environments → production → Environment secrets"
+        echo "3. Update the ORG_ID and PROJECT_ID values in this workflow file"
         echo ""
         echo "📋 To get correct values locally:"
         echo "   vercel link  # Links project and shows IDs"
@@ -79,17 +81,12 @@ jobs:
         echo "🚀 Pulling Vercel environment information..."
         vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       env:
-        VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-        VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
     - name: Build Project Artifacts
       run: |
         export APP_ENV=production
         vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-      env:
-        VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-        VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
     - name: Deploy to Vercel (Production)
       id: deploy
@@ -97,9 +94,6 @@ jobs:
         DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
         echo "deployment-url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
         echo "Production deployment URL: $DEPLOYMENT_URL"
-      env:
-        VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-        VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
     - name: Health Check
       run: |

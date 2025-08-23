@@ -12,6 +12,8 @@ on:
 
 env:
   NODE_VERSION: '22.x'
+  VERCEL_ORG_ID: 'team_shaibs3_8f8f8f8f8f8f8f8f'  # Replace with your actual org ID
+  VERCEL_PROJECT_ID: 'datekeeper'  # Replace with your actual project ID
 
 jobs:
   deploy-staging:
@@ -57,23 +59,18 @@ jobs:
       run: |
         echo "🔍 Vercel Configuration Debug Info:"
         echo "Environment: staging"
-        echo "VERCEL_ORG_ID is set: $([[ -n "$VERCEL_ORG_ID" ]] && echo "✅ Yes (${#VERCEL_ORG_ID} chars) - ${VERCEL_ORG_ID:0:8}..." || echo "❌ No")"
-        echo "VERCEL_PROJECT_ID is set: $([[ -n "$VERCEL_PROJECT_ID" ]] && echo "✅ Yes (${#VERCEL_PROJECT_ID} chars) - ${VERCEL_PROJECT_ID:0:8}..." || echo "❌ No")"
+        echo "VERCEL_ORG_ID: $VERCEL_ORG_ID"
+        echo "VERCEL_PROJECT_ID: $VERCEL_PROJECT_ID"
         echo "VERCEL_TOKEN is set: $([[ -n "$VERCEL_TOKEN" ]] && echo "✅ Yes (${#VERCEL_TOKEN} chars) - ${VERCEL_TOKEN:0:8}..." || echo "❌ No")"
         echo "🚀 Pulling Vercel environment information..."
         vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
       env:
-        VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-        VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
     - name: Build Project Artifacts
       run: |
         export APP_ENV=staging
         vercel build --token=${{ secrets.VERCEL_TOKEN }}
-      env:
-        VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-        VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
     - name: Deploy to Vercel (Staging)
       id: deploy
@@ -81,16 +78,10 @@ jobs:
         DEPLOYMENT_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
         echo "deployment-url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
         echo "Staging deployment URL: $DEPLOYMENT_URL"
-      env:
-        VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-        VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
     - name: Assign Custom Domain
       run: |
         vercel alias ${{ steps.deploy.outputs.deployment-url }} datekeeper-staging.vercel.app --token=${{ secrets.VERCEL_TOKEN }}
-      env:
-        VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-        VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
     - name: Health Check
       run: |

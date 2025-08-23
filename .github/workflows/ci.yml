@@ -4,7 +4,8 @@ on:
   push:
     branches: [ main, develop, test ]
   pull_request:
-    branches: [ main, develop, test ]
+    branches: [ main, develop ]
+    # Note: test branch excluded from PR trigger to avoid duplicate runs
 
 env:
   NODE_VERSION: '22.x'

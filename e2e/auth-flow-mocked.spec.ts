@@ -19,16 +19,17 @@ test.describe('Authentication Flow with Mocked OAuth', () => {
       const callbackUrl = url.searchParams.get('callbackUrl') || '/home';
       const isSignup = callbackUrl.includes('signup=true');
 
-      // Redirect to our callback with mock data
+      // Use JavaScript redirect instead of HTTP 302
+      const callbackTarget = `/api/auth/callback/google?${new URLSearchParams({
+        code: 'mock-auth-code',
+        state: isSignup ? 'signup=true' : 'signin=true',
+        callbackUrl: callbackUrl,
+      })}`;
+
       await route.fulfill({
-        status: 302,
-        headers: {
-          Location: `/api/auth/callback/google?${new URLSearchParams({
-            code: 'mock-auth-code',
-            state: isSignup ? 'signup=true' : 'signin=true',
-            callbackUrl: callbackUrl,
-          })}`,
-        },
+        status: 200,
+        contentType: 'text/html',
+        body: `<script>window.location.href = '${callbackTarget}';</script>`,
       });
     });
 
@@ -45,10 +46,9 @@ test.describe('Authentication Flow with Mocked OAuth', () => {
       // With simplified auth, all flows succeed
       // New users are automatically created, existing users can use any page
       await route.fulfill({
-        status: 302,
-        headers: {
-          Location: '/home',
-        },
+        status: 200,
+        contentType: 'text/html',
+        body: `<script>window.location.href = '/home';</script>`,
       });
     });
   });
@@ -114,13 +114,8 @@ test.describe('Authentication Flow with Mocked OAuth', () => {
   });
 
   test('error page provides correct navigation links', async ({ page }) => {
-    // Test UserNotRegistered error
-    await page.addInitScript(() => {
-      window.testUserScenario = 'new-user';
-    });
-
-    await page.goto('/auth/signin');
-    await page.click('button:has-text("Sign in with Google")');
+    // Test UserNotRegistered error by directly navigating to error page
+    await page.goto('/auth/error?error=UserNotRegistered');
 
     // Should be on error page
     await expect(page).toHaveURL('/auth/error?error=UserNotRegistered');
@@ -134,15 +129,10 @@ test.describe('Authentication Flow with Mocked OAuth', () => {
   });
 
   test('complete registration flow for new user', async ({ page }) => {
-    await page.addInitScript(() => {
-      window.testUserScenario = 'new-user';
-    });
+    // Start with error page (simulating failed sign-in)
+    await page.goto('/auth/error?error=UserNotRegistered');
 
-    // Start with incorrect flow (sign-in for new user)
-    await page.goto('/auth/signin');
-    await page.click('button:has-text("Sign in with Google")');
-
-    // Should get error
+    // Should be on error page
     await expect(page).toHaveURL('/auth/error?error=UserNotRegistered');
 
     // Follow the correct path

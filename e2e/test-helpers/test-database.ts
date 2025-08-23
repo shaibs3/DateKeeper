@@ -53,11 +53,13 @@ export class TestDatabase {
   }
 
   /**
-   * Create a test user
+   * Create a test user (or update if exists)
    */
   async createTestUser(email: string, name: string = 'Test User') {
-    return await this.prisma.user.create({
-      data: {
+    return await this.prisma.user.upsert({
+      where: { email },
+      update: { name },
+      create: {
         email,
         name,
         image: null,

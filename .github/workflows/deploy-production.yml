@@ -83,10 +83,19 @@ jobs:
       env:
         VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
+    - name: Run Database Migrations
+      run: |
+        echo "🗄️ Running database migrations..."
+        npx prisma migrate deploy
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
     - name: Build Project Artifacts
       run: |
         export APP_ENV=production
         vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
     - name: Deploy to Vercel (Production)
       id: deploy

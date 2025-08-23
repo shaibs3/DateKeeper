@@ -29,6 +29,9 @@ jobs:
     environment: 
       name: production
       url: https://datekeeper.vercel.app
+    permissions:
+      contents: write  # Required for creating releases
+      actions: read    # Required for workflow_run trigger
     
     steps:
     - name: Checkout code

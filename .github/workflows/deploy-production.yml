@@ -18,8 +18,8 @@ on:
 
 env:
   NODE_VERSION: '22.x'
-  VERCEL_ORG_ID: 'team_shaibs3_8f8f8f8f8f8f8f8f'  # Replace with your actual org ID
-  VERCEL_PROJECT_ID: 'datekeeper'  # Replace with your actual project ID
+  VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
 
 jobs:
   deploy-production:
@@ -70,9 +70,9 @@ jobs:
         echo "VERCEL_TOKEN is set: $([[ -n "$VERCEL_TOKEN" ]] && echo "✅ Yes (${#VERCEL_TOKEN} chars) - ${VERCEL_TOKEN:0:8}..." || echo "❌ No")"
         echo ""
         echo "🔧 Configuration:"
-        echo "1. VERCEL_ORG_ID and VERCEL_PROJECT_ID are set as environment variables in workflow"
+        echo "1. VERCEL_ORG_ID and VERCEL_PROJECT_ID should be in GitHub → Settings → Environments → production → Environment variables"
         echo "2. VERCEL_TOKEN should be in GitHub → Settings → Environments → production → Environment secrets"
-        echo "3. Update the ORG_ID and PROJECT_ID values in this workflow file"
+        echo "3. Variables are public, secrets are private - perfect for this use case"
         echo ""
         echo "📋 To get correct values locally:"
         echo "   vercel link  # Links project and shows IDs"

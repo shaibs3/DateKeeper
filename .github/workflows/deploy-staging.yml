@@ -12,8 +12,8 @@ on:
 
 env:
   NODE_VERSION: '22.x'
-  VERCEL_ORG_ID: 'team_shaibs3_8f8f8f8f8f8f8f8f'  # Replace with your actual org ID
-  VERCEL_PROJECT_ID: 'datekeeper'  # Replace with your actual project ID
+  VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
 
 jobs:
   deploy-staging:

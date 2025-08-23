@@ -19,13 +19,14 @@ env:
 jobs:
   deploy-staging:
     runs-on: ubuntu-latest
-    # Only run if CI pipeline completed successfully, or manual trigger
-    # For develop branch: always deploy after CI success
-    # For main branch: only deploy if it's a PR (not direct push)
+    # Deploy to staging when:
+    # 1. CI passes on develop branch (ongoing development)
+    # 2. CI passes on any PR (feature preview)
+    # 3. Manual trigger
     if: |
       (github.event.workflow_run.conclusion == 'success' && 
        (github.event.workflow_run.head_branch == 'develop' || 
-        (github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.event == 'pull_request'))) ||
+        github.event.workflow_run.event == 'pull_request')) ||
       github.event_name == 'workflow_dispatch'
     environment: 
       name: staging

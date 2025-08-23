@@ -6,12 +6,12 @@ This guide explains how to test the user registration flow with E2E tests, both 
 
 The registration flow tests verify that:
 
-1. **New users cannot sign in** → Get "Account Not Found" error
-2. **Existing users cannot sign up** → Get "Account Already Exists" error
+1. **New users can sign in** → Account automatically created + signed in (simplified auth)
+2. **Existing users can sign up** → Signed in successfully (simplified auth)
 3. **New users can sign up successfully** → Account created + signed in
 4. **Existing users can sign in successfully** → Authenticated
-5. **Error pages provide correct navigation** → Users guided to correct flow
-6. **OAuth parameters are correct** → Signup flow includes proper flags
+5. **Error pages work correctly** → Error pages display and navigate properly (edge cases)
+6. **OAuth parameters are handled** → Both signup and signin flows work seamlessly
 
 ## 🧪 Test Files
 

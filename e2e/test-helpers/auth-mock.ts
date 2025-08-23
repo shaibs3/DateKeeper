@@ -124,24 +124,14 @@ export class AuthMock {
     switch (scenario) {
       case 'new-user':
         // New user attempting different flows
-        if (isSignup) {
-          // New user signing up - success
-          redirectUrl = '/home';
-        } else {
-          // New user trying to sign in - fail
-          redirectUrl = '/auth/error?error=UserNotRegistered';
-        }
+        // With simplified auth, both signup and signin work for new users
+        redirectUrl = '/home';
         break;
 
       case 'existing-user':
         // Existing user attempting different flows
-        if (isSignup) {
-          // Existing user trying to sign up - fail
-          redirectUrl = '/auth/error?error=UserAlreadyExists';
-        } else {
-          // Existing user signing in - success
-          redirectUrl = '/home';
-        }
+        // With simplified auth, both signup and signin work for existing users
+        redirectUrl = '/home';
         break;
 
       case 'new-user-success':

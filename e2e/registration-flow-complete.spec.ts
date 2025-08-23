@@ -14,7 +14,7 @@ test.describe('Complete Registration Flow Tests', () => {
   });
 
   test.describe('New User Scenarios', () => {
-    test('new user attempting sign-in gets redirected to error page', async ({ page }) => {
+    test('new user attempting sign-in succeeds (auto-registration)', async ({ page }) => {
       await authMock.setMockUserScenario('new-user', 'newuser@example.com');
 
       // Go to sign-in page
@@ -24,14 +24,8 @@ test.describe('Complete Registration Flow Tests', () => {
       // Attempt to sign in
       await page.click('button:has-text("Sign in with Google")');
 
-      // Should be redirected to error page
-      await expect(page).toHaveURL('/auth/error?error=UserNotRegistered');
-      await expect(page.locator('h2')).toContainText('Account Not Found');
-      await expect(page.locator('text=No account found with this email address')).toBeVisible();
-
-      // Verify error page has correct action buttons
-      await expect(page.locator('a:has-text("Sign Up")')).toBeVisible();
-      await expect(page.locator('a:has-text("Back to Sign In")')).toBeVisible();
+      // With simplified auth, new users are automatically created and signed in
+      await expect(page).toHaveURL('/home');
     });
 
     test('new user can successfully sign up', async ({ page }) => {
@@ -69,7 +63,7 @@ test.describe('Complete Registration Flow Tests', () => {
   });
 
   test.describe('Existing User Scenarios', () => {
-    test('existing user attempting sign-up gets redirected to error page', async ({ page }) => {
+    test('existing user attempting sign-up succeeds (simplified auth)', async ({ page }) => {
       await authMock.setMockUserScenario('existing-user', 'existing@example.com');
 
       // Go to sign-up page
@@ -79,14 +73,8 @@ test.describe('Complete Registration Flow Tests', () => {
       // Attempt to sign up
       await page.click('button:has-text("Sign up with Google")');
 
-      // Should be redirected to error page
-      await expect(page).toHaveURL('/auth/error?error=UserAlreadyExists');
-      await expect(page.locator('h2')).toContainText('Account Already Exists');
-      await expect(page.locator('text=An account with this email already exists')).toBeVisible();
-
-      // Verify error page has correct action buttons
-      await expect(page.locator('a:has-text("Sign In")')).toBeVisible();
-      await expect(page.locator('a:has-text("Back to Sign Up")')).toBeVisible();
+      // With simplified auth, existing users can use signup page too
+      await expect(page).toHaveURL('/home');
     });
 
     test('existing user can successfully sign in', async ({ page }) => {
@@ -103,21 +91,17 @@ test.describe('Complete Registration Flow Tests', () => {
       await expect(page).toHaveURL('/home');
     });
 
-    test('existing user follows correct flow after initial error', async ({ page }) => {
+    test('existing user can use either signup or signin page (simplified auth)', async ({ page }) => {
       await authMock.setMockUserScenario('existing-user', 'existing@example.com');
 
-      // Start with incorrect flow (sign-up)
+      // Test signup page works for existing users
       await page.goto('/auth/signup');
       await page.click('button:has-text("Sign up with Google")');
+      await expect(page).toHaveURL('/home');
 
-      // Get error
-      await expect(page).toHaveURL('/auth/error?error=UserAlreadyExists');
-
-      // Follow the correct path via error page
-      await page.click('a:has-text("Sign In")');
-      await expect(page).toHaveURL('/auth/signin');
-
-      // Now successfully sign in
+      // Reset and test signin page also works
+      await page.goto('/auth/signout');
+      await page.goto('/auth/signin');
       await page.click('button:has-text("Sign in with Google")');
       await expect(page).toHaveURL('/home');
     });

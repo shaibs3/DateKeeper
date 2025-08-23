@@ -42,35 +42,18 @@ test.describe('Authentication Flow with Mocked OAuth', () => {
       // Get test scenario from page context or use default
       const testUser = await page.evaluate(() => window.testUserScenario);
 
-      if (testUser === 'new-user' && !isSignup) {
-        // New user trying to sign in - should fail
-        await route.fulfill({
-          status: 302,
-          headers: {
-            Location: '/auth/error?error=UserNotRegistered',
-          },
-        });
-      } else if (testUser === 'existing-user' && isSignup) {
-        // Existing user trying to sign up - should fail
-        await route.fulfill({
-          status: 302,
-          headers: {
-            Location: '/auth/error?error=UserAlreadyExists',
-          },
-        });
-      } else {
-        // Successful flow
-        await route.fulfill({
-          status: 302,
-          headers: {
-            Location: '/home',
-          },
-        });
-      }
+      // With simplified auth, all flows succeed
+      // New users are automatically created, existing users can use any page
+      await route.fulfill({
+        status: 302,
+        headers: {
+          Location: '/home',
+        },
+      });
     });
   });
 
-  test('new user sign-in fails with UserNotRegistered error', async ({ page }) => {
+  test('new user sign-in succeeds with auto-registration', async ({ page }) => {
     // Set test scenario
     await page.addInitScript(() => {
       window.testUserScenario = 'new-user';
@@ -81,13 +64,11 @@ test.describe('Authentication Flow with Mocked OAuth', () => {
     // Click sign in button
     await page.click('button:has-text("Sign in with Google")');
 
-    // Should be redirected to error page
-    await expect(page).toHaveURL('/auth/error?error=UserNotRegistered');
-    await expect(page.locator('h2')).toContainText('Account Not Found');
-    await expect(page.locator('text=No account found with this email address')).toBeVisible();
+    // With simplified auth, new users are automatically created
+    await expect(page).toHaveURL('/home');
   });
 
-  test('existing user sign-up fails with UserAlreadyExists error', async ({ page }) => {
+  test('existing user sign-up succeeds with simplified auth', async ({ page }) => {
     // Set test scenario
     await page.addInitScript(() => {
       window.testUserScenario = 'existing-user';
@@ -98,10 +79,8 @@ test.describe('Authentication Flow with Mocked OAuth', () => {
     // Click sign up button
     await page.click('button:has-text("Sign up with Google")');
 
-    // Should be redirected to error page
-    await expect(page).toHaveURL('/auth/error?error=UserAlreadyExists');
-    await expect(page.locator('h2')).toContainText('Account Already Exists');
-    await expect(page.locator('text=An account with this email already exists')).toBeVisible();
+    // With simplified auth, existing users can use signup page too
+    await expect(page).toHaveURL('/home');
   });
 
   test('new user sign-up succeeds', async ({ page }) => {

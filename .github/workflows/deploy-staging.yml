@@ -3,7 +3,6 @@ name: Deploy to Staging
 on:
   # Trigger only on pull requests for staging preview
   pull_request:
-    branches: [ main, develop ]
     types: [ opened, synchronize, reopened ]
   # Allow manual deployment
   workflow_dispatch:

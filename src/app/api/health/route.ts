@@ -2,6 +2,24 @@ import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
+  const baseResponse = {
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    environment: process.env.APP_ENV || 'local',
+    version: process.env.npm_package_version || 'unknown',
+  };
+
+  // If no DATABASE_URL is configured, return basic health check
+  if (!process.env.DATABASE_URL) {
+    return NextResponse.json({
+      ...baseResponse,
+      database: {
+        connected: false,
+        note: 'DATABASE_URL not configured - basic health check only',
+      },
+    });
+  }
+
   try {
     // Test database connection
     await prisma.$connect();
@@ -11,27 +29,24 @@ export async function GET() {
     const eventCount = await prisma.dateEvent.count();
 
     return NextResponse.json({
-      status: 'healthy',
-      timestamp: new Date().toISOString(),
+      ...baseResponse,
       database: {
         connected: true,
         users: userCount,
         events: eventCount,
       },
-      environment: process.env.APP_ENV || 'local',
     });
   } catch (error) {
     console.error('Health check failed:', error);
 
     return NextResponse.json(
       {
-        status: 'unhealthy',
-        timestamp: new Date().toISOString(),
+        ...baseResponse,
+        status: 'degraded',
         database: {
           connected: false,
           error: error instanceof Error ? error.message : 'Unknown error',
         },
-        environment: process.env.APP_ENV || 'local',
       },
       { status: 500 }
     );

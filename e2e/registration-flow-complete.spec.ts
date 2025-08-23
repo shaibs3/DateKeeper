@@ -91,7 +91,9 @@ test.describe('Complete Registration Flow Tests', () => {
       await expect(page).toHaveURL('/home');
     });
 
-    test('existing user can use either signup or signin page (simplified auth)', async ({ page }) => {
+    test('existing user can use either signup or signin page (simplified auth)', async ({
+      page,
+    }) => {
       await authMock.setMockUserScenario('existing-user', 'existing@example.com');
 
       // Test signup page works for existing users

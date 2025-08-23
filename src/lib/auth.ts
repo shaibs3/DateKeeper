@@ -50,7 +50,7 @@ export const {
               image: user.image || null,
             },
           });
-          console.log(`✅ Created new user: ${user.email}`);
+          // User created successfully
           return true;
         } catch (error) {
           console.error('❌ Error creating user:', error);
@@ -58,7 +58,6 @@ export const {
         }
       } else {
         // User exists - allow sign-in
-        console.log(`✅ User signed in: ${user.email}`);
         return true;
       }
     },

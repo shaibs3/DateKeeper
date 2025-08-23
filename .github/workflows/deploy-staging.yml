@@ -10,6 +10,7 @@ on:
   # Allow manual deployment
   workflow_dispatch:
 
+
 env:
   NODE_VERSION: '22.x'
   VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}

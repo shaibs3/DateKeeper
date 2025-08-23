@@ -86,16 +86,22 @@ jobs:
     - name: Run Database Migrations
       run: |
         echo "🗄️ Running database migrations..."
+        echo "📁 Loading environment variables from Vercel..."
+        set -a  # automatically export all variables
+        source .vercel/.env.production.local
+        set +a  # stop auto-exporting
+        echo "✅ DATABASE_URL loaded from Vercel environment"
         npx prisma migrate deploy
-      env:
-        DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
     - name: Build Project Artifacts
       run: |
+        echo "🏗️ Building project artifacts..."
+        echo "📁 Loading environment variables from Vercel..."
+        set -a
+        source .vercel/.env.production.local
+        set +a
         export APP_ENV=production
         vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-      env:
-        DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
     - name: Deploy to Vercel (Production)
       id: deploy

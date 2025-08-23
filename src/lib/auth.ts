@@ -39,14 +39,10 @@ export const {
 
       const existingUser = await prisma.user.findUnique({ where: { email: user.email } });
 
-      // Check the callbackUrl to determine if this is sign-up or sign-in
-      const callbackUrl = typeof account?.callbackUrl === 'string' ? account.callbackUrl : '';
-      const isSignUpFlow = callbackUrl.includes('signup=true');
-
       if (!existingUser) {
-        // User doesn't exist
-        if (isSignUpFlow) {
-          // This is a sign-up flow, create the user
+        // User doesn't exist - create them automatically
+        // This simplifies the flow and avoids the callback URL issue
+        try {
           await prisma.user.create({
             data: {
               email: user.email,
@@ -54,23 +50,27 @@ export const {
               image: user.image || null,
             },
           });
+          console.log(`✅ Created new user: ${user.email}`);
           return true;
-        } else {
-          // This is a sign-in flow, but user doesn't exist
-          return '/auth/error?error=UserNotRegistered';
+        } catch (error) {
+          console.error('❌ Error creating user:', error);
+          return false;
         }
       } else {
-        // User exists
-        if (isSignUpFlow) {
-          // This is a sign-up flow but user already exists
-          return '/auth/error?error=UserAlreadyExists';
-        } else {
-          // This is a sign-in flow and user exists, allow sign-in
-          return true;
-        }
+        // User exists - allow sign-in
+        console.log(`✅ User signed in: ${user.email}`);
+        return true;
       }
     },
-    session({ session }) {
+    async session({ session, token }) {
+      if (session.user?.email) {
+        const dbUser = await prisma.user.findUnique({
+          where: { email: session.user.email },
+        });
+        if (dbUser) {
+          session.user.id = dbUser.id;
+        }
+      }
       return session;
     },
     async redirect({ url, baseUrl }) {

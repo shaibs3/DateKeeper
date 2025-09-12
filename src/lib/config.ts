@@ -44,7 +44,7 @@ export const config = {
   features: {
     enableAnalytics: process.env.APP_ENV === 'production',
     enableSentry: process.env.APP_ENV !== 'local',
-    debugMode: process.env.NODE_ENV === 'development',
+    debugMode: process.env.NODE_ENV === 'development' || process.env.APP_ENV === 'development',
     enableTestNotifications: process.env.APP_ENV !== 'production',
   },
 } as const;
@@ -73,6 +73,7 @@ export function validateEnvironment() {
 
 // Environment helpers
 export const isLocal = () => config.APP_ENV === 'local';
+export const isDevelopmentEnv = () => config.APP_ENV === 'development';
 export const isStaging = () => config.APP_ENV === 'staging';
 export const isProduction = () => config.APP_ENV === 'production';
 export const isDevelopment = () => config.NODE_ENV === 'development';

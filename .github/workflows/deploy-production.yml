@@ -92,7 +92,6 @@ jobs:
         echo "📁 Loading environment variables from Vercel..."
         set -a  # automatically export all variables
         source .vercel/.env.production.local
-        cat .vercel/.env.production.local | grep DATABASE_URL
         set +a  # stop auto-exporting
         echo "✅ DATABASE_URL loaded from Vercel environment"
         npx prisma migrate deploy

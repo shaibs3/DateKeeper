@@ -37,9 +37,15 @@ export const {
     async signIn({ user, account, profile }) {
       console.log('🔐 SignIn callback started');
       console.log('📧 User email:', user.email);
-      console.log('👤 User data:', JSON.stringify({ id: user.id, name: user.name, email: user.email }, null, 2));
-      console.log('🔑 Account data:', JSON.stringify({ provider: account?.provider, type: account?.type }, null, 2));
-      
+      console.log(
+        '👤 User data:',
+        JSON.stringify({ id: user.id, name: user.name, email: user.email }, null, 2)
+      );
+      console.log(
+        '🔑 Account data:',
+        JSON.stringify({ provider: account?.provider, type: account?.type }, null, 2)
+      );
+
       if (!user.email) {
         console.error('❌ No email provided');
         return false;
@@ -70,7 +76,7 @@ export const {
         console.error('❌ Error details:', {
           message: error instanceof Error ? error.message : 'Unknown error',
           code: (error as any)?.code,
-          meta: (error as any)?.meta
+          meta: (error as any)?.meta,
         });
         return false;
       }
@@ -78,14 +84,14 @@ export const {
     async session({ session, token }) {
       console.log('🎫 Session callback started');
       console.log('📧 Session email:', session.user?.email);
-      
+
       if (session.user?.email) {
         try {
           console.log('🔍 Looking up user in database for session...');
           const dbUser = await prisma.user.findUnique({
             where: { email: session.user.email },
           });
-          
+
           if (dbUser) {
             session.user.id = dbUser.id;
             console.log('✅ Session user ID set:', dbUser.id);
@@ -96,7 +102,7 @@ export const {
           console.error('❌ Database error in session callback:', error);
         }
       }
-      
+
       console.log('🎫 Session callback completed');
       return session;
     },

@@ -56,12 +56,12 @@ export const {
         console.log('🔍 STEP 2: Testing database connection...');
         console.log('🔍 DATABASE_URL exists:', !!process.env.DATABASE_URL);
         console.log('🔍 DATABASE_URL preview:', process.env.DATABASE_URL?.substring(0, 20) + '...');
-        
+
         // Step 3: Check if user exists
         console.log('🔍 STEP 3: Checking if user exists in database...');
-        const existingUser = await prisma.user.findUnique({ 
+        const existingUser = await prisma.user.findUnique({
           where: { email: user.email },
-          select: { id: true, email: true, name: true }
+          select: { id: true, email: true, name: true },
         });
         console.log('👥 STEP 3 RESULT: Existing user found:', !!existingUser);
         if (existingUser) {
@@ -76,7 +76,7 @@ export const {
             name: user.name || '',
             image: user.image || null,
           });
-          
+
           const newUser = await prisma.user.create({
             data: {
               email: user.email,
@@ -98,8 +98,11 @@ export const {
         console.error('❌ Error type:', typeof error);
         console.error('❌ Error instanceof Error:', error instanceof Error);
         console.error('❌ Raw error:', error);
-        console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack available');
-        
+        console.error(
+          '❌ Error stack:',
+          error instanceof Error ? error.stack : 'No stack available'
+        );
+
         // Enhanced Prisma error logging
         if (error && typeof error === 'object') {
           console.error('❌ Error properties:', Object.keys(error));
@@ -110,7 +113,7 @@ export const {
             name: (error as any)?.name,
           });
         }
-        
+
         console.log('🔐 SIGNIN CALLBACK RETURNING FALSE - DATABASE ERROR');
         return false;
       }

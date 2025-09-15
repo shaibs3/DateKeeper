@@ -149,6 +149,21 @@ DATABASE_URL="postgresql://datekeeper:dev_password_123@localhost:5432/datekeeper
 - Tailwind CSS for styling
 - React 18 with TypeScript throughout
 
+**IMPORTANT: Code Formatting Requirements**
+
+- **ALWAYS run `npm run format` after making ANY code changes**
+- **BEFORE committing, ALWAYS run `npm run format:check`**
+- **If `npm run format:check` fails, the commit MUST be rejected**
+- **Never commit code that doesn't pass formatting checks**
+
+**Pre-Commit Checklist:**
+
+1. Run `npm run format` to auto-fix formatting
+2. Run `npm run format:check` to verify formatting
+3. Run `npm run lint` to check for linting issues
+4. Run `npm run type-check` to verify TypeScript
+5. Only proceed with commit if ALL checks pass
+
 ### Multi-Environment Setup
 
 - **Local:** `APP_ENV=local` with full debugging

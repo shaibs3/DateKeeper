@@ -68,9 +68,9 @@ export const {
       } catch (error) {
         console.error('❌ Database error in signIn callback:', error);
         console.error('❌ Error details:', {
-          message: error.message,
-          code: error.code,
-          meta: error.meta
+          message: error instanceof Error ? error.message : 'Unknown error',
+          code: (error as any)?.code,
+          meta: (error as any)?.meta
         });
         return false;
       }

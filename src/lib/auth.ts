@@ -35,29 +35,48 @@ export const {
   debug: config.features.debugMode,
   callbacks: {
     async signIn({ user, account, profile }) {
-      console.log('🔐 SignIn callback started');
+      console.log('🔐 =================================');
+      console.log('🔐 SIGNIN CALLBACK STARTED');
+      console.log('🔐 =================================');
       console.log('📧 User email:', user.email);
-      console.log(
-        '👤 User data:',
-        JSON.stringify({ id: user.id, name: user.name, email: user.email }, null, 2)
-      );
-      console.log(
-        '🔑 Account data:',
-        JSON.stringify({ provider: account?.provider, type: account?.type }, null, 2)
-      );
+      console.log('👤 Full user object:', JSON.stringify(user, null, 2));
+      console.log('🔑 Full account object:', JSON.stringify(account, null, 2));
+      console.log('👤 Full profile object:', JSON.stringify(profile, null, 2));
 
+      // Step 1: Validate email
       if (!user.email) {
-        console.error('❌ No email provided');
+        console.error('❌ STEP 1 FAILED: No email provided in user object');
+        console.log('🔐 SIGNIN CALLBACK RETURNING FALSE - NO EMAIL');
         return false;
       }
+      console.log('✅ STEP 1 PASSED: Email validation successful');
 
       try {
-        console.log('🔍 Checking if user exists in database...');
-        const existingUser = await prisma.user.findUnique({ where: { email: user.email } });
-        console.log('👥 Existing user found:', !!existingUser);
+        // Step 2: Database connection test
+        console.log('🔍 STEP 2: Testing database connection...');
+        console.log('🔍 DATABASE_URL exists:', !!process.env.DATABASE_URL);
+        console.log('🔍 DATABASE_URL preview:', process.env.DATABASE_URL?.substring(0, 20) + '...');
+        
+        // Step 3: Check if user exists
+        console.log('🔍 STEP 3: Checking if user exists in database...');
+        const existingUser = await prisma.user.findUnique({ 
+          where: { email: user.email },
+          select: { id: true, email: true, name: true }
+        });
+        console.log('👥 STEP 3 RESULT: Existing user found:', !!existingUser);
+        if (existingUser) {
+          console.log('👥 Existing user details:', JSON.stringify(existingUser, null, 2));
+        }
 
         if (!existingUser) {
-          console.log('👤 Creating new user...');
+          // Step 4: Create new user
+          console.log('👤 STEP 4: Creating new user...');
+          console.log('👤 User data to create:', {
+            email: user.email,
+            name: user.name || '',
+            image: user.image || null,
+          });
+          
           const newUser = await prisma.user.create({
             data: {
               email: user.email,
@@ -65,23 +84,38 @@ export const {
               image: user.image || null,
             },
           });
-          console.log('✅ New user created successfully:', newUser.id);
+          console.log('✅ STEP 4 SUCCESS: New user created:', JSON.stringify(newUser, null, 2));
+          console.log('🔐 SIGNIN CALLBACK RETURNING TRUE - NEW USER CREATED');
           return true;
         } else {
-          console.log('✅ Existing user sign-in successful:', existingUser.id);
+          // Step 5: Existing user login
+          console.log('✅ STEP 5 SUCCESS: Existing user sign-in successful');
+          console.log('🔐 SIGNIN CALLBACK RETURNING TRUE - EXISTING USER');
           return true;
         }
       } catch (error) {
-        console.error('❌ Database error in signIn callback:', error);
-        console.error('❌ Error details:', {
-          message: error instanceof Error ? error.message : 'Unknown error',
-          code: (error as any)?.code,
-          meta: (error as any)?.meta,
-        });
+        console.error('❌ FATAL ERROR in signIn callback');
+        console.error('❌ Error type:', typeof error);
+        console.error('❌ Error instanceof Error:', error instanceof Error);
+        console.error('❌ Raw error:', error);
+        console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack available');
+        
+        // Enhanced Prisma error logging
+        if (error && typeof error === 'object') {
+          console.error('❌ Error properties:', Object.keys(error));
+          console.error('❌ Error details:', {
+            message: error instanceof Error ? error.message : 'Unknown error',
+            code: (error as any)?.code,
+            meta: (error as any)?.meta,
+            name: (error as any)?.name,
+          });
+        }
+        
+        console.log('🔐 SIGNIN CALLBACK RETURNING FALSE - DATABASE ERROR');
         return false;
       }
     },
-    async session({ session, token }) {
+    async session({ session }) {
       console.log('🎫 Session callback started');
       console.log('📧 Session email:', session.user?.email);
 

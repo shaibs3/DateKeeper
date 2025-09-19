@@ -3,7 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { Resend } from 'resend';
 import { DateEvent, User } from '@prisma/client';
 
-export const runtime = 'edge';
+// Using Node.js runtime for Prisma compatibility
+// export const runtime = 'edge';
 
 type ReminderType = '1_DAY' | '3_DAYS' | '1_WEEK' | '2_WEEKS' | '1_MONTH';
 

@@ -25,9 +25,9 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 // Cast mocked functions for TypeScript
-const mockAuth = auth as jest.MockedFunction<typeof auth>;
-const mockPrismaUserFindUnique = prisma.user.findUnique as jest.MockedFunction<typeof prisma.user.findUnique>;
-const mockPrismaEventCreate = prisma.dateEvent.create as jest.MockedFunction<typeof prisma.dateEvent.create>;
+const mockAuth = auth as any;
+const mockPrismaUserFindUnique = prisma.user.findUnique as any;
+const mockPrismaEventCreate = prisma.dateEvent.create as any;
 
 describe('/api/date-event', () => {
   beforeEach(() => {
@@ -45,13 +45,14 @@ describe('/api/date-event', () => {
       reminders: ['1_DAY', '1_WEEK'],
     };
 
-    const createMockRequest = (data = eventData) => new NextRequest('http://localhost:3000/api/date-event', {
-      method: 'POST',
-      body: JSON.stringify(data),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const createMockRequest = (data: any = eventData) =>
+      new NextRequest('http://localhost:3000/api/date-event', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
     it('should return 401 when user is not authenticated', async () => {
       mockAuth.mockResolvedValue(null);
@@ -97,6 +98,7 @@ describe('/api/date-event', () => {
         id: 'user-123',
         email: 'test@example.com',
         name: 'Test User',
+        image: null,
       };
 
       const mockCreatedEvent = {
@@ -115,7 +117,12 @@ describe('/api/date-event', () => {
 
       mockAuth.mockResolvedValue({ user: { email: 'test@example.com' } });
       mockPrismaUserFindUnique.mockResolvedValue(mockUser);
-      mockPrismaEventCreate.mockResolvedValue(mockCreatedEvent);
+      mockPrismaEventCreate.mockResolvedValue({
+        ...mockCreatedEvent,
+        date: new Date(mockCreatedEvent.date),
+        createdAt: new Date(mockCreatedEvent.createdAt),
+        updatedAt: new Date(mockCreatedEvent.updatedAt),
+      });
 
       const response = await POST(createMockRequest());
       const data = await response.json();
@@ -157,6 +164,7 @@ describe('/api/date-event', () => {
         id: 'user-123',
         email: 'test@example.com',
         name: 'Test User',
+        image: null,
       };
 
       mockAuth.mockResolvedValue({ user: { email: 'test@example.com' } });
@@ -199,6 +207,7 @@ describe('/api/date-event', () => {
         id: 'user-123',
         email: 'test@example.com',
         name: 'Test User',
+        image: null,
       };
 
       const mockCreatedEvent = {
@@ -246,6 +255,7 @@ describe('/api/date-event', () => {
         id: 'user-123',
         email: 'test@example.com',
         name: 'Test User',
+        image: null,
       };
 
       const mockCreatedEvent = {

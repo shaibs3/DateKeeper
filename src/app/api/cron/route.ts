@@ -76,8 +76,8 @@ async function sendNotificationEmail(
   if (!user.email || user.dateEvents.length === 0) return;
 
   try {
-    await resend.emails.send({
-      from: 'DateKeeper <noreply@datekeeper.app>',
+    const emailResult = await resend.emails.send({
+      from: 'DateKeeper <noreply@resend.dev>',
       to: user.email,
       subject: `Reminder: Your Event(s) ${reminderConfig.displayName}!`,
       html: `
@@ -100,6 +100,13 @@ async function sendNotificationEmail(
         <p>Don't forget to prepare for your special day!</p>
       `,
     });
+
+    if (emailResult.error) {
+      console.error(
+        `Error sending ${reminderConfig.type} email to ${user.email}:`,
+        emailResult.error
+      );
+    }
   } catch (error) {
     console.error(`Error sending ${reminderConfig.type} email to ${user.email}:`, error);
   }

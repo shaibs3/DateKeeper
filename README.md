@@ -1,7 +1,7 @@
 # 🎂 DateKeeper
 
-[![Tests](https://img.shields.io/badge/tests-59%20passing-brightgreen)](https://github.com/shaibs3/DateKeeper/actions)
-[![Coverage](https://img.shields.io/badge/coverage-22.35%25-yellow)](https://github.com/shaibs3/DateKeeper/actions)
+[![Tests](https://img.shields.io/badge/tests-258%20passing-brightgreen)](https://github.com/shaibs3/DateKeeper/actions)
+[![Coverage](https://img.shields.io/badge/coverage-51.98%25-orange)](https://github.com/shaibs3/DateKeeper/actions)
 [![API Coverage](https://img.shields.io/badge/API%20routes-100%25-brightgreen)](https://github.com/shaibs3/DateKeeper/actions)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
@@ -182,7 +182,7 @@ git push origin main
 
 ```bash
 # Unit tests
-npm test                    # Run all unit tests (59 tests)
+npm test                    # Run all unit tests (258 tests)
 npm run test:watch          # Unit tests in watch mode
 npm run test:coverage       # Unit tests with coverage report
 
@@ -196,9 +196,9 @@ npm run test:e2e:debug     # E2E tests with debugging
 
 **📊 Current Test Statistics:**
 
-- **59 total tests** - All passing ✅
+- **258 total tests** - All passing ✅
 - **46 API route tests** - 100% coverage of all CRUD operations
-- **13 component tests** - React component testing with RTL
+- **202 component tests** - React component testing with RTL
 - **10 E2E tests** - Cross-browser compatibility testing
 
 **🎯 Coverage Breakdown:**

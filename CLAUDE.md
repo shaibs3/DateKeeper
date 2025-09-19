@@ -162,7 +162,8 @@ DATABASE_URL="postgresql://datekeeper:dev_password_123@localhost:5432/datekeeper
 2. Run `npm run format:check` to verify formatting
 3. Run `npm run lint` to check for linting issues
 4. Run `npm run type-check` to verify TypeScript
-5. Only proceed with commit if ALL checks pass
+5. Run `npm audit` to check for security vulnerabilities
+6. Only proceed with commit if ALL checks pass
 
 ### Multi-Environment Setup
 

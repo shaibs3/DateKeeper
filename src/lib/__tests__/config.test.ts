@@ -31,7 +31,7 @@ describe('config', () => {
   describe('Environment Variables', () => {
     it('should use default values when environment variables are not set', () => {
       // Clear specific env vars
-      delete process.env.NODE_ENV;
+      delete (process.env as any).NODE_ENV;
       delete process.env.APP_ENV;
       delete process.env.APP_URL;
       delete process.env.NEXTAUTH_URL;
@@ -47,7 +47,7 @@ describe('config', () => {
     });
 
     it('should use provided environment variables', () => {
-      process.env.NODE_ENV = 'production';
+      (process.env as any).NODE_ENV = 'production';
       process.env.APP_ENV = 'staging';
       process.env.APP_URL = 'https://staging.datekeeper.app';
       process.env.NEXTAUTH_SECRET = 'test-secret';
@@ -128,21 +128,21 @@ describe('config', () => {
 
     it('should enable debug mode in development environments', () => {
       // Test NODE_ENV development
-      process.env.NODE_ENV = 'development';
+      (process.env as any).NODE_ENV = 'development';
       process.env.APP_ENV = 'production'; // Should still enable debug due to NODE_ENV
       let { config: freshConfig } = require('../config');
       expect(freshConfig.features.debugMode).toBe(true);
 
       // Test APP_ENV development
       jest.resetModules();
-      process.env.NODE_ENV = 'production';
+      (process.env as any).NODE_ENV = 'production';
       process.env.APP_ENV = 'development';
       freshConfig = require('../config').config;
       expect(freshConfig.features.debugMode).toBe(true);
 
       // Test non-development (should be disabled)
       jest.resetModules();
-      process.env.NODE_ENV = 'production';
+      (process.env as any).NODE_ENV = 'production';
       process.env.APP_ENV = 'production';
       freshConfig = require('../config').config;
       expect(freshConfig.features.debugMode).toBe(false);
@@ -216,7 +216,7 @@ describe('validateEnvironment', () => {
   });
 
   it('should skip validation in test environment', () => {
-    process.env.NODE_ENV = 'test';
+    (process.env as any).NODE_ENV = 'test';
     // Clear required vars
     delete process.env.NEXTAUTH_SECRET;
     delete process.env.NEXTAUTH_URL;
@@ -231,7 +231,7 @@ describe('validateEnvironment', () => {
   });
 
   it('should skip validation in CI environment', () => {
-    process.env.NODE_ENV = 'production';
+    (process.env as any).NODE_ENV = 'production';
     process.env.CI = 'true';
     // Clear required vars
     delete process.env.NEXTAUTH_SECRET;
@@ -244,7 +244,7 @@ describe('validateEnvironment', () => {
   });
 
   it('should pass validation when all required variables are present', () => {
-    process.env.NODE_ENV = 'production';
+    (process.env as any).NODE_ENV = 'production';
     delete process.env.CI;
 
     process.env.NEXTAUTH_SECRET = 'test-secret';
@@ -260,7 +260,7 @@ describe('validateEnvironment', () => {
   });
 
   it('should throw error when required variables are missing', () => {
-    process.env.NODE_ENV = 'production';
+    (process.env as any).NODE_ENV = 'production';
     delete process.env.CI;
 
     // Clear some required vars
@@ -278,7 +278,7 @@ describe('validateEnvironment', () => {
   });
 
   it('should include all missing variables in error message', () => {
-    process.env.NODE_ENV = 'production';
+    (process.env as any).NODE_ENV = 'production';
     delete process.env.CI;
 
     // Clear all required vars
@@ -350,7 +350,7 @@ describe('Environment Helper Functions', () => {
 
   describe('NODE_ENV helpers', () => {
     it('should correctly identify NODE_ENV development', () => {
-      process.env.NODE_ENV = 'development';
+      (process.env as any).NODE_ENV = 'development';
       const { isDevelopment, isProductive } = require('../config');
 
       expect(isDevelopment()).toBe(true);
@@ -358,7 +358,7 @@ describe('Environment Helper Functions', () => {
     });
 
     it('should correctly identify NODE_ENV production', () => {
-      process.env.NODE_ENV = 'production';
+      (process.env as any).NODE_ENV = 'production';
       const { isDevelopment, isProductive } = require('../config');
 
       expect(isDevelopment()).toBe(false);
@@ -366,7 +366,7 @@ describe('Environment Helper Functions', () => {
     });
 
     it('should handle other NODE_ENV values', () => {
-      process.env.NODE_ENV = 'test';
+      (process.env as any).NODE_ENV = 'test';
       const { isDevelopment, isProductive } = require('../config');
 
       expect(isDevelopment()).toBe(false);
@@ -377,7 +377,7 @@ describe('Environment Helper Functions', () => {
   describe('Default environment values', () => {
     it('should use default values when env vars are not set', () => {
       delete process.env.APP_ENV;
-      delete process.env.NODE_ENV;
+      delete (process.env as any).NODE_ENV;
 
       const { isLocal, isDevelopment } = require('../config');
 

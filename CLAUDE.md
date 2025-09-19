@@ -177,3 +177,204 @@ DATABASE_URL="postgresql://datekeeper:dev_password_123@localhost:5432/datekeeper
 3. Run tests: `npm test && npm run test:e2e`
 4. Check code quality: `npm run lint && npm run type-check`
 5. Test against staging: `npm run test:e2e:staging` (if deployed)
+
+## Email Notifications System
+
+### Cron Job Configuration
+
+- **API Route:** `src/app/api/cron/route.ts`
+- **Schedule:** Daily at midnight UTC via `vercel.json`
+- **Authentication:** Bearer token via `CRON_SECRET` environment variable
+- **Email Service:** Resend API with `RESEND_API_KEY`
+
+### Reminder Types
+
+The system supports 5 reminder types with extensible configuration:
+
+```typescript
+const REMINDER_CONFIGS: ReminderConfig[] = [
+  { type: '1_DAY', days: 1, displayName: 'tomorrow' },
+  { type: '3_DAYS', days: 3, displayName: 'in 3 days' },
+  { type: '1_WEEK', days: 7, displayName: 'in 1 week' },
+  { type: '2_WEEKS', days: 14, displayName: 'in 2 weeks' },
+  { type: '1_MONTH', days: 30, displayName: 'in 1 month' },
+];
+```
+
+### Error Handling & Retry Logic
+
+- **Retry Strategy:** Exponential backoff (1s, 2s, 4s)
+- **Max Retries:** 3 attempts per email
+- **Error Logging:** Comprehensive failure tracking
+- **Graceful Degradation:** System continues processing other users on individual failures
+
+## Testing Guidelines
+
+### Unit Testing Best Practices
+
+- **Coverage Threshold:** 30% global, 80% for critical API routes
+- **Test Files:** Place in `__tests__` directories alongside components
+- **Mocking Strategy:** Mock external dependencies (Prisma, Resend)
+- **Environment:** Use Node.js environment for API tests, JSDOM for component tests
+
+### Test Coverage Commands
+
+```bash
+npm run test:coverage           # Generate coverage report
+npm run test:coverage:watch     # Coverage in watch mode
+npm run test:coverage:threshold # Enforce coverage thresholds
+```
+
+### E2E Testing Strategy
+
+- **Authentication Flows:** Google OAuth, sign-up/sign-in differentiation
+- **Event Management:** CRUD operations, date validation
+- **Cross-Browser:** Chrome, Firefox, Safari, Mobile viewports
+- **Environment Testing:** Local, staging, production validation
+
+### Test Data Management
+
+- **Seed Data:** Use `npm run db:seed` for consistent test data
+- **Test User:** `test@example.com` with pre-configured events
+- **Database Reset:** `npm run db:reset` for clean state
+
+## Code Quality Standards
+
+### TypeScript Configuration
+
+- **Strict Mode:** Enabled for type safety
+- **Path Mapping:** `@/` alias for `src/` directory
+- **Type Definitions:** Custom types in `src/types/`
+- **Prisma Types:** Auto-generated from schema
+
+### Component Architecture
+
+- **React Patterns:** Functional components with hooks
+- **State Management:** Local state with React hooks, no external state manager
+- **Props Validation:** TypeScript interfaces for all props
+- **Error Boundaries:** Implement for production error handling
+
+### API Route Patterns
+
+- **Authentication:** Verify user sessions for protected routes
+- **Error Handling:** Consistent error responses with proper HTTP status codes
+- **Input Validation:** Validate and sanitize all inputs
+- **Database Operations:** Use Prisma transactions for complex operations
+
+## Security Guidelines
+
+### Authentication & Authorization
+
+- **NextAuth.js:** Google OAuth 2.0 with custom callbacks
+- **Session Management:** Secure session tokens with proper expiration
+- **CSRF Protection:** Built-in NextAuth.js CSRF protection
+- **Environment Secrets:** Never commit secrets, use `.env.local`
+
+### Database Security
+
+- **Connection Security:** SSL-enabled PostgreSQL connections in production
+- **Query Safety:** Prisma prevents SQL injection
+- **User Data:** Encrypt sensitive data at rest
+- **Access Control:** Role-based access (future enhancement)
+
+### Email Security
+
+- **API Keys:** Secure Resend API key storage
+- **Content Validation:** Sanitize email content
+- **Rate Limiting:** Implement email sending limits
+- **Unsubscribe:** Provide opt-out mechanisms
+
+## Performance Optimization
+
+### Frontend Performance
+
+- **Next.js Optimization:** Leverage built-in optimizations (Image, Link components)
+- **Bundle Analysis:** Use `npm run analyze` to check bundle size
+- **Lazy Loading:** Implement for non-critical components
+- **Caching:** Utilize Next.js caching strategies
+
+### Database Performance
+
+- **Query Optimization:** Use Prisma query optimization
+- **Indexing:** Proper database indexes for frequent queries
+- **Connection Pooling:** Configure for production workloads
+- **Migrations:** Version-controlled schema changes
+
+### API Performance
+
+- **Response Caching:** Cache static responses where appropriate
+- **Pagination:** Implement for large data sets
+- **Background Jobs:** Use Vercel Cron for heavy operations
+- **Error Handling:** Fast-fail strategies for better UX
+
+## Deployment & CI/CD
+
+### Branch Strategy
+
+- **main:** Production deployments
+- **develop:** Staging deployments (if implemented)
+- **feature/*:** Feature development branches
+- **hotfix/*:** Emergency production fixes
+
+### GitHub Actions Workflows
+
+- **Test Coverage:** Automated coverage reporting on PRs
+- **Code Quality:** ESLint, TypeScript, and Prettier checks
+- **E2E Testing:** Automated browser testing (when configured)
+- **Security Scanning:** Dependency vulnerability checks
+
+### Environment Management
+
+- **Local:** Full development environment with Docker
+- **Staging:** Vercel preview deployments for testing
+- **Production:** Vercel production with analytics and monitoring
+
+## Monitoring & Observability
+
+### Error Tracking
+
+- **Console Logging:** Structured logging for debugging
+- **Error Boundaries:** React error boundary implementation
+- **API Error Handling:** Consistent error response format
+- **Email Failure Tracking:** Comprehensive notification failure logs
+
+### Performance Monitoring
+
+- **Core Web Vitals:** Monitor loading, interactivity, visual stability
+- **API Response Times:** Track endpoint performance
+- **Database Query Performance:** Monitor slow queries
+- **Email Delivery Rates:** Track notification success rates
+
+## Important Instruction Reminders
+
+### Development Workflow
+
+- **NEVER create files unless they're absolutely necessary for achieving your goal**
+- **ALWAYS prefer editing an existing file to creating a new one**
+- **NEVER proactively create documentation files (*.md) or README files unless explicitly requested**
+- **ALWAYS run formatting commands before committing:**
+  1. `npm run format` - Auto-fix formatting
+  2. `npm run format:check` - Verify formatting
+  3. `npm run lint` - Check for linting issues
+  4. `npm run type-check` - Verify TypeScript
+
+### Code Standards
+
+- **Follow existing patterns** - Study the codebase before implementing new features
+- **Use TypeScript strictly** - No `any` types unless absolutely necessary
+- **Test coverage** - Maintain or improve existing coverage percentages
+- **Security first** - Never commit secrets, validate all inputs
+
+### Communication
+
+- **Be concise** - Keep responses short and actionable
+- **Ask before major changes** - Confirm architectural decisions
+- **Document decisions** - Update relevant documentation when making changes
+- **Use conventional commits** - Follow commit message standards
+
+### Error Handling
+
+- **Graceful degradation** - Applications should work even when services are down
+- **User-friendly errors** - Provide helpful error messages to users
+- **Comprehensive logging** - Log errors with context for debugging
+- **Recovery strategies** - Implement retry logic where appropriate

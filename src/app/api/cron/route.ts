@@ -71,45 +71,71 @@ async function getEventsForReminder(
 async function sendNotificationEmail(
   resend: Resend,
   user: User & { dateEvents: DateEvent[] },
-  reminderConfig: ReminderConfig
+  reminderConfig: ReminderConfig,
+  maxRetries = 3
 ) {
-  if (!user.email || user.dateEvents.length === 0) return;
+  if (!user.email || user.dateEvents.length === 0)
+    return { success: false, reason: 'No email or events' };
 
-  try {
-    const emailResult = await resend.emails.send({
-      from: 'DateKeeper <noreply@resend.dev>',
-      to: user.email,
-      subject: `Reminder: Your Event(s) ${reminderConfig.displayName}!`,
-      html: `
-        <h1>Upcoming Event Reminder</h1>
-        <p>These events are happening <strong>${reminderConfig.displayName}</strong>:</p>
-        <ul>
-          ${user.dateEvents
-            .map(
-              (event: DateEvent) => `
-            <li>
-              <strong>${event.name}</strong><br>
-              Date: ${new Date(event.date).toLocaleDateString()}<br>
-              Category: ${event.category}<br>
-              ${event.notes ? `Notes: ${event.notes}` : ''}
-            </li>
-          `
-            )
-            .join('')}
-        </ul>
-        <p>Don't forget to prepare for your special day!</p>
-      `,
-    });
+  const emailTemplate = `
+    <h1>Upcoming Event Reminder</h1>
+    <p>These events are happening <strong>${reminderConfig.displayName}</strong>:</p>
+    <ul>
+      ${user.dateEvents
+        .map(
+          (event: DateEvent) => `
+        <li>
+          <strong>${event.name}</strong><br>
+          Date: ${new Date(event.date).toLocaleDateString()}<br>
+          Category: ${event.category}<br>
+          ${event.notes ? `Notes: ${event.notes}` : ''}
+        </li>
+      `
+        )
+        .join('')}
+    </ul>
+    <p>Don't forget to prepare for your special day!</p>
+  `;
 
-    if (emailResult.error) {
-      console.error(
-        `Error sending ${reminderConfig.type} email to ${user.email}:`,
-        emailResult.error
-      );
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const emailResult = await resend.emails.send({
+        from: 'DateKeeper <noreply@resend.dev>',
+        to: user.email,
+        subject: `Reminder: Your Event(s) ${reminderConfig.displayName}!`,
+        html: emailTemplate,
+      });
+
+      if (emailResult.error) {
+        throw new Error(`Resend API error: ${emailResult.error.message}`);
+      }
+
+      // Success - return early
+      return {
+        success: true,
+        emailId: emailResult.data?.id,
+        attempt,
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`Attempt ${attempt}/${maxRetries} failed for ${user.email}:`, errorMessage);
+
+      if (attempt === maxRetries) {
+        // Final failure - return error details
+        return {
+          success: false,
+          error: errorMessage,
+          totalAttempts: maxRetries,
+        };
+      }
+
+      // Wait before retry with exponential backoff
+      const delayMs = 1000 * Math.pow(2, attempt - 1); // 1s, 2s, 4s...
+      await new Promise(resolve => setTimeout(resolve, delayMs));
     }
-  } catch (error) {
-    console.error(`Error sending ${reminderConfig.type} email to ${user.email}:`, error);
   }
+
+  return { success: false, error: 'Unexpected end of retry loop' };
 }
 
 export async function POST(request: Request) {
@@ -122,6 +148,8 @@ export async function POST(request: Request) {
 
     const resend = new Resend(process.env.RESEND_API_KEY);
     let totalNotificationsSent = 0;
+    let totalFailures = 0;
+    const failureDetails: Array<{ user: string; error: string; attempts: number }> = [];
 
     // Process each reminder type
     for (const reminderConfig of REMINDER_CONFIGS) {
@@ -130,15 +158,35 @@ export async function POST(request: Request) {
 
       // Send notifications for this reminder type
       for (const user of users) {
-        await sendNotificationEmail(resend, user, reminderConfig);
-        totalNotificationsSent += user.dateEvents.length;
+        const result = await sendNotificationEmail(resend, user, reminderConfig);
+
+        if (result.success) {
+          totalNotificationsSent += user.dateEvents.length;
+        } else {
+          totalFailures++;
+          failureDetails.push({
+            user: user.email || 'unknown',
+            error: result.error || result.reason || 'Unknown error',
+            attempts: result.totalAttempts || 0,
+          });
+        }
       }
     }
 
+    // Log summary for monitoring
+    if (totalFailures > 0) {
+      console.error(
+        `Notification summary: ${totalNotificationsSent} sent, ${totalFailures} failed`
+      );
+      console.error('Failed notifications:', failureDetails);
+    }
+
     return NextResponse.json({
-      message: 'Notifications processed successfully',
+      message: 'Notifications processed',
       totalNotificationsSent,
+      totalFailures,
       processedReminderTypes: REMINDER_CONFIGS.map(c => c.type),
+      ...(totalFailures > 0 && { failureDetails }),
     });
   } catch (error) {
     console.error('Cron job error:', error);

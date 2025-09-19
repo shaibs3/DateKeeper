@@ -41,6 +41,7 @@ export function AddEventForm({ onSubmit }: AddEventFormProps) {
           <input
             type="text"
             id="name"
+            name="name"
             value={formData.name}
             onChange={e => setFormData({ ...formData, name: e.target.value })}
             className="input-field"
@@ -56,6 +57,7 @@ export function AddEventForm({ onSubmit }: AddEventFormProps) {
           <input
             type="date"
             id="date"
+            name="date"
             value={formData.date}
             onChange={e => setFormData({ ...formData, date: e.target.value })}
             className="input-field"
@@ -69,6 +71,7 @@ export function AddEventForm({ onSubmit }: AddEventFormProps) {
           </label>
           <select
             id="type"
+            name="type"
             value={formData.type}
             onChange={e => {
               const value = e.target.value as EventType;

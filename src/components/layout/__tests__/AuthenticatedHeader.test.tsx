@@ -123,7 +123,12 @@ describe('AuthenticatedHeader', () => {
       const buttons = screen.getAllByRole('button');
       // Bell button is typically the first icon button (after Dashboard)
       const dashboardButton = screen.getByText('Dashboard').closest('button');
-      const iconButtons = buttons.filter(btn => btn !== dashboardButton && !btn.textContent?.includes('Settings') && !btn.textContent?.includes('Sign Out'));
+      const iconButtons = buttons.filter(
+        btn =>
+          btn !== dashboardButton &&
+          !btn.textContent?.includes('Settings') &&
+          !btn.textContent?.includes('Sign Out')
+      );
 
       // Click the first icon button (should be bell)
       if (iconButtons[0]) {
@@ -207,9 +212,9 @@ describe('AuthenticatedHeader', () => {
 
       const buttons = screen.getAllByRole('button');
       // Settings button should be one with focus:outline-none class
-      const settingsIconButton = buttons.find(btn =>
-        btn.className.includes('focus:outline-none') &&
-        !btn.textContent?.includes('Dashboard')
+      const settingsIconButton = buttons.find(
+        btn =>
+          btn.className.includes('focus:outline-none') && !btn.textContent?.includes('Dashboard')
       );
 
       expect(settingsIconButton).toBeInTheDocument();

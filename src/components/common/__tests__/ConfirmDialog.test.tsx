@@ -22,7 +22,11 @@ describe('ConfirmDialog', () => {
       render(<ConfirmDialog {...defaultProps} />);
 
       expect(screen.getByText('Delete Event')).toBeInTheDocument();
-      expect(screen.getByText('Are you sure you want to delete this event? This action cannot be undone.')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Are you sure you want to delete this event? This action cannot be undone.'
+        )
+      ).toBeInTheDocument();
       expect(screen.getByText('Cancel')).toBeInTheDocument();
       expect(screen.getByText('Delete')).toBeInTheDocument();
     });
@@ -92,11 +96,7 @@ describe('ConfirmDialog', () => {
       const trackingOnClose = jest.fn(() => callOrder.push('close'));
 
       render(
-        <ConfirmDialog
-          {...defaultProps}
-          onConfirm={trackingOnConfirm}
-          onClose={trackingOnClose}
-        />
+        <ConfirmDialog {...defaultProps} onConfirm={trackingOnConfirm} onClose={trackingOnClose} />
       );
 
       fireEvent.click(screen.getByText('Delete'));
@@ -174,7 +174,16 @@ describe('ConfirmDialog', () => {
       render(<ConfirmDialog {...defaultProps} />);
 
       const overlay = screen.getByText('Delete Event').closest('.fixed');
-      expect(overlay).toHaveClass('fixed', 'inset-0', 'z-50', 'flex', 'items-center', 'justify-center', 'bg-black', 'bg-opacity-40');
+      expect(overlay).toHaveClass(
+        'fixed',
+        'inset-0',
+        'z-50',
+        'flex',
+        'items-center',
+        'justify-center',
+        'bg-black',
+        'bg-opacity-40'
+      );
     });
 
     it('should apply correct CSS classes for dialog content', () => {
@@ -190,7 +199,13 @@ describe('ConfirmDialog', () => {
       const cancelButton = screen.getByText('Cancel');
       const deleteButton = screen.getByText('Delete');
 
-      expect(cancelButton).toHaveClass('px-4', 'py-2', 'text-gray-700', 'bg-gray-100', 'rounded-lg');
+      expect(cancelButton).toHaveClass(
+        'px-4',
+        'py-2',
+        'text-gray-700',
+        'bg-gray-100',
+        'rounded-lg'
+      );
       expect(deleteButton).toHaveClass('px-4', 'py-2', 'text-white', 'bg-red-600', 'rounded-lg');
     });
   });
@@ -222,7 +237,9 @@ describe('ConfirmDialog', () => {
       render(<ConfirmDialog {...specialProps} />);
 
       expect(screen.getByText('Title with "quotes" & <symbols>')).toBeInTheDocument();
-      expect(screen.getByText('Message with émojis 🚀 and ñspecial characters')).toBeInTheDocument();
+      expect(
+        screen.getByText('Message with émojis 🚀 and ñspecial characters')
+      ).toBeInTheDocument();
     });
   });
 
@@ -233,13 +250,7 @@ describe('ConfirmDialog', () => {
       expect(screen.getByText('Delete Event')).toBeInTheDocument();
 
       // Update props
-      rerender(
-        <ConfirmDialog
-          {...defaultProps}
-          title="Updated Title"
-          message="Updated message"
-        />
-      );
+      rerender(<ConfirmDialog {...defaultProps} title="Updated Title" message="Updated message" />);
 
       expect(screen.getByText('Updated Title')).toBeInTheDocument();
       expect(screen.getByText('Updated message')).toBeInTheDocument();

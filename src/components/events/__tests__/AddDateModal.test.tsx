@@ -49,7 +49,7 @@ describe('AddDateModal', () => {
       render(<AddDateModal {...defaultProps} />);
 
       expect(screen.getByText('Add New Date')).toBeInTheDocument();
-      expect(screen.getByPlaceholderText('e.g., John\'s Birthday')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText("e.g., John's Birthday")).toBeInTheDocument();
       expect(screen.getByText('Category')).toBeInTheDocument();
       expect(screen.getByText('Color')).toBeInTheDocument();
       expect(screen.getByText('Reminders')).toBeInTheDocument();
@@ -66,7 +66,7 @@ describe('AddDateModal', () => {
     it('should have default values for new event', () => {
       render(<AddDateModal {...defaultProps} />);
 
-      expect(screen.getByPlaceholderText('e.g., John\'s Birthday')).toHaveValue('');
+      expect(screen.getByPlaceholderText("e.g., John's Birthday")).toHaveValue('');
       expect(screen.getByDisplayValue('Birthday')).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'green' })).toHaveTextContent('✓');
     });
@@ -88,7 +88,7 @@ describe('AddDateModal', () => {
   describe('Form Interactions', () => {
     it('should update name input', () => {
       render(<AddDateModal {...defaultProps} />);
-      const nameInput = screen.getByPlaceholderText('e.g., John\'s Birthday');
+      const nameInput = screen.getByPlaceholderText("e.g., John's Birthday");
 
       fireEvent.change(nameInput, { target: { value: 'New Event Name' } });
 
@@ -187,7 +187,9 @@ describe('AddDateModal', () => {
       render(<AddDateModal {...defaultProps} onSaved={jest.fn()} />);
 
       // Fill required fields
-      fireEvent.change(screen.getByPlaceholderText('e.g., John\'s Birthday'), { target: { value: 'Test Event' } });
+      fireEvent.change(screen.getByPlaceholderText("e.g., John's Birthday"), {
+        target: { value: 'Test Event' },
+      });
       const dateInput = screen.getAllByDisplayValue('')[0]; // First empty input is date
       fireEvent.change(dateInput, { target: { value: '2024-12-25' } });
 
@@ -222,7 +224,9 @@ describe('AddDateModal', () => {
 
       render(<AddDateModal {...defaultProps} onClose={mockOnClose} onSaved={mockOnSaved} />);
 
-      fireEvent.change(screen.getByPlaceholderText('e.g., John\'s Birthday'), { target: { value: 'Test Event' } });
+      fireEvent.change(screen.getByPlaceholderText("e.g., John's Birthday"), {
+        target: { value: 'Test Event' },
+      });
       const dateInput = screen.getAllByDisplayValue('')[0]; // First empty input is date
       fireEvent.change(dateInput, { target: { value: '2024-12-25' } });
       fireEvent.click(screen.getByText('Save'));
@@ -245,7 +249,9 @@ describe('AddDateModal', () => {
       render(<AddDateModal {...defaultProps} event={mockEvent} />);
 
       // Modify name
-      fireEvent.change(screen.getByDisplayValue('Test Event'), { target: { value: 'Updated Event' } });
+      fireEvent.change(screen.getByDisplayValue('Test Event'), {
+        target: { value: 'Updated Event' },
+      });
 
       // Submit form
       fireEvent.click(screen.getByText('Save'));
@@ -274,7 +280,9 @@ describe('AddDateModal', () => {
 
       render(<AddDateModal {...defaultProps} />);
 
-      fireEvent.change(screen.getByPlaceholderText('e.g., John\'s Birthday'), { target: { value: 'Test Event' } });
+      fireEvent.change(screen.getByPlaceholderText("e.g., John's Birthday"), {
+        target: { value: 'Test Event' },
+      });
       const dateInput = screen.getAllByDisplayValue('')[0]; // First empty input is date
       fireEvent.change(dateInput, { target: { value: '2024-12-25' } });
       fireEvent.click(screen.getByText('Save'));
@@ -292,7 +300,9 @@ describe('AddDateModal', () => {
 
       render(<AddDateModal {...defaultProps} />);
 
-      fireEvent.change(screen.getByPlaceholderText('e.g., John\'s Birthday'), { target: { value: 'Test Event' } });
+      fireEvent.change(screen.getByPlaceholderText("e.g., John's Birthday"), {
+        target: { value: 'Test Event' },
+      });
       const dateInput = screen.getAllByDisplayValue('')[0]; // First empty input is date
       fireEvent.change(dateInput, { target: { value: '2024-12-25' } });
       fireEvent.click(screen.getByText('Save'));
@@ -327,7 +337,9 @@ describe('AddDateModal', () => {
 
       render(<AddDateModal {...defaultProps} />);
 
-      fireEvent.change(screen.getByPlaceholderText('e.g., John\'s Birthday'), { target: { value: 'Test Event' } });
+      fireEvent.change(screen.getByPlaceholderText("e.g., John's Birthday"), {
+        target: { value: 'Test Event' },
+      });
       const dateInput = screen.getAllByDisplayValue('')[0]; // First empty input is date
       fireEvent.change(dateInput, { target: { value: '2024-12-25' } });
       fireEvent.click(screen.getByText('Save'));
@@ -360,7 +372,7 @@ describe('AddDateModal', () => {
     it('should have required fields marked', () => {
       render(<AddDateModal {...defaultProps} />);
 
-      expect(screen.getByPlaceholderText('e.g., John\'s Birthday')).toBeRequired();
+      expect(screen.getByPlaceholderText("e.g., John's Birthday")).toBeRequired();
       const dateInput = screen.getAllByDisplayValue('')[0]; // First empty input is date
       expect(dateInput).toBeRequired();
     });

@@ -24,10 +24,10 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 // Cast mocked functions for TypeScript
-const mockAuth = auth as jest.MockedFunction<typeof auth>;
-const mockPrismaFindUnique = prisma.dateEvent.findUnique as jest.MockedFunction<typeof prisma.dateEvent.findUnique>;
-const mockPrismaDelete = prisma.dateEvent.delete as jest.MockedFunction<typeof prisma.dateEvent.delete>;
-const mockPrismaUpdate = prisma.dateEvent.update as jest.MockedFunction<typeof prisma.dateEvent.update>;
+const mockAuth = auth as any;
+const mockPrismaFindUnique = prisma.dateEvent.findUnique as any;
+const mockPrismaDelete = prisma.dateEvent.delete as any;
+const mockPrismaUpdate = prisma.dateEvent.update as any;
 
 describe('/api/events/[id]', () => {
   const mockParams = { params: Promise.resolve({ id: 'event-123' }) };

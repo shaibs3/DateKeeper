@@ -313,8 +313,8 @@ npm run test:coverage:threshold # Enforce coverage thresholds
 
 - **main:** Production deployments
 - **develop:** Staging deployments (if implemented)
-- **feature/*:** Feature development branches
-- **hotfix/*:** Emergency production fixes
+- **feature/\*:** Feature development branches
+- **hotfix/\*:** Emergency production fixes
 
 ### GitHub Actions Workflows
 
@@ -351,7 +351,7 @@ npm run test:coverage:threshold # Enforce coverage thresholds
 
 - **NEVER create files unless they're absolutely necessary for achieving your goal**
 - **ALWAYS prefer editing an existing file to creating a new one**
-- **NEVER proactively create documentation files (*.md) or README files unless explicitly requested**
+- **NEVER proactively create documentation files (\*.md) or README files unless explicitly requested**
 - **ALWAYS run formatting commands before committing:**
   1. `npm run format` - Auto-fix formatting
   2. `npm run format:check` - Verify formatting

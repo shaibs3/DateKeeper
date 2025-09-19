@@ -7,6 +7,11 @@ on:
     branches: [ main, develop ]
     types: [ opened, synchronize, reopened ]
 
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 env:
   NODE_VERSION: '22.x'
 
@@ -57,12 +62,14 @@ jobs:
       - name: Run unit tests
         run: npm run test:coverage
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+      - name: Upload results to Codecov
+        uses: codecov/codecov-action@v5
         with:
-          file: ./coverage/lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
           flags: unittests
-          name: codecov-umbrella
+          fail_ci_if_error: false
+        continue-on-error: true
 
   build:
     name: Build Application

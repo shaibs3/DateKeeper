@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [ main, develop ]
 
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 jobs:
   test-coverage:
     runs-on: ubuntu-latest
@@ -26,13 +31,15 @@ jobs:
     - name: Run unit tests with coverage
       run: npm run test:coverage
 
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v4
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v5
       with:
-        file: ./coverage/lcov.info
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: ./coverage/lcov.info
         flags: unittests
         name: codecov-umbrella
-        fail_ci_if_error: true
+        fail_ci_if_error: false
+      continue-on-error: true
 
     - name: Comment PR with coverage
       uses: romeovs/lcov-reporter-action@v0.3.1
@@ -40,3 +47,4 @@ jobs:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         lcov-file: ./coverage/lcov.info
       if: github.event_name == 'pull_request'
+      continue-on-error: true

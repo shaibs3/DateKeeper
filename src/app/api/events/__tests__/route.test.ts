@@ -25,9 +25,9 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 // Cast mocked functions for TypeScript
-const mockAuth = auth as jest.MockedFunction<typeof auth>;
-const mockPrismaFindUnique = prisma.user.findUnique as jest.MockedFunction<typeof prisma.user.findUnique>;
-const mockPrismaDeleteMany = prisma.dateEvent.deleteMany as jest.MockedFunction<typeof prisma.dateEvent.deleteMany>;
+const mockAuth = auth as any;
+const mockPrismaFindUnique = prisma.user.findUnique as any;
+const mockPrismaDeleteMany = prisma.dateEvent.deleteMany as any;
 
 describe('/api/events', () => {
   beforeEach(() => {
@@ -191,6 +191,8 @@ describe('/api/events', () => {
       mockPrismaFindUnique.mockResolvedValue({
         id: 'user1',
         email: 'test@example.com',
+        name: 'Test User',
+        image: null,
       });
       mockPrismaDeleteMany.mockResolvedValue({ count: 5 });
 
@@ -225,6 +227,8 @@ describe('/api/events', () => {
       mockPrismaFindUnique.mockResolvedValue({
         id: 'user1',
         email: 'test@example.com',
+        name: 'Test User',
+        image: null,
       });
       mockPrismaDeleteMany.mockRejectedValue(new Error('Deletion failed'));
 

@@ -1,10 +1,10 @@
 name: Deploy to Staging
 
 on:
-  # Trigger only on pull requests for staging preview
-  pull_request:
-    types: [ opened, synchronize, reopened ]
-  # Allow manual deployment
+  # Disabled automatic staging deployments - only manual deployment allowed
+  # pull_request:
+  #   types: [ opened, synchronize, reopened ]
+  # Allow manual deployment only
   workflow_dispatch:
 
 env:

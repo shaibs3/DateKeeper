@@ -31,7 +31,7 @@ export default function HomeClient() {
   const { status } = useSession();
   const router = useRouter();
   const [events, setEvents] = useState<DateEvent[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [selectedMonths, setSelectedMonths] = useState<{ value: number; label: string }[]>([]);
   const [selectedYear, setSelectedYear] = useState<string>('All');
@@ -45,12 +45,16 @@ export default function HomeClient() {
   ];
 
   const fetchEvents = async () => {
+    setLoading(true);
     try {
       const response = await fetch('/api/events');
       if (response.ok) {
         const data = await response.json();
         setEvents(data);
       }
+    } catch (error) {
+      console.error('Failed to fetch events:', error);
+      setEvents([]);
     } finally {
       setLoading(false);
     }

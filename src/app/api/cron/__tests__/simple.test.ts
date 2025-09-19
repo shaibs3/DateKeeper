@@ -62,7 +62,7 @@ describe('Cron Job Tests', () => {
 
       const mockRequest = {
         headers: {
-          get: (key: string) => key === 'authorization' ? 'Bearer test-secret' : null,
+          get: (key: string) => (key === 'authorization' ? 'Bearer test-secret' : null),
         },
       };
 
@@ -71,7 +71,13 @@ describe('Cron Job Tests', () => {
 
       expect(response.status).toBe(200);
       expect(body.message).toBe('Notifications processed');
-      expect(body.processedReminderTypes).toEqual(['1_DAY', '3_DAYS', '1_WEEK', '2_WEEKS', '1_MONTH']);
+      expect(body.processedReminderTypes).toEqual([
+        '1_DAY',
+        '3_DAYS',
+        '1_WEEK',
+        '2_WEEKS',
+        '1_MONTH',
+      ]);
       expect(mockPrismaFindMany).toHaveBeenCalledTimes(5);
     });
 
@@ -98,15 +104,13 @@ describe('Cron Job Tests', () => {
       });
 
       // Return user for first call, empty for others
-      mockPrismaFindMany
-        .mockResolvedValueOnce([mockUser])
-        .mockResolvedValue([]);
+      mockPrismaFindMany.mockResolvedValueOnce([mockUser]).mockResolvedValue([]);
 
       const { POST } = require('../route');
 
       const mockRequest = {
         headers: {
-          get: (key: string) => key === 'authorization' ? 'Bearer test-secret' : null,
+          get: (key: string) => (key === 'authorization' ? 'Bearer test-secret' : null),
         },
       };
 
@@ -145,15 +149,13 @@ describe('Cron Job Tests', () => {
       // Mock email sending failure
       mockEmailSend.mockRejectedValue(new Error('Network error'));
 
-      mockPrismaFindMany
-        .mockResolvedValueOnce([mockUser])
-        .mockResolvedValue([]);
+      mockPrismaFindMany.mockResolvedValueOnce([mockUser]).mockResolvedValue([]);
 
       const { POST } = require('../route');
 
       const mockRequest = {
         headers: {
-          get: (key: string) => key === 'authorization' ? 'Bearer test-secret' : null,
+          get: (key: string) => (key === 'authorization' ? 'Bearer test-secret' : null),
         },
       };
 
@@ -196,15 +198,13 @@ describe('Cron Job Tests', () => {
         },
       });
 
-      mockPrismaFindMany
-        .mockResolvedValueOnce([mockUser])
-        .mockResolvedValue([]);
+      mockPrismaFindMany.mockResolvedValueOnce([mockUser]).mockResolvedValue([]);
 
       const { POST } = require('../route');
 
       const mockRequest = {
         headers: {
-          get: (key: string) => key === 'authorization' ? 'Bearer test-secret' : null,
+          get: (key: string) => (key === 'authorization' ? 'Bearer test-secret' : null),
         },
       };
 
@@ -233,15 +233,13 @@ describe('Cron Job Tests', () => {
         ],
       };
 
-      mockPrismaFindMany
-        .mockResolvedValueOnce([mockUser])
-        .mockResolvedValue([]);
+      mockPrismaFindMany.mockResolvedValueOnce([mockUser]).mockResolvedValue([]);
 
       const { POST } = require('../route');
 
       const mockRequest = {
         headers: {
-          get: (key: string) => key === 'authorization' ? 'Bearer test-secret' : null,
+          get: (key: string) => (key === 'authorization' ? 'Bearer test-secret' : null),
         },
       };
 
@@ -263,15 +261,13 @@ describe('Cron Job Tests', () => {
         dateEvents: [],
       };
 
-      mockPrismaFindMany
-        .mockResolvedValueOnce([mockUser])
-        .mockResolvedValue([]);
+      mockPrismaFindMany.mockResolvedValueOnce([mockUser]).mockResolvedValue([]);
 
       const { POST } = require('../route');
 
       const mockRequest = {
         headers: {
-          get: (key: string) => key === 'authorization' ? 'Bearer test-secret' : null,
+          get: (key: string) => (key === 'authorization' ? 'Bearer test-secret' : null),
         },
       };
 
@@ -292,7 +288,7 @@ describe('Cron Job Tests', () => {
 
       const mockRequest = {
         headers: {
-          get: (key: string) => key === 'authorization' ? 'Bearer test-secret' : null,
+          get: (key: string) => (key === 'authorization' ? 'Bearer test-secret' : null),
         },
       };
 
@@ -322,15 +318,13 @@ describe('Cron Job Tests', () => {
       // Mock non-Error object being thrown
       mockEmailSend.mockRejectedValue('String error message');
 
-      mockPrismaFindMany
-        .mockResolvedValueOnce([mockUser])
-        .mockResolvedValue([]);
+      mockPrismaFindMany.mockResolvedValueOnce([mockUser]).mockResolvedValue([]);
 
       const { POST } = require('../route');
 
       const mockRequest = {
         headers: {
-          get: (key: string) => key === 'authorization' ? 'Bearer test-secret' : null,
+          get: (key: string) => (key === 'authorization' ? 'Bearer test-secret' : null),
         },
       };
 
@@ -364,15 +358,13 @@ describe('Cron Job Tests', () => {
         error: null,
       });
 
-      mockPrismaFindMany
-        .mockResolvedValueOnce([mockUser])
-        .mockResolvedValue([]);
+      mockPrismaFindMany.mockResolvedValueOnce([mockUser]).mockResolvedValue([]);
 
       const { POST } = require('../route');
 
       const mockRequest = {
         headers: {
-          get: (key: string) => key === 'authorization' ? 'Bearer test-secret' : null,
+          get: (key: string) => (key === 'authorization' ? 'Bearer test-secret' : null),
         },
       };
 

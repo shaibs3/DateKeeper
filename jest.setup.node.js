@@ -14,13 +14,15 @@ process.env.NEXTAUTH_URL = 'http://localhost:3000';
 const originalConsoleError = console.error;
 console.error = (...args) => {
   // Only show console.error in tests if it's not from our expected error handling
-  if (!args.some(arg =>
-    typeof arg === 'string' && (
-      arg.includes('Attempt') ||
-      arg.includes('Notification summary') ||
-      arg.includes('Failed notifications')
+  if (
+    !args.some(
+      arg =>
+        typeof arg === 'string' &&
+        (arg.includes('Attempt') ||
+          arg.includes('Notification summary') ||
+          arg.includes('Failed notifications'))
     )
-  )) {
+  ) {
     originalConsoleError(...args);
   }
 };

@@ -1,7 +1,7 @@
 # 🎂 DateKeeper
 
 [![Tests](https://img.shields.io/badge/tests-258%20passing-brightgreen)](https://github.com/shaibs3/DateKeeper/actions)
-[![Coverage](https://img.shields.io/badge/coverage-51.98%25-orange)](https://github.com/shaibs3/DateKeeper/actions)
+[![Coverage](https://codecov.io/gh/shaibs3/DateKeeper/branch/main/graph/badge.svg)](https://codecov.io/gh/shaibs3/DateKeeper)
 [![API Coverage](https://img.shields.io/badge/API%20routes-100%25-brightgreen)](https://github.com/shaibs3/DateKeeper/actions)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)

@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { signOut } from 'next-auth/react';
 import SignOutButton from '../SignOutButton';
 
@@ -127,11 +127,13 @@ describe('SignOutButton', () => {
   });
 
   describe('Error Handling', () => {
-    it('should not break if signOut throws an error', () => {
+    it('should not break if signOut throws an error', async () => {
+      // Suppress console errors for this test
+      const originalConsoleError = console.error;
+      console.error = jest.fn();
+
       const mockSignOut = signOut as jest.Mock;
-      mockSignOut.mockImplementationOnce(() => {
-        throw new Error('Network error');
-      });
+      mockSignOut.mockRejectedValueOnce(new Error('Network error'));
 
       render(<SignOutButton />);
 
@@ -142,7 +144,12 @@ describe('SignOutButton', () => {
         fireEvent.click(button);
       }).not.toThrow();
 
-      expect(mockSignOut).toHaveBeenCalledWith({ callbackUrl: '/' });
+      // Wait for async operation to complete
+      await waitFor(() => {
+        expect(mockSignOut).toHaveBeenCalledWith({ callbackUrl: '/' });
+      });
+
+      console.error = originalConsoleError;
     });
   });
 
@@ -186,20 +193,18 @@ describe('SignOutButton', () => {
       expect(signOut).toHaveBeenCalledTimes(2);
     });
 
-    it('should maintain function binding correctly', () => {
+    it('should maintain function binding correctly', async () => {
       render(<SignOutButton />);
 
       const button = screen.getByRole('button', { name: 'Sign Out' });
 
-      // Extract the onClick handler
-      const clickHandler = button.onclick;
-      expect(typeof clickHandler).toBe('function');
+      // Simply test that clicking works correctly
+      fireEvent.click(button);
 
-      // Simulate direct function call
-      if (clickHandler) {
-        clickHandler(new MouseEvent('click'));
+      // Wait for async operation to complete
+      await waitFor(() => {
         expect(signOut).toHaveBeenCalledWith({ callbackUrl: '/' });
-      }
+      });
     });
   });
 

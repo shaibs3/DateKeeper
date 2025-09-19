@@ -29,7 +29,7 @@ describe('Prisma Client Configuration', () => {
   });
 
   afterAll(() => {
-    process.env.NODE_ENV = originalEnv;
+    (process.env as any).NODE_ENV = originalEnv;
   });
 
   describe('Prisma Client Initialization', () => {
@@ -57,7 +57,7 @@ describe('Prisma Client Configuration', () => {
 
   describe('Global Prisma Instance Management', () => {
     it('should store prisma instance globally in development environment', () => {
-      process.env.NODE_ENV = 'development';
+      (process.env as any).NODE_ENV = 'development';
       delete (global as any).prisma;
 
       const { prisma } = require('../prisma');
@@ -66,7 +66,7 @@ describe('Prisma Client Configuration', () => {
     });
 
     it('should store prisma instance globally in test environment', () => {
-      process.env.NODE_ENV = 'test';
+      (process.env as any).NODE_ENV = 'test';
       delete (global as any).prisma;
 
       const { prisma } = require('../prisma');
@@ -75,7 +75,7 @@ describe('Prisma Client Configuration', () => {
     });
 
     it('should not store prisma instance globally in production environment', () => {
-      process.env.NODE_ENV = 'production';
+      (process.env as any).NODE_ENV = 'production';
       delete (global as any).prisma;
 
       const { prisma } = require('../prisma');
@@ -84,7 +84,7 @@ describe('Prisma Client Configuration', () => {
     });
 
     it('should handle undefined NODE_ENV as non-production', () => {
-      delete process.env.NODE_ENV;
+      delete (process.env as any).NODE_ENV;
       delete (global as any).prisma;
 
       const { prisma } = require('../prisma');
@@ -95,7 +95,7 @@ describe('Prisma Client Configuration', () => {
 
   describe('Singleton Pattern', () => {
     it('should return the same instance on multiple requires in non-production', () => {
-      process.env.NODE_ENV = 'development';
+      (process.env as any).NODE_ENV = 'development';
       delete (global as any).prisma;
 
       const { prisma: prisma1 } = require('../prisma');
@@ -122,7 +122,7 @@ describe('Prisma Client Configuration', () => {
 
       require('../prisma');
 
-      const callArgs = MockPrismaClient.mock.calls[0][0];
+      const callArgs = (MockPrismaClient.mock.calls as any[])[0]?.[0];
       expect(callArgs).toEqual({
         log: ['query'],
       });
@@ -160,7 +160,7 @@ describe('Prisma Client Configuration', () => {
 
   describe('Environment Edge Cases', () => {
     it('should handle empty NODE_ENV string', () => {
-      process.env.NODE_ENV = '';
+      (process.env as any).NODE_ENV = '';
       delete (global as any).prisma;
 
       const { prisma } = require('../prisma');
@@ -170,7 +170,7 @@ describe('Prisma Client Configuration', () => {
     });
 
     it('should handle NODE_ENV with different casing', () => {
-      process.env.NODE_ENV = 'PRODUCTION';
+      (process.env as any).NODE_ENV = 'PRODUCTION';
       delete (global as any).prisma;
 
       const { prisma } = require('../prisma');
@@ -180,7 +180,7 @@ describe('Prisma Client Configuration', () => {
     });
 
     it('should handle whitespace in NODE_ENV', () => {
-      process.env.NODE_ENV = ' production ';
+      (process.env as any).NODE_ENV = ' production ';
       delete (global as any).prisma;
 
       const { prisma } = require('../prisma');
@@ -192,7 +192,7 @@ describe('Prisma Client Configuration', () => {
 
   describe('Memory Management', () => {
     it('should not create multiple PrismaClient instances in development', () => {
-      process.env.NODE_ENV = 'development';
+      (process.env as any).NODE_ENV = 'development';
       delete (global as any).prisma;
 
       // Import multiple times
@@ -204,7 +204,7 @@ describe('Prisma Client Configuration', () => {
     });
 
     it('should properly manage global reference', () => {
-      process.env.NODE_ENV = 'development';
+      (process.env as any).NODE_ENV = 'development';
       delete (global as any).prisma;
 
       const { prisma } = require('../prisma');
@@ -216,7 +216,7 @@ describe('Prisma Client Configuration', () => {
 
   describe('Global Object Type Casting', () => {
     it('should handle global type casting correctly', () => {
-      process.env.NODE_ENV = 'development';
+      (process.env as any).NODE_ENV = 'development';
       delete (global as any).prisma;
 
       const { prisma } = require('../prisma');
@@ -226,7 +226,7 @@ describe('Prisma Client Configuration', () => {
     });
 
     it('should handle global object extension safely', () => {
-      process.env.NODE_ENV = 'development';
+      (process.env as any).NODE_ENV = 'development';
       delete (global as any).prisma;
 
       const { prisma } = require('../prisma');
@@ -239,7 +239,7 @@ describe('Prisma Client Configuration', () => {
   describe('Production vs Non-Production Behavior', () => {
     it('should behave differently in production vs development', () => {
       // Test development
-      process.env.NODE_ENV = 'development';
+      (process.env as any).NODE_ENV = 'development';
       delete (global as any).prisma;
 
       const { prisma: devPrisma } = require('../prisma');
@@ -250,7 +250,7 @@ describe('Prisma Client Configuration', () => {
       delete (global as any).prisma;
 
       // Test production
-      process.env.NODE_ENV = 'production';
+      (process.env as any).NODE_ENV = 'production';
       const { prisma: prodPrisma } = require('../prisma');
       expect((global as any).prisma).toBeUndefined();
     });
@@ -263,9 +263,9 @@ describe('Prisma Client Configuration', () => {
         delete (global as any).prisma;
 
         if (env === undefined) {
-          delete process.env.NODE_ENV;
+          delete (process.env as any).NODE_ENV;
         } else {
-          process.env.NODE_ENV = env;
+          (process.env as any).NODE_ENV = env;
         }
 
         const { prisma } = require('../prisma');

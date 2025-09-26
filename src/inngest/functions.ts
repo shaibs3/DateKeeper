@@ -147,7 +147,7 @@ export const sendEventReminders = inngest.createFunction(
     id: 'send-event-reminders',
     retries: 3,
   },
-  { cron: '*/5 * * * *' }, // Every 5 minutes for testing
+  { cron: '0 0 * * *' }, // Daily at midnight UTC
   async ({ step }) => {
     inngestLogger.info('🚀 Inngest function started - sendEventReminders');
 

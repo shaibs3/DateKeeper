@@ -1,27 +1,36 @@
-import pino from 'pino';
+import winston from 'winston';
 
-// Configure Pino logger based on environment
+// Configure Winston logger based on environment
 const isDevelopment = process.env.NODE_ENV === 'development';
 const isTest = process.env.NODE_ENV === 'test';
 
-export const logger = pino({
-  level: isTest ? 'warn' : isDevelopment ? 'debug' : 'info',
-  transport: isDevelopment
-    ? {
-        target: 'pino-pretty',
-        options: {
-          colorize: true,
-          ignore: 'pid,hostname',
-          translateTime: 'SYS:standard',
-        },
-      }
-    : undefined, // Production uses JSON format
-  formatters: {
-    level: label => {
-      return { level: label.toUpperCase() };
-    },
-  },
-  timestamp: pino.stdTimeFunctions.isoTime,
+const logLevel = isTest ? 'warn' : isDevelopment ? 'debug' : 'info';
+
+// Create base logger
+export const logger = winston.createLogger({
+  level: logLevel,
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.errors({ stack: true }),
+    winston.format.json()
+  ),
+  transports: [
+    new winston.transports.Console({
+      format: isDevelopment
+        ? winston.format.combine(
+            winston.format.colorize(),
+            winston.format.simple(),
+            winston.format.printf(({ timestamp, level, message, module, ...meta }) => {
+              const metaStr = Object.keys(meta).length ? JSON.stringify(meta, null, 2) : '';
+              const moduleStr = module ? `[${module}] ` : '';
+              return `${timestamp} ${level}: ${moduleStr}${message} ${metaStr}`;
+            })
+          )
+        : winston.format.json(),
+    }),
+  ],
+  // Prevent crashes on unhandled exceptions
+  exitOnError: false,
 });
 
 // Create child loggers for different modules

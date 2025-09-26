@@ -51,7 +51,9 @@ export const {
           where: { email: user.email },
           select: { id: true, email: true, name: true },
         });
-        authLogger.debug(`User lookup result - email: ${user.email}, exists: ${!!existingUser}, id: ${existingUser?.id}`);
+        authLogger.debug(
+          `User lookup result - email: ${user.email}, exists: ${!!existingUser}, id: ${existingUser?.id}`
+        );
 
         if (!existingUser) {
           authLogger.info(`Creating new user: ${user.email}`);
@@ -66,11 +68,15 @@ export const {
           authLogger.info(`New user created successfully: ${user.email} with ID ${newUser.id}`);
           return true;
         } else {
-          authLogger.info(`Existing user sign-in successful: ${user.email} with ID ${existingUser.id}`);
+          authLogger.info(
+            `Existing user sign-in successful: ${user.email} with ID ${existingUser.id}`
+          );
           return true;
         }
       } catch (error) {
-        authLogger.error(`Sign-in callback failed for ${user.email}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        authLogger.error(
+          `Sign-in callback failed for ${user.email}: ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
         return false;
       }
     },
@@ -91,7 +97,9 @@ export const {
             authLogger.warn(`User not found in database for session: ${session.user.email}`);
           }
         } catch (error) {
-          authLogger.error(`Database error in session callback for ${session.user.email}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          authLogger.error(
+            `Database error in session callback for ${session.user.email}: ${error instanceof Error ? error.message : 'Unknown error'}`
+          );
         }
       }
 

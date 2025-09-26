@@ -115,7 +115,9 @@ async function sendNotificationEmail(
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      inngestLogger.warn(`Email sending failed for ${user.email} (attempt ${attempt}/${maxRetries}): ${errorMessage}`);
+      inngestLogger.warn(
+        `Email sending failed for ${user.email} (attempt ${attempt}/${maxRetries}): ${errorMessage}`
+      );
 
       if (attempt === maxRetries) {
         return {
@@ -179,9 +181,13 @@ export const sendEventReminders = inngest.createFunction(
     };
 
     if (totalFailures > 0) {
-      inngestLogger.warn(`Email notifications completed with failures: ${summary.totalNotificationsSent} sent, ${summary.totalFailures} failed`);
+      inngestLogger.warn(
+        `Email notifications completed with failures: ${summary.totalNotificationsSent} sent, ${summary.totalFailures} failed`
+      );
     } else {
-      inngestLogger.info(`Email notifications completed successfully: ${summary.totalNotificationsSent} sent, ${summary.totalFailures} failed`);
+      inngestLogger.info(
+        `Email notifications completed successfully: ${summary.totalNotificationsSent} sent, ${summary.totalFailures} failed`
+      );
     }
 
     return {

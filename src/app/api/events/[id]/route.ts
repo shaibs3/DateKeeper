@@ -31,7 +31,9 @@ export async function DELETE(req: NextRequest, context: { params: Promise<{ id: 
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    apiLogger.error(`Failed to delete event ${params.id} for user ${session.user.id}: ${error instanceof Error ? error.message : error}`);
+    apiLogger.error(
+      `Failed to delete event ${params.id} for user ${session.user.id}: ${error instanceof Error ? error.message : error}`
+    );
     return NextResponse.json({ error: 'Failed to delete event', details: error }, { status: 500 });
   }
 }
@@ -76,7 +78,9 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
 
     return NextResponse.json({ message: `Event with ID ${params.id} updated successfully.` });
   } catch (error) {
-    apiLogger.error(`Failed to update event ${params.id} for user ${session.user.id}: ${error instanceof Error ? error.message : error}`);
+    apiLogger.error(
+      `Failed to update event ${params.id} for user ${session.user.id}: ${error instanceof Error ? error.message : error}`
+    );
     return NextResponse.json({ error: 'Failed to update event', details: error }, { status: 500 });
   }
 }

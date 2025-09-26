@@ -169,7 +169,7 @@ INNGEST_SIGNING_KEY=your-inngest-signing-key
 **Pre-Commit Checklist:**
 
 1. Run `npm run format` to auto-fix formatting
-2. Run `npm run format:check` to verify formatting
+2. **Run `npm run format:check` to verify formatting** (REQUIRED - commits MUST be rejected if formatting check fails)
 3. Run `npm run lint` to check for linting issues
 4. Run `npm run type-check` to verify TypeScript
 5. **Run `npm test` to verify all unit tests pass** (REQUIRED - commits MUST be rejected if ANY tests fail)

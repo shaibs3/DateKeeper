@@ -1,6 +1,7 @@
 'use client';
 
 import { signIn } from 'next-auth/react';
+import { clientLogger } from '@/lib/clientLogger';
 import Link from 'next/link';
 
 export default function SignUp() {
@@ -12,7 +13,7 @@ export default function SignUp() {
         redirect: true,
       });
     } catch (error) {
-      console.error('Error signing up:', error);
+      clientLogger.error('Error signing up', error);
     }
   };
 

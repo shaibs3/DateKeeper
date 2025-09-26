@@ -22,6 +22,8 @@ const customJestConfig = {
     '!src/**/index.{js,jsx,ts,tsx}',
     '!src/middleware.ts',
     '!src/lib/auth.ts',
+    '!src/inngest/**/*',
+    '!src/app/api/inngest/**/*',
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],

@@ -1,10 +1,8 @@
-import { NextResponse } from 'next/server';
+import { inngest } from './client';
 import { prisma } from '@/lib/prisma';
 import { Resend } from 'resend';
 import { DateEvent, User } from '@prisma/client';
-
-// Using Node.js runtime for Prisma compatibility
-// export const runtime = 'edge';
+import { inngestLogger } from '@/lib/logger';
 
 type ReminderType = '1_DAY' | '3_DAYS' | '1_WEEK' | '2_WEEKS' | '1_MONTH';
 
@@ -110,7 +108,6 @@ async function sendNotificationEmail(
         throw new Error(`Resend API error: ${emailResult.error.message}`);
       }
 
-      // Success - return early
       return {
         success: true,
         emailId: emailResult.data?.id,
@@ -118,10 +115,11 @@ async function sendNotificationEmail(
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      console.error(`Attempt ${attempt}/${maxRetries} failed for ${user.email}:`, errorMessage);
+      inngestLogger.warn(
+        `Email sending failed for ${user.email} (attempt ${attempt}/${maxRetries}): ${errorMessage}`
+      );
 
       if (attempt === maxRetries) {
-        // Final failure - return error details
         return {
           success: false,
           error: errorMessage,
@@ -129,8 +127,7 @@ async function sendNotificationEmail(
         };
       }
 
-      // Wait before retry with exponential backoff
-      const delayMs = 1000 * Math.pow(2, attempt - 1); // 1s, 2s, 4s...
+      const delayMs = 1000 * Math.pow(2, attempt - 1);
       await new Promise(resolve => setTimeout(resolve, delayMs));
     }
   }
@@ -138,58 +135,66 @@ async function sendNotificationEmail(
   return { success: false, error: 'Unexpected end of retry loop' };
 }
 
-export async function POST(request: Request) {
-  try {
-    // Verify the request is from Vercel Cron
-    const authHeader = request.headers.get('authorization');
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
+export const sendEventReminders = inngest.createFunction(
+  {
+    id: 'send-event-reminders',
+    retries: 3,
+  },
+  { cron: '0 0 * * *' }, // Daily at midnight UTC
+  async ({ step }) => {
     const resend = new Resend(process.env.RESEND_API_KEY);
+
     let totalNotificationsSent = 0;
     let totalFailures = 0;
     const failureDetails: Array<{ user: string; error: string; attempts: number }> = [];
 
     // Process each reminder type
     for (const reminderConfig of REMINDER_CONFIGS) {
-      const dateRange = calculateDateRange(reminderConfig.days);
-      const users = await getEventsForReminder(reminderConfig.type, dateRange);
+      await step.run(`process-${reminderConfig.type}-reminders`, async () => {
+        const dateRange = calculateDateRange(reminderConfig.days);
+        const users = await getEventsForReminder(reminderConfig.type, dateRange);
 
-      // Send notifications for this reminder type
-      for (const user of users) {
-        const result = await sendNotificationEmail(resend, user, reminderConfig);
+        // Send notifications for this reminder type
+        for (const user of users) {
+          const result = await sendNotificationEmail(resend, user, reminderConfig);
 
-        if (result.success) {
-          totalNotificationsSent += user.dateEvents.length;
-        } else {
-          totalFailures++;
-          failureDetails.push({
-            user: user.email || 'unknown',
-            error: result.error || result.reason || 'Unknown error',
-            attempts: result.totalAttempts || 0,
-          });
+          if (result.success) {
+            totalNotificationsSent += user.dateEvents.length;
+          } else {
+            totalFailures++;
+            failureDetails.push({
+              user: user.email || 'unknown',
+              error: result.error || result.reason || 'Unknown error',
+              attempts: result.totalAttempts || 0,
+            });
+          }
         }
-      }
+      });
     }
 
     // Log summary for monitoring
-    if (totalFailures > 0) {
-      console.error(
-        `Notification summary: ${totalNotificationsSent} sent, ${totalFailures} failed`
-      );
-      console.error('Failed notifications:', failureDetails);
-    }
-
-    return NextResponse.json({
-      message: 'Notifications processed',
+    const summary = {
       totalNotificationsSent,
       totalFailures,
       processedReminderTypes: REMINDER_CONFIGS.map(c => c.type),
       ...(totalFailures > 0 && { failureDetails }),
-    });
-  } catch (error) {
-    console.error('Cron job error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    };
+
+    if (totalFailures > 0) {
+      inngestLogger.warn(
+        `Email notifications completed with failures: ${summary.totalNotificationsSent} sent, ${summary.totalFailures} failed`
+      );
+    } else {
+      inngestLogger.info(
+        `Email notifications completed successfully: ${summary.totalNotificationsSent} sent, ${summary.totalFailures} failed`
+      );
+    }
+
+    return {
+      totalNotificationsSent,
+      totalFailures,
+      processedReminderTypes: REMINDER_CONFIGS.map(c => c.type),
+      ...(totalFailures > 0 && { failureDetails }),
+    };
   }
-}
+);

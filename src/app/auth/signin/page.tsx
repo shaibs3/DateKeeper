@@ -4,6 +4,7 @@ import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { FcGoogle } from 'react-icons/fc';
+import { clientLogger } from '@/lib/clientLogger';
 
 export default function SignIn() {
   const { data: session } = useSession();
@@ -22,7 +23,7 @@ export default function SignIn() {
         redirect: true,
       });
     } catch (error) {
-      console.error('Error signing in:', error);
+      clientLogger.error('Error signing in', error);
     }
   };
 

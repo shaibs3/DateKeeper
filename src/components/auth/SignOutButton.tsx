@@ -1,13 +1,14 @@
 'use client';
 
 import { signOut } from 'next-auth/react';
+import { clientLogger } from '@/lib/clientLogger';
 
 export default function SignOutButton() {
   const handleSignOut = async () => {
     try {
       await signOut({ callbackUrl: '/' });
     } catch (error) {
-      console.error('Sign out error:', error);
+      clientLogger.error('Sign out error', error);
     }
   };
 

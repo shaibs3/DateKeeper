@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { apiLogger } from '@/lib/logger';
 
 export async function DELETE(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   const session = await auth();
@@ -30,7 +31,9 @@ export async function DELETE(req: NextRequest, context: { params: Promise<{ id: 
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Failed to delete event:', error);
+    apiLogger.error(
+      `Failed to delete event ${params.id} for user ${session.user.id}: ${error instanceof Error ? error.message : error}`
+    );
     return NextResponse.json({ error: 'Failed to delete event', details: error }, { status: 500 });
   }
 }
@@ -75,7 +78,9 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
 
     return NextResponse.json({ message: `Event with ID ${params.id} updated successfully.` });
   } catch (error) {
-    console.error('Failed to update event:', error);
+    apiLogger.error(
+      `Failed to update event ${params.id} for user ${session.user.id}: ${error instanceof Error ? error.message : error}`
+    );
     return NextResponse.json({ error: 'Failed to update event', details: error }, { status: 500 });
   }
 }

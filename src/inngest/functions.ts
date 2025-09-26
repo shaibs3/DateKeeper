@@ -2,6 +2,7 @@ import { inngest } from './client';
 import { prisma } from '@/lib/prisma';
 import { Resend } from 'resend';
 import { DateEvent, User } from '@prisma/client';
+import { inngestLogger } from '@/lib/logger';
 
 type ReminderType = '1_DAY' | '3_DAYS' | '1_WEEK' | '2_WEEKS' | '1_MONTH';
 
@@ -114,7 +115,7 @@ async function sendNotificationEmail(
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      console.error(`Attempt ${attempt}/${maxRetries} failed for ${user.email}:`, errorMessage);
+      inngestLogger.warn(`Email sending failed for ${user.email} (attempt ${attempt}/${maxRetries}): ${errorMessage}`);
 
       if (attempt === maxRetries) {
         return {
@@ -170,11 +171,17 @@ export const sendEventReminders = inngest.createFunction(
     }
 
     // Log summary for monitoring
+    const summary = {
+      totalNotificationsSent,
+      totalFailures,
+      processedReminderTypes: REMINDER_CONFIGS.map(c => c.type),
+      ...(totalFailures > 0 && { failureDetails }),
+    };
+
     if (totalFailures > 0) {
-      console.error(
-        `Notification summary: ${totalNotificationsSent} sent, ${totalFailures} failed`
-      );
-      console.error('Failed notifications:', failureDetails);
+      inngestLogger.warn(`Email notifications completed with failures: ${summary.totalNotificationsSent} sent, ${summary.totalFailures} failed`);
+    } else {
+      inngestLogger.info(`Email notifications completed successfully: ${summary.totalNotificationsSent} sent, ${summary.totalFailures} failed`);
     }
 
     return {

@@ -8,6 +8,7 @@ import { AuthenticatedHeader } from '@/components/layout/AuthenticatedHeader';
 import { AddDateModal } from '@/components/events/AddDateModal';
 import { DateList } from '@/components/events/DateList';
 import Select, { MultiValue } from 'react-select';
+import { clientLogger } from '@/lib/clientLogger';
 import type { DateEvent } from '@/components/events/DateList';
 
 const MONTHS = [
@@ -53,7 +54,7 @@ export default function HomeClient() {
         setEvents(data);
       }
     } catch (error) {
-      console.error('Failed to fetch events:', error);
+      clientLogger.error('Failed to fetch events', error);
       setEvents([]);
     } finally {
       setLoading(false);

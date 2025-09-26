@@ -2,6 +2,7 @@ import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import { prisma } from '@/lib/prisma';
 import { config, validateEnvironment } from '@/lib/config';
+import { authLogger } from '@/lib/logger';
 
 declare module 'next-auth' {
   interface Session {
@@ -35,47 +36,25 @@ export const {
   debug: config.features.debugMode,
   callbacks: {
     async signIn({ user, account, profile }) {
-      console.log('🔐 =================================');
-      console.log('🔐 SIGNIN CALLBACK STARTED');
-      console.log('🔐 =================================');
-      console.log('📧 User email:', user.email);
-      console.log('👤 Full user object:', JSON.stringify(user, null, 2));
-      console.log('🔑 Full account object:', JSON.stringify(account, null, 2));
-      console.log('👤 Full profile object:', JSON.stringify(profile, null, 2));
+      authLogger.debug(`Sign-in callback started for email: ${user.email}`);
 
       // Step 1: Validate email
       if (!user.email) {
-        console.error('❌ STEP 1 FAILED: No email provided in user object');
-        console.log('🔐 SIGNIN CALLBACK RETURNING FALSE - NO EMAIL');
+        authLogger.error('Sign-in failed: No email provided');
         return false;
       }
-      console.log('✅ STEP 1 PASSED: Email validation successful');
+      authLogger.debug(`Email validation passed for: ${user.email}`);
 
       try {
-        // Step 2: Database connection test
-        console.log('🔍 STEP 2: Testing database connection...');
-        console.log('🔍 DATABASE_URL exists:', !!process.env.DATABASE_URL);
-        console.log('🔍 DATABASE_URL preview:', process.env.DATABASE_URL?.substring(0, 20) + '...');
-
-        // Step 3: Check if user exists
-        console.log('🔍 STEP 3: Checking if user exists in database...');
+        authLogger.debug(`Checking user existence in database for: ${user.email}`);
         const existingUser = await prisma.user.findUnique({
           where: { email: user.email },
           select: { id: true, email: true, name: true },
         });
-        console.log('👥 STEP 3 RESULT: Existing user found:', !!existingUser);
-        if (existingUser) {
-          console.log('👥 Existing user details:', JSON.stringify(existingUser, null, 2));
-        }
+        authLogger.debug(`User lookup result - email: ${user.email}, exists: ${!!existingUser}, id: ${existingUser?.id}`);
 
         if (!existingUser) {
-          // Step 4: Create new user
-          console.log('👤 STEP 4: Creating new user...');
-          console.log('👤 User data to create:', {
-            email: user.email,
-            name: user.name || '',
-            image: user.image || null,
-          });
+          authLogger.info(`Creating new user: ${user.email}`);
 
           const newUser = await prisma.user.create({
             data: {
@@ -84,63 +63,39 @@ export const {
               image: user.image || null,
             },
           });
-          console.log('✅ STEP 4 SUCCESS: New user created:', JSON.stringify(newUser, null, 2));
-          console.log('🔐 SIGNIN CALLBACK RETURNING TRUE - NEW USER CREATED');
+          authLogger.info(`New user created successfully: ${user.email} with ID ${newUser.id}`);
           return true;
         } else {
-          // Step 5: Existing user login
-          console.log('✅ STEP 5 SUCCESS: Existing user sign-in successful');
-          console.log('🔐 SIGNIN CALLBACK RETURNING TRUE - EXISTING USER');
+          authLogger.info(`Existing user sign-in successful: ${user.email} with ID ${existingUser.id}`);
           return true;
         }
       } catch (error) {
-        console.error('❌ FATAL ERROR in signIn callback');
-        console.error('❌ Error type:', typeof error);
-        console.error('❌ Error instanceof Error:', error instanceof Error);
-        console.error('❌ Raw error:', error);
-        console.error(
-          '❌ Error stack:',
-          error instanceof Error ? error.stack : 'No stack available'
-        );
-
-        // Enhanced Prisma error logging
-        if (error && typeof error === 'object') {
-          console.error('❌ Error properties:', Object.keys(error));
-          console.error('❌ Error details:', {
-            message: error instanceof Error ? error.message : 'Unknown error',
-            code: (error as any)?.code,
-            meta: (error as any)?.meta,
-            name: (error as any)?.name,
-          });
-        }
-
-        console.log('🔐 SIGNIN CALLBACK RETURNING FALSE - DATABASE ERROR');
+        authLogger.error(`Sign-in callback failed for ${user.email}: ${error instanceof Error ? error.message : 'Unknown error'}`);
         return false;
       }
     },
     async session({ session }) {
-      console.log('🎫 Session callback started');
-      console.log('📧 Session email:', session.user?.email);
+      authLogger.debug(`Session callback started for: ${session.user?.email}`);
 
       if (session.user?.email) {
         try {
-          console.log('🔍 Looking up user in database for session...');
+          authLogger.debug(`Looking up user for session: ${session.user.email}`);
           const dbUser = await prisma.user.findUnique({
             where: { email: session.user.email },
           });
 
           if (dbUser) {
             session.user.id = dbUser.id;
-            console.log('✅ Session user ID set:', dbUser.id);
+            authLogger.debug(`Session user ID set: ${session.user.email} -> ${dbUser.id}`);
           } else {
-            console.warn('⚠️ User not found in database for session');
+            authLogger.warn(`User not found in database for session: ${session.user.email}`);
           }
         } catch (error) {
-          console.error('❌ Database error in session callback:', error);
+          authLogger.error(`Database error in session callback for ${session.user.email}: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
       }
 
-      console.log('🎫 Session callback completed');
+      authLogger.debug(`Session callback completed for user: ${session.user?.id}`);
       return session;
     },
     async redirect({ url, baseUrl }) {

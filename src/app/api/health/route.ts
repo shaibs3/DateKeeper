@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
+import { apiLogger } from '@/lib/logger';
 
 export async function GET() {
   const baseResponse = {
@@ -37,7 +38,7 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error('Health check failed:', error);
+    apiLogger.error(`Health check failed: ${error instanceof Error ? error.message : error}`);
 
     return NextResponse.json(
       {

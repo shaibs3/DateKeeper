@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { apiLogger } from '@/lib/logger';
 
 export async function GET(_req: NextRequest) {
   const session = await auth();
@@ -22,7 +23,7 @@ export async function GET(_req: NextRequest) {
 
     return NextResponse.json(user.dateEvents);
   } catch (error) {
-    console.error('Failed to fetch events:', error);
+    apiLogger.error(`Failed to fetch events for user ${session.user.id}: ${error instanceof Error ? error.message : error}`);
     return NextResponse.json({ error: 'Failed to fetch events', details: error }, { status: 500 });
   }
 }
@@ -41,7 +42,7 @@ export async function DELETE(_req: NextRequest) {
     await prisma.dateEvent.deleteMany({ where: { userId: user.id } });
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Failed to delete all events:', error);
+    apiLogger.error(`Failed to delete all events for user ${session.user.id}: ${error instanceof Error ? error.message : error}`);
     return NextResponse.json(
       { error: 'Failed to delete all events', details: error },
       { status: 500 }

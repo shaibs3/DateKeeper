@@ -140,7 +140,7 @@ export const sendEventReminders = inngest.createFunction(
     id: 'send-event-reminders',
     retries: 3,
   },
-  { cron: '0 0 * * *' }, // Daily at midnight UTC
+  { cron: '*/5 * * * *' }, // Every 5 minutes for testing
   async ({ step }) => {
     const resend = new Resend(process.env.RESEND_API_KEY);
 

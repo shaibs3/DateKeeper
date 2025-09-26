@@ -36,74 +36,86 @@ export const {
   debug: config.features.debugMode,
   callbacks: {
     async signIn({ user, account, profile }) {
-      authLogger.debug(`Sign-in callback started for email: ${user.email}`);
-
-      // Step 1: Validate email
-      if (!user.email) {
-        authLogger.error('Sign-in failed: No email provided');
-        return false;
-      }
-      authLogger.debug(`Email validation passed for: ${user.email}`);
-
       try {
-        authLogger.debug(`Checking user existence in database for: ${user.email}`);
-        const existingUser = await prisma.user.findUnique({
-          where: { email: user.email },
-          select: { id: true, email: true, name: true },
-        });
-        authLogger.debug(
-          `User lookup result - email: ${user.email}, exists: ${!!existingUser}, id: ${existingUser?.id}`
-        );
+        authLogger.debug(`Sign-in callback started for email: ${user.email || 'unknown'}`);
 
-        if (!existingUser) {
-          authLogger.info(`Creating new user: ${user.email}`);
-
-          const newUser = await prisma.user.create({
-            data: {
-              email: user.email,
-              name: user.name || '',
-              image: user.image || null,
-            },
-          });
-          authLogger.info(`New user created successfully: ${user.email} with ID ${newUser.id}`);
-          return true;
-        } else {
-          authLogger.info(
-            `Existing user sign-in successful: ${user.email} with ID ${existingUser.id}`
-          );
-          return true;
+        // Step 1: Validate email
+        if (!user.email) {
+          authLogger.error('Sign-in failed: No email provided');
+          return false;
         }
-      } catch (error) {
-        authLogger.error(
-          `Sign-in callback failed for ${user.email}: ${error instanceof Error ? error.message : 'Unknown error'}`
-        );
+        authLogger.debug(`Email validation passed for: ${user.email}`);
+
+        try {
+          authLogger.debug(`Checking user existence in database for: ${user.email}`);
+          const existingUser = await prisma.user.findUnique({
+            where: { email: user.email },
+            select: { id: true, email: true, name: true },
+          });
+          authLogger.debug(
+            `User lookup result - email: ${user.email}, exists: ${!!existingUser}, id: ${existingUser?.id}`
+          );
+
+          if (!existingUser) {
+            authLogger.info(`Creating new user: ${user.email}`);
+
+            const newUser = await prisma.user.create({
+              data: {
+                email: user.email,
+                name: user.name || '',
+                image: user.image || null,
+              },
+            });
+            authLogger.info(`New user created successfully: ${user.email} with ID ${newUser.id}`);
+            return true;
+          } else {
+            authLogger.info(
+              `Existing user sign-in successful: ${user.email} with ID ${existingUser.id}`
+            );
+            return true;
+          }
+        } catch (error) {
+          authLogger.error(
+            `Sign-in callback failed for ${user.email}: ${error instanceof Error ? error.message : 'Unknown error'}`
+          );
+          return false;
+        }
+      } catch (logError) {
+        // Fallback: if logging fails, don't crash the sign-in
+        console.error('Logger error in signIn callback:', logError);
         return false;
       }
     },
     async session({ session }) {
-      authLogger.debug(`Session callback started for: ${session.user?.email}`);
+      try {
+        authLogger.debug(`Session callback started for: ${session.user?.email || 'unknown'}`);
 
-      if (session.user?.email) {
-        try {
-          authLogger.debug(`Looking up user for session: ${session.user.email}`);
-          const dbUser = await prisma.user.findUnique({
-            where: { email: session.user.email },
-          });
+        if (session.user?.email) {
+          try {
+            authLogger.debug(`Looking up user for session: ${session.user.email}`);
+            const dbUser = await prisma.user.findUnique({
+              where: { email: session.user.email },
+            });
 
-          if (dbUser) {
-            session.user.id = dbUser.id;
-            authLogger.debug(`Session user ID set: ${session.user.email} -> ${dbUser.id}`);
-          } else {
-            authLogger.warn(`User not found in database for session: ${session.user.email}`);
+            if (dbUser) {
+              session.user.id = dbUser.id;
+              authLogger.debug(`Session user ID set: ${session.user.email} -> ${dbUser.id}`);
+            } else {
+              authLogger.warn(`User not found in database for session: ${session.user.email}`);
+            }
+          } catch (error) {
+            authLogger.error(
+              `Database error in session callback for ${session.user.email}: ${error instanceof Error ? error.message : 'Unknown error'}`
+            );
           }
-        } catch (error) {
-          authLogger.error(
-            `Database error in session callback for ${session.user.email}: ${error instanceof Error ? error.message : 'Unknown error'}`
-          );
         }
+
+        authLogger.debug(`Session callback completed for user: ${session.user?.id || 'unknown'}`);
+      } catch (logError) {
+        // Fallback: if logging fails, don't crash the session
+        console.error('Logger error in session callback:', logError);
       }
 
-      authLogger.debug(`Session callback completed for user: ${session.user?.id}`);
       return session;
     },
     async redirect({ url, baseUrl }) {

@@ -209,23 +209,26 @@ export function DateList({
     <>
       <div className="space-y-8">
         {/* Coming Up Soon: current month */}
-        {eventsByMonth[currentMonth] && eventsByMonth[currentMonth].length > 0 && (
-          <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Coming Up Soon</h2>
-            <div className="space-y-3">
-              {eventsByMonth[currentMonth]
-                .filter(event => {
-                  const eventDate = new Date(event.date);
-                  const today = new Date();
-                  today.setHours(0, 0, 0, 0);
-                  return eventDate >= today;
-                })
-                .map(event => (
+        {(() => {
+          const currentMonthFutureEvents =
+            eventsByMonth[currentMonth]?.filter(event => {
+              const eventDate = new Date(event.date);
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              return eventDate >= today;
+            }) || [];
+
+          return currentMonthFutureEvents.length > 0 ? (
+            <section>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Coming Up Soon</h2>
+              <div className="space-y-3">
+                {currentMonthFutureEvents.map(event => (
                   <EventCard key={event.id} event={event} />
                 ))}
-            </div>
-          </section>
-        )}
+              </div>
+            </section>
+          ) : null;
+        })()}
         {/* Other months in calendar order after current */}
         {orderedMonths
           .filter(

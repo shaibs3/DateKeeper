@@ -133,8 +133,20 @@ describe('DateList', () => {
     it('should show "Coming Up Soon" section for current month future events', () => {
       // Create an event for current month that's in the future
       const currentDate = new Date();
-      const futureDate = new Date(currentDate);
-      futureDate.setDate(futureDate.getDate() + 5); // 5 days from today
+      const currentMonth = currentDate.getMonth();
+      const currentYear = currentDate.getFullYear();
+
+      // Create a date that's guaranteed to be in the current month and in the future
+      const futureDate = new Date(
+        currentYear,
+        currentMonth,
+        Math.min(currentDate.getDate() + 3, 28)
+      );
+
+      // If the calculated date is not in the future, use the last day of current month
+      if (futureDate <= currentDate) {
+        futureDate.setDate(new Date(currentYear, currentMonth + 1, 0).getDate()); // Last day of current month
+      }
 
       const currentMonthEvent: DateEvent = {
         id: '6',

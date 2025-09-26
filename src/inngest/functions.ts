@@ -72,8 +72,15 @@ async function sendNotificationEmail(
   reminderConfig: ReminderConfig,
   maxRetries = 3
 ) {
-  if (!user.email || user.dateEvents.length === 0)
+  inngestLogger.info(`📧 sendNotificationEmail called for ${user.email}`);
+  inngestLogger.info(`📧 User has ${user.dateEvents.length} events`);
+
+  if (!user.email || user.dateEvents.length === 0) {
+    inngestLogger.warn(
+      `📧 Skipping email - no email (${!!user.email}) or no events (${user.dateEvents.length})`
+    );
     return { success: false, reason: 'No email or events' };
+  }
 
   const emailTemplate = `
     <h1>Upcoming Event Reminder</h1>
@@ -142,6 +149,16 @@ export const sendEventReminders = inngest.createFunction(
   },
   { cron: '*/5 * * * *' }, // Every 5 minutes for testing
   async ({ step }) => {
+    inngestLogger.info('🚀 Inngest function started - sendEventReminders');
+
+    // Check environment variables
+    inngestLogger.info(`📧 RESEND_API_KEY exists: ${!!process.env.RESEND_API_KEY}`);
+    if (process.env.RESEND_API_KEY) {
+      inngestLogger.info(
+        `📧 RESEND_API_KEY preview: ${process.env.RESEND_API_KEY.substring(0, 8)}...`
+      );
+    }
+
     const resend = new Resend(process.env.RESEND_API_KEY);
 
     let totalNotificationsSent = 0;
@@ -151,17 +168,45 @@ export const sendEventReminders = inngest.createFunction(
     // Process each reminder type
     for (const reminderConfig of REMINDER_CONFIGS) {
       await step.run(`process-${reminderConfig.type}-reminders`, async () => {
+        inngestLogger.info(
+          `🔍 Processing ${reminderConfig.type} reminders (${reminderConfig.displayName})`
+        );
+
         const dateRange = calculateDateRange(reminderConfig.days);
+        inngestLogger.info(
+          `📅 Date range for ${reminderConfig.type}: ${dateRange.start.toISOString()} to ${dateRange.end.toISOString()}`
+        );
+
         const users = await getEventsForReminder(reminderConfig.type, dateRange);
+        inngestLogger.info(`👥 Found ${users.length} users with ${reminderConfig.type} reminders`);
+
+        if (users.length > 0) {
+          users.forEach((user, index) => {
+            inngestLogger.info(
+              `👤 User ${index + 1}: ${user.email} has ${user.dateEvents.length} events`
+            );
+            user.dateEvents.forEach((event, eventIndex) => {
+              inngestLogger.info(
+                `  📅 Event ${eventIndex + 1}: ${event.name} on ${event.date.toISOString()}`
+              );
+            });
+          });
+        }
 
         // Send notifications for this reminder type
         for (const user of users) {
+          inngestLogger.info(`📧 Attempting to send email to: ${user.email}`);
           const result = await sendNotificationEmail(resend, user, reminderConfig);
+          inngestLogger.info(`📧 Email result for ${user.email}: ${JSON.stringify(result)}`);
 
           if (result.success) {
             totalNotificationsSent += user.dateEvents.length;
+            inngestLogger.info(`✅ Successfully sent email to ${user.email}`);
           } else {
             totalFailures++;
+            inngestLogger.error(
+              `❌ Failed to send email to ${user.email}: ${result.error || result.reason}`
+            );
             failureDetails.push({
               user: user.email || 'unknown',
               error: result.error || result.reason || 'Unknown error',
@@ -180,15 +225,20 @@ export const sendEventReminders = inngest.createFunction(
       ...(totalFailures > 0 && { failureDetails }),
     };
 
+    inngestLogger.info(`📊 FINAL SUMMARY: ${JSON.stringify(summary, null, 2)}`);
+
     if (totalFailures > 0) {
       inngestLogger.warn(
         `Email notifications completed with failures: ${summary.totalNotificationsSent} sent, ${summary.totalFailures} failed`
       );
+      inngestLogger.warn(`Failure details: ${JSON.stringify(failureDetails, null, 2)}`);
     } else {
       inngestLogger.info(
         `Email notifications completed successfully: ${summary.totalNotificationsSent} sent, ${summary.totalFailures} failed`
       );
     }
+
+    inngestLogger.info('🏁 Inngest function completed - sendEventReminders');
 
     return {
       totalNotificationsSent,

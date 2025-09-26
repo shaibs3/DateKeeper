@@ -45,6 +45,13 @@ npm run db:seed            # Seed with test data
 npm run db:reset           # Reset database (destructive)
 ```
 
+### Inngest Commands
+
+```bash
+npx inngest-cli@latest dev # Start Inngest Dev Server (local development)
+# Access Inngest Dashboard at http://localhost:8288
+```
+
 ## Architecture Overview
 
 ### Tech Stack
@@ -94,6 +101,9 @@ NEXTAUTH_URL=http://localhost:3000
 GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
 DATABASE_URL="postgresql://datekeeper:dev_password_123@localhost:5432/datekeeper_dev"
+RESEND_API_KEY=your-resend-api-key
+INNGEST_EVENT_KEY=your-inngest-event-key
+INNGEST_SIGNING_KEY=your-inngest-signing-key
 ```
 
 #### Test Data
@@ -189,12 +199,14 @@ DATABASE_URL="postgresql://datekeeper:dev_password_123@localhost:5432/datekeeper
 
 ## Email Notifications System
 
-### Cron Job Configuration
+### Inngest Integration
 
-- **API Route:** `src/app/api/cron/route.ts`
-- **Schedule:** Daily at midnight UTC via `vercel.json`
-- **Authentication:** Bearer token via `CRON_SECRET` environment variable
+- **Functions:** `src/inngest/functions.ts`
+- **API Route:** `src/app/api/inngest/route.ts`
+- **Client:** `src/inngest/client.ts`
+- **Schedule:** Daily at midnight UTC via Inngest cron triggers
 - **Email Service:** Resend API with `RESEND_API_KEY`
+- **Reliability:** Built-in retries, error handling, and monitoring via Inngest dashboard
 
 ### Reminder Types
 
@@ -313,7 +325,7 @@ npm run test:coverage:threshold # Enforce coverage thresholds
 
 - **Response Caching:** Cache static responses where appropriate
 - **Pagination:** Implement for large data sets
-- **Background Jobs:** Use Vercel Cron for heavy operations
+- **Background Jobs:** Use Inngest for reliable job processing and workflows
 - **Error Handling:** Fast-fail strategies for better UX
 
 ## Deployment & CI/CD

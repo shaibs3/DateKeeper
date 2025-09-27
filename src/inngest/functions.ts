@@ -198,7 +198,18 @@ export const sendEventReminders = inngest.createFunction(
         await step.run(`notify-${user.id}-${reminderConfig.type}`, async () => {
           inngestLogger.info(`📧 Attempting to send email to: ${user.email} for ${reminderConfig.type}`);
 
-          const result = await sendNotificationEmail(resend, user, reminderConfig);
+          // Fix date serialization issue: convert string dates back to Date objects
+          const userWithDeserializedDates = {
+            ...user,
+            dateEvents: user.dateEvents.map(event => ({
+              ...event,
+              date: new Date(event.date),
+              createdAt: new Date(event.createdAt),
+              updatedAt: new Date(event.updatedAt),
+            }))
+          };
+
+          const result = await sendNotificationEmail(resend, userWithDeserializedDates, reminderConfig);
           inngestLogger.info(`📧 Email result for ${user.email}: ${JSON.stringify(result)}`);
 
           if (result.success) {

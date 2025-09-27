@@ -161,13 +161,10 @@ export const sendEventReminders = inngest.createFunction(
 
     const resend = new Resend(process.env.RESEND_API_KEY);
 
-    let totalNotificationsSent = 0;
-    let totalFailures = 0;
-    const failureDetails: Array<{ user: string; error: string; attempts: number }> = [];
-
     // Process each reminder type
     for (const reminderConfig of REMINDER_CONFIGS) {
-      await step.run(`process-${reminderConfig.type}-reminders`, async () => {
+      // Step 1: Query users for this reminder type
+      const users = await step.run(`query-${reminderConfig.type}-users`, async () => {
         inngestLogger.info(
           `🔍 Processing ${reminderConfig.type} reminders (${reminderConfig.displayName})`
         );
@@ -177,11 +174,11 @@ export const sendEventReminders = inngest.createFunction(
           `📅 Date range for ${reminderConfig.type}: ${dateRange.start.toISOString()} to ${dateRange.end.toISOString()}`
         );
 
-        const users = await getEventsForReminder(reminderConfig.type, dateRange);
-        inngestLogger.info(`👥 Found ${users.length} users with ${reminderConfig.type} reminders`);
+        const queriedUsers = await getEventsForReminder(reminderConfig.type, dateRange);
+        inngestLogger.info(`👥 Found ${queriedUsers.length} users with ${reminderConfig.type} reminders`);
 
-        if (users.length > 0) {
-          users.forEach((user, index) => {
+        if (queriedUsers.length > 0) {
+          queriedUsers.forEach((user, index) => {
             inngestLogger.info(
               `👤 User ${index + 1}: ${user.email} has ${user.dateEvents.length} events`
             );
@@ -193,58 +190,61 @@ export const sendEventReminders = inngest.createFunction(
           });
         }
 
-        // Send notifications for this reminder type
-        for (const user of users) {
-          inngestLogger.info(`📧 Attempting to send email to: ${user.email}`);
+        return queriedUsers;
+      });
+
+      // Step 2: Process each user individually
+      for (const user of users) {
+        await step.run(`notify-${user.id}-${reminderConfig.type}`, async () => {
+          inngestLogger.info(`📧 Attempting to send email to: ${user.email} for ${reminderConfig.type}`);
+
           const result = await sendNotificationEmail(resend, user, reminderConfig);
           inngestLogger.info(`📧 Email result for ${user.email}: ${JSON.stringify(result)}`);
 
           if (result.success) {
-            totalNotificationsSent += user.dateEvents.length;
-            inngestLogger.info(`✅ Successfully sent email to ${user.email}`);
+            const eventsCount = user.dateEvents.length;
+            inngestLogger.info(`✅ Successfully sent email to ${user.email} for ${eventsCount} events`);
+            return {
+              success: true,
+              user: user.email,
+              eventsNotified: eventsCount,
+              reminderType: reminderConfig.type,
+            };
           } else {
-            totalFailures++;
             inngestLogger.error(
               `❌ Failed to send email to ${user.email}: ${result.error || result.reason}`
             );
-            failureDetails.push({
+            return {
+              success: false,
               user: user.email || 'unknown',
               error: result.error || result.reason || 'Unknown error',
               attempts: result.totalAttempts || 0,
-            });
+              reminderType: reminderConfig.type,
+            };
           }
-        }
-      });
+        });
+      }
     }
 
-    // Log summary for monitoring
-    const summary = {
-      totalNotificationsSent,
-      totalFailures,
-      processedReminderTypes: REMINDER_CONFIGS.map(c => c.type),
-      ...(totalFailures > 0 && { failureDetails }),
-    };
+    // Log completion summary
+    // Note: Individual step results are logged above. Final metrics will be available
+    // in Inngest dashboard and logs. Each user notification is now processed as a separate,
+    // recoverable step for better fault tolerance.
 
-    inngestLogger.info(`📊 FINAL SUMMARY: ${JSON.stringify(summary, null, 2)}`);
+    const processedReminderTypes = REMINDER_CONFIGS.map(c => c.type);
 
-    if (totalFailures > 0) {
-      inngestLogger.warn(
-        `Email notifications completed with failures: ${summary.totalNotificationsSent} sent, ${summary.totalFailures} failed`
-      );
-      inngestLogger.warn(`Failure details: ${JSON.stringify(failureDetails, null, 2)}`);
-    } else {
-      inngestLogger.info(
-        `Email notifications completed successfully: ${summary.totalNotificationsSent} sent, ${summary.totalFailures} failed`
-      );
-    }
-
-    inngestLogger.info('🏁 Inngest function completed - sendEventReminders');
+    inngestLogger.info(
+      `🏁 Inngest function completed - sendEventReminders. Processed reminder types: ${processedReminderTypes.join(', ')}`
+    );
+    inngestLogger.info(
+      '📊 Individual notification results are logged above. Check Inngest dashboard for detailed step-by-step execution status.'
+    );
 
     return {
-      totalNotificationsSent,
-      totalFailures,
-      processedReminderTypes: REMINDER_CONFIGS.map(c => c.type),
-      ...(totalFailures > 0 && { failureDetails }),
+      message: 'Email notifications processing completed',
+      processedReminderTypes,
+      processingApproach: 'granular-steps-per-user',
+      note: 'Individual step results are available in logs and Inngest dashboard',
     };
   }
 );

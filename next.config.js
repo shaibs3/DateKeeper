@@ -12,6 +12,7 @@ const nextConfig = {
     ],
   },
   serverExternalPackages: ['@prisma/client'],
+  outputFileTracingRoot: __dirname,
 };
 
 module.exports = nextConfig;

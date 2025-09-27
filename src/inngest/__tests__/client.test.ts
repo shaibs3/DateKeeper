@@ -3,16 +3,16 @@
  */
 
 // Mock process.env
-const originalEnv = process.env;
+const originalClientEnv = process.env;
 
 describe('Inngest Client', () => {
   beforeEach(() => {
     // Reset env to original state
-    process.env = { ...originalEnv };
+    process.env = { ...originalClientEnv };
   });
 
   afterAll(() => {
-    process.env = originalEnv;
+    process.env = originalClientEnv;
   });
 
   describe('Client Configuration', () => {

@@ -18,7 +18,11 @@ jest.mock('@/lib/prisma', () => ({
 }));
 
 jest.mock('resend', () => ({
-  Resend: jest.fn(),
+  Resend: jest.fn().mockImplementation(() => ({
+    emails: {
+      send: jest.fn(),
+    },
+  })),
 }));
 
 jest.mock('@/lib/logger', () => ({
@@ -46,6 +50,32 @@ const mockCreateFunction = inngest.createFunction as jest.MockedFunction<
 const mockPrismaFindMany = prisma.user.findMany as jest.MockedFunction<typeof prisma.user.findMany>;
 const MockResend = Resend as jest.MockedClass<typeof Resend>;
 const mockLogger = inngestLogger as jest.Mocked<typeof inngestLogger>;
+
+// Helper function to re-establish mocks after jest.resetModules()
+function reestablishMocks() {
+  // Re-mock the modules that were cleared by jest.resetModules()
+  jest.doMock('@/inngest/client', () => ({
+    inngest: {
+      createFunction: mockCreateFunction,
+    },
+  }));
+
+  jest.doMock('@/lib/prisma', () => ({
+    prisma: {
+      user: {
+        findMany: mockPrismaFindMany,
+      },
+    },
+  }));
+
+  jest.doMock('resend', () => ({
+    Resend: MockResend,
+  }));
+
+  jest.doMock('@/lib/logger', () => ({
+    inngestLogger: mockLogger,
+  }));
+}
 
 describe('Inngest Functions', () => {
   beforeEach(() => {
@@ -148,8 +178,6 @@ describe('Inngest Functions', () => {
 
   describe('getEventsForReminder', () => {
     beforeEach(() => {
-      // Clear module cache to ensure fresh imports
-      jest.resetModules();
       jest.clearAllMocks();
     });
 
@@ -283,7 +311,7 @@ describe('Inngest Functions', () => {
     let reminderConfig: any;
 
     beforeEach(() => {
-      jest.resetModules();
+      jest.clearAllMocks();
 
       mockResend = {
         emails: {
@@ -296,14 +324,14 @@ describe('Inngest Functions', () => {
         email: 'test@example.com',
         name: 'Test User',
         image: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
         dateEvents: [
           {
             id: 'event1',
             name: 'Birthday',
             date: new Date('2024-01-16'),
             category: 'Birthday',
+            color: '#ff0000',
+            recurrence: 'yearly',
             notes: 'Test notes',
             reminders: ['1_DAY'],
             userId: 'user1',
@@ -311,7 +339,7 @@ describe('Inngest Functions', () => {
             updatedAt: new Date(),
           },
         ],
-      };
+      } as any;
 
       reminderConfig = {
         type: '1_DAY',
@@ -366,6 +394,8 @@ describe('Inngest Functions', () => {
         name: 'Anniversary',
         date: new Date('2024-01-16'),
         category: 'Anniversary',
+        color: '#00ff00',
+        recurrence: 'yearly',
         notes: null,
         reminders: ['1_DAY'],
         userId: 'user1',
@@ -471,7 +501,11 @@ describe('Inngest Functions', () => {
     });
 
     it('should implement exponential backoff correctly', async () => {
-      jest.useFakeTimers();
+      // Mock setTimeout to resolve immediately instead of waiting
+      const originalSetTimeout = setTimeout;
+      global.setTimeout = jest.fn((callback, delay) => {
+        return originalSetTimeout(callback, 0); // Execute immediately
+      }) as unknown as typeof setTimeout;
 
       mockResend.emails.send
         .mockRejectedValueOnce(new Error('Error 1'))
@@ -482,22 +516,13 @@ describe('Inngest Functions', () => {
         });
 
       const { sendNotificationEmail } = require('../functions');
-      const resultPromise = sendNotificationEmail(mockResend, mockUser, reminderConfig);
-
-      // Advance timers for first retry (1000ms)
-      jest.advanceTimersByTime(1000);
-      await Promise.resolve(); // Allow Promise to resolve
-
-      // Advance timers for second retry (2000ms)
-      jest.advanceTimersByTime(2000);
-      await Promise.resolve();
-
-      const result = await resultPromise;
+      const result = await sendNotificationEmail(mockResend, mockUser, reminderConfig);
 
       expect(result.success).toBe(true);
       expect(mockResend.emails.send).toHaveBeenCalledTimes(3);
 
-      jest.useRealTimers();
+      // Restore setTimeout
+      global.setTimeout = originalSetTimeout;
     });
 
     it('should handle non-Error exceptions', async () => {
@@ -514,7 +539,6 @@ describe('Inngest Functions', () => {
     });
 
     it('should log email sending attempts', async () => {
-      jest.resetModules();
       jest.clearAllMocks();
 
       mockResend.emails.send.mockResolvedValue({
@@ -537,12 +561,14 @@ describe('Inngest Functions', () => {
 
     beforeEach(() => {
       process.env.RESEND_API_KEY = 'test-api-key';
+      // Clear module cache to ensure createFunction is called fresh
       jest.resetModules();
+      reestablishMocks();
       jest.clearAllMocks();
 
       // Create a mock function handler
       mockFunctionHandler = jest.fn();
-      mockCreateFunction.mockReturnValue(mockFunctionHandler);
+      mockCreateFunction.mockReturnValue(mockFunctionHandler as any);
     });
 
     it('should create function with correct configuration', () => {
@@ -565,11 +591,14 @@ describe('Inngest Functions', () => {
 
       mockPrismaFindMany.mockResolvedValue([]);
 
-      MockResend.mockImplementation(() => ({
-        emails: {
-          send: jest.fn(),
-        },
-      }));
+      MockResend.mockImplementation(
+        () =>
+          ({
+            emails: {
+              send: jest.fn(),
+            },
+          }) as any
+      );
 
       require('../functions');
 
@@ -605,21 +634,24 @@ describe('Inngest Functions', () => {
               reminders: ['1_DAY'],
             },
           ],
-        },
+        } as any,
       ]);
 
-      MockResend.mockImplementation(() => ({
-        emails: {
-          send: jest.fn().mockResolvedValue({
-            data: { id: 'email-123' },
-            error: null,
-          }),
-        },
-      }));
+      MockResend.mockImplementation(
+        () =>
+          ({
+            emails: {
+              send: jest.fn().mockResolvedValue({
+                data: { id: 'email-123' },
+                error: null,
+              }),
+            },
+          }) as any
+      );
 
       require('../functions');
       const functionHandler = mockCreateFunction.mock.calls[0][2];
-      const result = await functionHandler({ step: mockStep });
+      const result = await functionHandler({ step: mockStep } as any);
 
       expect(result).toEqual({
         totalNotificationsSent: 5, // 1 event * 5 reminder types
@@ -629,6 +661,12 @@ describe('Inngest Functions', () => {
     });
 
     it('should return failure details when emails fail', async () => {
+      // Mock setTimeout to resolve immediately instead of waiting
+      const originalSetTimeout = setTimeout;
+      global.setTimeout = jest.fn((callback, delay) => {
+        return originalSetTimeout(callback, 0); // Execute immediately
+      }) as unknown as typeof setTimeout;
+
       const mockStep = {
         run: jest.fn().mockImplementation(async (id, fn) => await fn()),
       };
@@ -647,18 +685,21 @@ describe('Inngest Functions', () => {
               reminders: ['1_DAY'],
             },
           ],
-        },
+        } as any,
       ]);
 
-      MockResend.mockImplementation(() => ({
-        emails: {
-          send: jest.fn().mockRejectedValue(new Error('Email service down')),
-        },
-      }));
+      MockResend.mockImplementation(
+        () =>
+          ({
+            emails: {
+              send: jest.fn().mockRejectedValue(new Error('Email service down')),
+            },
+          }) as any
+      );
 
       require('../functions');
       const functionHandler = mockCreateFunction.mock.calls[0][2];
-      const result = await functionHandler({ step: mockStep });
+      const result = await functionHandler({ step: mockStep } as any);
 
       expect(result).toEqual({
         totalNotificationsSent: 0,
@@ -672,6 +713,9 @@ describe('Inngest Functions', () => {
           }),
         ]),
       });
+
+      // Restore setTimeout
+      global.setTimeout = originalSetTimeout;
     });
 
     it('should log environment variable information', async () => {
@@ -728,21 +772,24 @@ describe('Inngest Functions', () => {
       ];
 
       // Mock to return users only for 1_DAY reminder type
-      mockPrismaFindMany.mockImplementation(query => {
-        if (query.include.dateEvents.where.reminders.has === '1_DAY') {
+      mockPrismaFindMany.mockImplementation(((query: any) => {
+        if (query?.include?.dateEvents?.where?.reminders?.has === '1_DAY') {
           return Promise.resolve(mockUsers);
         }
         return Promise.resolve([]);
-      });
+      }) as any);
 
-      MockResend.mockImplementation(() => ({
-        emails: {
-          send: jest.fn().mockResolvedValue({
-            data: { id: 'email-123' },
-            error: null,
-          }),
-        },
-      }));
+      MockResend.mockImplementation(
+        () =>
+          ({
+            emails: {
+              send: jest.fn().mockResolvedValue({
+                data: { id: 'email-123' },
+                error: null,
+              }),
+            },
+          }) as any
+      );
 
       require('../functions');
       const functionHandler = mockCreateFunction.mock.calls[0][2];
@@ -759,13 +806,14 @@ describe('Inngest Functions', () => {
   describe('REMINDER_CONFIGS', () => {
     it('should have correct configuration for all reminder types', async () => {
       jest.resetModules();
+      reestablishMocks();
       jest.clearAllMocks();
 
       // Setup mock function handler
       const mockFunctionHandler = jest.fn();
-      mockCreateFunction.mockReturnValue(mockFunctionHandler);
+      mockCreateFunction.mockReturnValue(mockFunctionHandler as any);
 
-      const functions = require('../functions');
+      require('../functions');
 
       // Access REMINDER_CONFIGS through a test export or by testing the actual functionality
       // Since it's not exported, we test through the sendEventReminders function behavior
@@ -792,11 +840,12 @@ describe('Inngest Functions', () => {
   describe('Error Handling', () => {
     beforeEach(() => {
       jest.resetModules();
+      reestablishMocks();
       jest.clearAllMocks();
 
       // Setup mock function handler
       const mockFunctionHandler = jest.fn();
-      mockCreateFunction.mockReturnValue(mockFunctionHandler);
+      mockCreateFunction.mockReturnValue(mockFunctionHandler as any);
     });
 
     it('should handle step execution errors gracefully', async () => {

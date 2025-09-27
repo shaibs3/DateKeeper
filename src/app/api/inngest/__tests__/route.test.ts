@@ -49,10 +49,10 @@ describe('/api/inngest', () => {
 
       // Mock serve to return the expected handlers
       mockServe.mockReturnValue({
-        GET: jest.fn(),
-        POST: jest.fn(),
-        PUT: jest.fn(),
-      });
+        GET: jest.fn() as any,
+        POST: jest.fn() as any,
+        PUT: jest.fn() as any,
+      } as any);
 
       // Require the route module to trigger the serve call
       await import('../route');
@@ -68,10 +68,10 @@ describe('/api/inngest', () => {
       delete process.env.INNGEST_SIGNING_KEY;
 
       mockServe.mockReturnValue({
-        GET: jest.fn(),
-        POST: jest.fn(),
-        PUT: jest.fn(),
-      });
+        GET: jest.fn() as any,
+        POST: jest.fn() as any,
+        PUT: jest.fn() as any,
+      } as any);
 
       // Clear module cache to force re-evaluation
       jest.resetModules();
@@ -108,10 +108,10 @@ describe('/api/inngest', () => {
       process.env.INNGEST_SIGNING_KEY = 'test-signing-key';
 
       const mockHandlers = {
-        GET: jest.fn(),
-        POST: jest.fn(),
-        PUT: jest.fn(),
-      };
+        GET: jest.fn() as any,
+        POST: jest.fn() as any,
+        PUT: jest.fn() as any,
+      } as any;
 
       mockServe.mockReturnValue(mockHandlers);
 
@@ -149,10 +149,10 @@ describe('/api/inngest', () => {
       process.env.INNGEST_SIGNING_KEY = 'test-signing-key';
 
       mockServe.mockReturnValue({
-        GET: jest.fn(),
-        POST: jest.fn(),
-        PUT: jest.fn(),
-      });
+        GET: jest.fn() as any,
+        POST: jest.fn() as any,
+        PUT: jest.fn() as any,
+      } as any);
 
       // Clear module cache
       jest.resetModules();
@@ -172,10 +172,10 @@ describe('/api/inngest', () => {
       process.env.INNGEST_SIGNING_KEY = 'test-signing-key';
 
       mockServe.mockReturnValue({
-        GET: jest.fn(),
-        POST: jest.fn(),
-        PUT: jest.fn(),
-      });
+        GET: jest.fn() as any,
+        POST: jest.fn() as any,
+        PUT: jest.fn() as any,
+      } as any);
 
       // Clear module cache
       jest.resetModules();
@@ -196,10 +196,10 @@ describe('/api/inngest', () => {
       process.env.INNGEST_SIGNING_KEY = '';
 
       mockServe.mockReturnValue({
-        GET: jest.fn(),
-        POST: jest.fn(),
-        PUT: jest.fn(),
-      });
+        GET: jest.fn() as any,
+        POST: jest.fn() as any,
+        PUT: jest.fn() as any,
+      } as any);
 
       // Clear module cache
       jest.resetModules();
@@ -220,10 +220,10 @@ describe('/api/inngest', () => {
       process.env.INNGEST_SIGNING_KEY = 'sk_test_!@#$%^&*()_+-=[]{}|;:,.<>?';
 
       mockServe.mockReturnValue({
-        GET: jest.fn(),
-        POST: jest.fn(),
-        PUT: jest.fn(),
-      });
+        GET: jest.fn() as any,
+        POST: jest.fn() as any,
+        PUT: jest.fn() as any,
+      } as any);
 
       // Clear module cache
       jest.resetModules();

@@ -175,7 +175,9 @@ export const sendEventReminders = inngest.createFunction(
         );
 
         const queriedUsers = await getEventsForReminder(reminderConfig.type, dateRange);
-        inngestLogger.info(`👥 Found ${queriedUsers.length} users with ${reminderConfig.type} reminders`);
+        inngestLogger.info(
+          `👥 Found ${queriedUsers.length} users with ${reminderConfig.type} reminders`
+        );
 
         if (queriedUsers.length > 0) {
           queriedUsers.forEach((user, index) => {
@@ -196,7 +198,9 @@ export const sendEventReminders = inngest.createFunction(
       // Step 2: Process each user individually
       for (const user of users) {
         await step.run(`notify-${user.id}-${reminderConfig.type}`, async () => {
-          inngestLogger.info(`📧 Attempting to send email to: ${user.email} for ${reminderConfig.type}`);
+          inngestLogger.info(
+            `📧 Attempting to send email to: ${user.email} for ${reminderConfig.type}`
+          );
 
           // Fix date serialization issue: convert string dates back to Date objects
           const userWithDeserializedDates = {
@@ -206,15 +210,21 @@ export const sendEventReminders = inngest.createFunction(
               date: new Date(event.date),
               createdAt: new Date(event.createdAt),
               updatedAt: new Date(event.updatedAt),
-            }))
+            })),
           };
 
-          const result = await sendNotificationEmail(resend, userWithDeserializedDates, reminderConfig);
+          const result = await sendNotificationEmail(
+            resend,
+            userWithDeserializedDates,
+            reminderConfig
+          );
           inngestLogger.info(`📧 Email result for ${user.email}: ${JSON.stringify(result)}`);
 
           if (result.success) {
             const eventsCount = user.dateEvents.length;
-            inngestLogger.info(`✅ Successfully sent email to ${user.email} for ${eventsCount} events`);
+            inngestLogger.info(
+              `✅ Successfully sent email to ${user.email} for ${eventsCount} events`
+            );
             return {
               success: true,
               user: user.email,

@@ -20,7 +20,7 @@ const REMINDER_CONFIGS: ReminderConfig[] = [
   { type: '1_MONTH', days: 30, displayName: 'in 1 month' },
 ];
 
-function calculateDateRange(daysFromNow: number): { start: Date; end: Date } {
+export function calculateDateRange(daysFromNow: number): { start: Date; end: Date } {
   const now = new Date();
   const targetDate = new Date(now);
   targetDate.setDate(now.getDate() + daysFromNow);
@@ -32,7 +32,7 @@ function calculateDateRange(daysFromNow: number): { start: Date; end: Date } {
   return { start: targetDate, end: endDate };
 }
 
-async function getEventsForReminder(
+export async function getEventsForReminder(
   reminderType: ReminderType,
   dateRange: { start: Date; end: Date }
 ) {
@@ -66,7 +66,7 @@ async function getEventsForReminder(
   });
 }
 
-async function sendNotificationEmail(
+export async function sendNotificationEmail(
   resend: Resend,
   user: User & { dateEvents: DateEvent[] },
   reminderConfig: ReminderConfig,

@@ -96,6 +96,78 @@ npm run env:check     # Environment validation
 - **Testing:** Jest (unit), Playwright (E2E)
 - **Deployment:** Vercel with CI/CD
 
+### Database Schema
+
+DateKeeper uses a PostgreSQL database with the following entity relationships:
+
+```mermaid
+erDiagram
+    User ||--o{ Account : "has many"
+    User ||--o{ Session : "has many"
+    User ||--o{ DateEvent : "has many"
+
+    User {
+        string id PK "cuid() - Primary Key"
+        string name "User display name"
+        string email UK "Unique email address"
+        string image "Profile image URL"
+    }
+
+    Account {
+        string id PK "cuid() - Primary Key"
+        string userId FK "References User.id"
+        string type "OAuth account type"
+        string provider "OAuth provider (google)"
+        string providerAccountId "Provider account ID"
+        string refresh_token "OAuth refresh token"
+        string access_token "OAuth access token"
+        int expires_at "Token expiration timestamp"
+        string token_type "Token type (Bearer)"
+        string scope "OAuth scope permissions"
+        string id_token "OpenID Connect ID token"
+        string session_state "OAuth session state"
+    }
+
+    Session {
+        string id PK "cuid() - Primary Key"
+        string sessionToken UK "Unique session token"
+        string userId FK "References User.id"
+        datetime expires "Session expiration date"
+    }
+
+    DateEvent {
+        string id PK "cuid() - Primary Key"
+        string name "Event name (e.g., John's Birthday)"
+        datetime date "Event date"
+        string category "Event category (birthday, anniversary)"
+        string color "UI color for event display"
+        string recurrence "Recurrence pattern (yearly, none)"
+        string notes "Optional event notes"
+        string userId FK "References User.id"
+        string[] reminders "Reminder types (1_DAY, 3_DAYS, etc.)"
+        datetime createdAt "Record creation timestamp"
+        datetime updatedAt "Record update timestamp"
+    }
+```
+
+#### Key Features:
+
+- **NextAuth.js Integration**: `Account` and `Session` models support Google OAuth authentication
+- **Event Management**: `DateEvent` stores user's important dates with customizable reminders
+- **Flexible Reminders**: Array field supports multiple reminder types (1_DAY, 3_DAYS, 1_WEEK, 2_WEEKS, 1_MONTH)
+- **Soft Relationships**: All foreign keys use `cuid()` for better scalability
+- **Audit Trail**: DateEvent includes `createdAt` and `updatedAt` timestamps
+
+#### Reminder System:
+
+The `reminders` field in DateEvent supports these values:
+
+- `1_DAY` - Reminder 1 day before event
+- `3_DAYS` - Reminder 3 days before event
+- `1_WEEK` - Reminder 1 week before event
+- `2_WEEKS` - Reminder 2 weeks before event
+- `1_MONTH` - Reminder 1 month before event
+
 ### Project Structure
 
 ```

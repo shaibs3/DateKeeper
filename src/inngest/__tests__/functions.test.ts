@@ -584,7 +584,7 @@ describe('Inngest Functions', () => {
       );
     });
 
-    it('should process all reminder types', async () => {
+    it('should process all reminder types with granular steps', async () => {
       const mockStep = {
         run: jest.fn().mockImplementation(async (id, fn) => await fn()),
       };
@@ -606,12 +606,13 @@ describe('Inngest Functions', () => {
       const functionHandler = mockCreateFunction.mock.calls[0][2];
       await functionHandler({ step: mockStep });
 
-      expect(mockStep.run).toHaveBeenCalledTimes(5); // 5 reminder types
-      expect(mockStep.run).toHaveBeenCalledWith('process-1_DAY-reminders', expect.any(Function));
-      expect(mockStep.run).toHaveBeenCalledWith('process-3_DAYS-reminders', expect.any(Function));
-      expect(mockStep.run).toHaveBeenCalledWith('process-1_WEEK-reminders', expect.any(Function));
-      expect(mockStep.run).toHaveBeenCalledWith('process-2_WEEKS-reminders', expect.any(Function));
-      expect(mockStep.run).toHaveBeenCalledWith('process-1_MONTH-reminders', expect.any(Function));
+      // Should have 5 query steps (one per reminder type) since no users are returned
+      expect(mockStep.run).toHaveBeenCalledTimes(5); // 5 reminder types, 0 users
+      expect(mockStep.run).toHaveBeenCalledWith('query-1_DAY-users', expect.any(Function));
+      expect(mockStep.run).toHaveBeenCalledWith('query-3_DAYS-users', expect.any(Function));
+      expect(mockStep.run).toHaveBeenCalledWith('query-1_WEEK-users', expect.any(Function));
+      expect(mockStep.run).toHaveBeenCalledWith('query-2_WEEKS-users', expect.any(Function));
+      expect(mockStep.run).toHaveBeenCalledWith('query-1_MONTH-users', expect.any(Function));
     });
 
     it('should return correct summary for successful processing', async () => {
@@ -654,10 +655,14 @@ describe('Inngest Functions', () => {
       const result = await functionHandler({ step: mockStep } as any);
 
       expect(result).toEqual({
-        totalNotificationsSent: 5, // 1 event * 5 reminder types
-        totalFailures: 0,
+        message: 'Email notifications processing completed',
         processedReminderTypes: ['1_DAY', '3_DAYS', '1_WEEK', '2_WEEKS', '1_MONTH'],
+        processingApproach: 'granular-steps-per-user',
+        note: 'Individual step results are available in logs and Inngest dashboard',
       });
+
+      // Should have 5 query steps + 5 notification steps (1 user * 5 reminder types)
+      expect(mockStep.run).toHaveBeenCalledTimes(10);
     });
 
     it('should return failure details when emails fail', async () => {
@@ -702,17 +707,15 @@ describe('Inngest Functions', () => {
       const result = await functionHandler({ step: mockStep } as any);
 
       expect(result).toEqual({
-        totalNotificationsSent: 0,
-        totalFailures: 5, // 1 user * 5 reminder types
+        message: 'Email notifications processing completed',
         processedReminderTypes: ['1_DAY', '3_DAYS', '1_WEEK', '2_WEEKS', '1_MONTH'],
-        failureDetails: expect.arrayContaining([
-          expect.objectContaining({
-            user: 'test@example.com',
-            error: 'Email service down',
-            attempts: 3,
-          }),
-        ]),
+        processingApproach: 'granular-steps-per-user',
+        note: 'Individual step results are available in logs and Inngest dashboard',
       });
+
+      // Should have 5 query steps + 5 notification steps (1 user * 5 reminder types)
+      // Individual step failures are now handled at the step level, not in the return value
+      expect(mockStep.run).toHaveBeenCalledTimes(10);
 
       // Restore setTimeout
       global.setTimeout = originalSetTimeout;
@@ -828,11 +831,11 @@ describe('Inngest Functions', () => {
 
       const reminderTypes = mockStep.run.mock.calls.map(call => call[0]);
       expect(reminderTypes).toEqual([
-        'process-1_DAY-reminders',
-        'process-3_DAYS-reminders',
-        'process-1_WEEK-reminders',
-        'process-2_WEEKS-reminders',
-        'process-1_MONTH-reminders',
+        'query-1_DAY-users',
+        'query-3_DAYS-users',
+        'query-1_WEEK-users',
+        'query-2_WEEKS-users',
+        'query-1_MONTH-users',
       ]);
     });
   });
